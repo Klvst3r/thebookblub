@@ -1,0 +1,224 @@
+2.3. Creación y Gestión de Bases de Datos en SQL
+
+Tablas y Buenas Prácticas
+
+
+Creación de las tablas books y authors
+---------------------------------------
+
+Resumen
+¿Cómo comenzar el desarrollo de una base de datos?
+
+Al iniciar el desarrollo de una base de datos, es crucial tener una visión clara de lo que se desea crear. En este contexto, nos enfocaremos en la creación de la base de datos usando SQL puro, buscando evitar migraciones automáticas para tener un control absoluto. Esto implica diseñar, ejecutar y definir las tablas necesarias para nuestro sistema, teniendo en claro que los datos son el corazón de cualquier aplicación.
+¿Por qué usar SQL para crear la base de datos?
+
+SQL permite un control detallado y preciso sobre la estructura y funcionamiento de la base de datos. Algunos aspectos a considerar al utilizar SQL incluyen:
+
+    Segmentación clara con CREATE DATABASE IF NOT EXISTS: Previene errores al no intentar crear una base de datos que ya existe.
+    Uso semántico en nombres de columna: Evita confusiones al referenciar identidades en joins complejos, como preferir "BookID" sobre "ID".
+    Definición precisa del tipo de datos: Uso de enteros sin signo para IDs, asegurando que no existan valores negativos.
+
+¿Cómo definir las tablas iniciales?
+
+Una base sólida requiere de tablas claramente definidas, empezando con aquellas más fundamentales. A continuación, se muestra cómo se crean dos de las tablas esenciales: "users" y "books".
+
+CREATE TABLE IF NOT EXISTS Books (
+    BookID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(100) NOT NULL,
+    AuthorID INT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+¿Cuáles son las buenas prácticas en SQL?
+
+Algunas recomendaciones útiles al estructurar tus tablas incluyen:
+
+    Nombrar tablas en plural: Facilita la comprensión semántica de la base de datos.
+    Agregar estándares de compatibilidad: Uso de charset utf-8mb4 y collation utf-8mb4_bin para manejo correcto de caracteres especiales y emojis.
+    Elección del motor de bases de datos: Siempre especificar el engine (InnoDB, en este caso) para asegurar consistencia en diferentes instancias de bases de datos.
+
+¿Cómo ejecutar y verificar la implementación de la base de datos?
+
+La ejecución manual de comandos en la terminal MySQL permite verificar cada paso, previniendo conflictos entre bases de datos ya existentes.
+
+SHOW DATABASES;
+CREATE DATABASE IF NOT EXISTS TheBookClub;
+USE TheBookClub;
+SHOW TABLES;
+DESCRIBE Books;
+
+La creación de este modo asegura que tras cada ejecución las tablas reflejen con precisión las definiciones iniciales propuestas. Podemos ver que queda registrado el diseño e implementación de las tablas con sus particularidades.
+¿Cuál es el siguiente paso tras definir las tablas?
+
+Luego de establecer las tablas base, es importante continuar con el desarrollo e integración del sistema, añadiendo y relacionando más tablas según las necesidades del proyecto. La claridad y consistencia en el diseño inicial facilitará el manejo y escalabilidad futuros de la base de datos. Es relevante recordar que aprender y dominar estas prácticas te brindará las herramientas para construir aplicaciones sólidas y eficientes. ¡Sigue explorando y desarrollando!
+
+
+
+
+-----
+Esquema SQL de la Base de datos
+
+Auqnue Yii tiene una herramienta de migraciones, es mejor tener el control absoluto de la BD po lo que se presenta el escquema de la bd con sql puro para crear la base de datos y la creación de la stablas.
+
+Iniciamos con la creación de nuestra base de datos y las tablas
+
+Por cuestion de convension las tablas se generaran en plural,por ejemplo
+usuarios, libros, ya que es una tabla que almacena libros o usuarios y no solo un valor.
+
+1. Ahora, dentro de la tabkla, en cada tupla o cada renglon, es una unidad y no se pondra por ejemplo books o libros.
+2. Poder utilizar id, pero es mejor tener claro y mas comodo tener la idea clara de referencia entre la cruzas ntre tablas y sera el ide exclusivo de nuestra tabla.
+	Asi que utilizaremos por ejemplo
+
+		book_id integer unsigned primary key auto_increment
+
+3. Los nombres de los campos lo haremos en ingles por convención.	
+
+4. Algunas versiones de la Bd tienen un conjunto de carcateres y las maquinas de la bd myisqm o innodb y cambian, esta estructura que para tener instancias de las bd agregar los defaults sigientes, conlos valores por defecto del charset y el collate que es la forma de almacenar los binarios o texto, por si queremos guardar emojis por ejemplos
+
+	ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+Esta es la forma de como se traspasa la información
+
+
+schema.sql
+-------------------
+create database if not exists thebookclub;
+use thebookclub;
+
+create table if not exists users ();
+
+create table if not exists books (
+  book_id integer unsigned primary key auto_increment,
+  title varchar(100) not null,
+  author_id integer unsigned not null
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+create table if not exists authors (
+  author_id integer unsigned primary key auto_increment,
+  name varchar(100) not null,
+  nationality varchar(2)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+create table if not exists clubs (
+  club_id integer unsigned primary key auto_increment,
+  name varchar(100) not null unique,
+  description varchar(500),
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+create table if not exists club_members (
+  club_member_id integer unsigned primary key auto_increment,
+  user_id integer unsigned not null,
+  club_id integer unsigned not null,
+  is_admin tinyint not null default 0,
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp,
+  unique key no_rep(user_id, club_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+create table if not exists user_books (
+  user_books_id integer unsigned primary key auto_increment,
+  user_id integer not null,
+  book_id integer not null,
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp,
+  unique key no_rep(user_id, book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+create table if not exists book_scores (
+	book_score_id integer unsigned primary key auto_increment,
+	user_id integer unsigned not null,
+	book_id integer unsigned not null,
+	score tinyint unsigned,
+	created_at timestamp not null default current_timestamp,
+	modified_at timestamp not null default current_timestamp on update current_timestamp,
+	unique key no_rep(user_id, book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+--------------------
+
+
+
+
+Comentarios:
+
+Hola, si bien el profe indica que las convenciones de las tablas y los campos son mas bien personales para Yii, Laravel, y en especial los frameworks que usan el ORM de Eloquent, si tienen una forma reomendada de nomenclatura.
+
+    Las tablas se llaman en ingles y en plural ¿Por qué en inglés? Porque es mas probable que el plural de una palabra sea el singular de esta misma con "s" al final ("user"->"users") Así, Eloquent ausme por defecto que si estas en el modelo App\Models\User, la tabla será users
+    En laravel sí prefieren usar id en vez de book_id ¿Por qué? Porque cuando en otra tabla usas una llava foranea, simplemente la llamas con el nombre de la tabla en singular + "raya al piso" + "nombre el campo". Ej: book_id . Cuando haces relaciones entre modelos, sí usas las conveniones, Eloquent hará asumpciones por defecto, y te ahorrarpa muichas lineas de código.
+
+Hay más tips, pero principalmente te recomiendo esos. En general los uso aunque no esté desarrollando en Laravel.
+
+
+Para continuar con el aprendizaje de yii2, dejo por aqui como serian los codigos para las migraciones:
+
+php yii migrate/create create_authors_table
+``````js
+	public function safeUp()
+	{
+		$this->createTable('{{%authors}}', [
+			'id' => $this->primaryKey(),
+			'name' => $this->string()->notNull(),
+			'nationality' => $this->string(2),
+
+		]);
+	}
+```Si la tabla books tiene llave foranea hacia authors, por eso primero se crea la tabla authors y despues books.
+
+
+
+```js
+php yii migrate/create create_books_table
+```La dificultad que encontre fue en el tema de las llaves foraneas, la gramatica de yii no me fue tan clara pero finalmente la pude entender, aqui con comentarios en cada linea :
+
+
+
+```js
+	public function safeUp()
+	{
+		$this->createTable('{{%books}}', [
+			'id' => $this->primaryKey(),
+			'title' => $this->string()->notNull(),
+			'author_id' => $this->integer()->notNull(),
+			
+		]);
+
+
+		// Add foreign key for column `author_id` to `users` table
+		$this->addForeignKey(
+			'fk-books-author_id', // Name of the foreign key
+			'{{%books}}', // The table that contains the foreign key
+			'author_id', // The column that contains the foreign key
+			'{{%authors}}', // The referenced table
+			'id', // The primary key in the referenced table
+			'CASCADE', // What to do on delete (e.g., CASCADE, SET NULL)
+			'CASCADE' // What to do on update (e.g., CASCADE, SET NULL)
+		);
+	}
+```   &#x20;
+
+con las migraciones listas, se ejecuta asi:
+
+
+
+```js
+yii migrate  
+
+si acaso ocurre algun problema o queremos devolvernos, tii devuelve de una migracion a la vez asi:
+
+yii migrate/down 
+
+Y finalmente comentar que si deseamos mas control (no se si total) de la base de datos, y modificar el charset o el collate etc, tambien se puede, chekense la documentacion.
+
+
+
+
+Referencias:
+
+https://www.yiiframework.com/doc/guide/2.0/es/db-migrations
+
+https://dev.mysql.com/doc/refman/8.4/en/innodb-introduction.html
