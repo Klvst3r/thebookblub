@@ -1,0 +1,344 @@
+6. Configuración de variables de entorno
+
+¿Cómo configurar un proyecto simple en Yii?
+
+Una vez que tienes Yii instalado en tu sistema, el siguiente paso es realizar una configuración básica para iniciar un proyecto simple. Este proceso no solo te enseñará a configurar los elementos iniciales, sino que también te orientará sobre cómo gestionar el crecimiento de tu proyecto agregando módulos y software de terceros de forma eficiente.
+¿Cómo configurar la base de datos?
+
+El primer paso esencial es configurar tu base de datos. Esto se logra a través del archivo db.php, que es el núcleo de la configuración de la base de datos. Aquí encontrarás un arreglo que define las propiedades clave del sistema, como la clase que se necesita, el DSN (Data Source Name), el host, nombre de la base, usuario, contraseña y charset. Aunque puedes tener múltiples bases de datos, para este ejercicio nos centraremos en una sola.
+
+return [
+    'class' => 'yii\db\Connection',
+    'dsn' => 'mysql:host=localhost;dbname=debug_club',
+    'username' => getenv('DB_USER'),
+    'password' => getenv('DB_PASSWORD'),
+    'charset' => 'utf8',
+];
+
+¿Por qué usar variables de entorno?
+
+Las variables de entorno ofrecen una forma profesional y segura para manejar información sensible como contraseñas. Crear un archivo de configuración de shell, como variables.local.sh, permite definir variables que el sistema operativo gestiona. Estas variables no se incluyen en el repositorio, lo que asegura que información crítica no quede expuesta.
+
+export DB_HOST=localhost
+export DB_NAME=debug_club
+export DB_USER=platzi
+export DB_PASSWORD=Yii2Rulez
+export DB_PORT=3306
+
+Este enfoque facilita una ejecución segura y controlada de tu entorno.
+
+
+¿Cómo ejecutar variables de entorno?
+
+Para utilizar las variables definidas, se procede a ejecutarlas en la terminal. En sistemas Mac y Linux, el comando source permite que estas variables queden disponibles en el entorno operativo. Una vez invocadas, cualquier programa ejecutado en esa terminal podrá acceder a las variables.
+
+source variables.local.sh
+echo $DB_HOST
+
+Al ejecutar estos comandos, confirmas que las variables están asignadas y listas para ser utilizadas por aplicaciones que necesiten dicha información.
+
+
+¿Cómo asegurar y formatear la entrada de datos?
+
+Dos funciones claves en PHP son getenv y sprintf. getenv se emplea para capturar el valor de una variable de entorno, mientras que sprintf formatea cadenas, asegurándose de que datos inesperados no alteren el sistema:
+
+sprintf("mysql:host=%s;dbname=%s", getenv("DB_HOST"), getenv("DB_NAME"))
+
+Estas funciones no solo aseguran un formato correcto, sino que también protegen contra el ingreso de código malicioso.
+
+
+¿Qué más debemos considerar en la configuración?
+
+Además del archivo db.php, hay otros archivos de configuración como params.php, que contiene configuraciones generales, y composer.json, que gestiona las dependencias del sistema. params.php puede almacenar aspectos generales como el remitente de correos o preferencias de paginación, mientras que composer.json te permite manejar las versiones de librerías y dependencias, asegurando compatibilidad y coherencia en el desarrollo.
+
+Con la configuración adecuada, tu proyecto en Yii estará listo para crecer de manera organizada y segura. La clave está en la utilización eficiente de las herramientas y prácticas disponibles, asegurando que las configuraciones sean claras y estandarizadas para facilitar el mantenimiento futuro.
+
+Podemos acudir a https://www.random.org/strings/
+	Generar String de 10 caracteres mayusculas minusclulas numeros
+
+
+Posterior de dar de alyta las variables y en terminal:
+
+	$ cd local
+	$ ls
+	$ more varables_local.sh
+
+Si queremos imprimir la variable
+
+	$ echo $db_host
+
+Invocamos del SO para asignar las variables en sistemas unix es con:
+
+	$source variables_local.sh
+
+y volvemos a invocar la variable
+
+	$ echo $bd_host
+
+Con sto podremos utilizar estos valores y almacenado en el sistema operativo, para acceder a los valores de manera segura, 
+
+La idea e spoder invocar estos valores sin que sean accesibles desde web
+
+
+
+
+
+Utilizaremos los siguientes archivos:
+
+variables-local.sh
+---
+	export db_host=localhost 
+	export db_name=thebookclub 
+	export db_user=platzi 
+	export db_pass=Yii2Rulez!
+	export db_port=3306
+
+	export salt=TUSALAQUI
+
+db.php
+---
+	<?php
+
+	return [
+	    'class' => 'yii\db\Connection',
+	    'dsn' => sprintf("mysql:host=%s;dbname=%s",
+	      getenv('db_host'), getenv("db_name")),
+	    'username' => sprintf("%s", getenv('db_user')),
+	    'password' => sprintf("%s", getenv('db_pass')),
+	    'charset' => 'utf8',
+
+	    // Schema cache options (for production environment)
+	    //'enableSchemaCache' => true,
+	    //'schemaCacheDuration' => 60,
+	    //'schemaCache' => 'cache',
+	];
+
+
+
+
+params.php
+---
+	<?php
+
+	return [
+	    'adminEmail' => 'admin@example.com',
+	    'senderEmail' => 'noreply@example.com',
+	    'senderName' => 'Example.com mailer',
+	];
+
+
+
+
+Comentarios:
+------------
+
+>Otra opcion seria usar un archivo .env como en otros frameworks.</u>
+
+Ok para windows users, quiero explicar para que puedan hacer el ejercicio de manera facil usando la terminal cmd:
+
+renombrar el archivo como .bat (local_variables.bat)
+
+@echo off
+set db_host=localhost
+set db_name=2024_yii_thebookclub
+set db_user=root
+set db_pass=
+set db_port=
+set salt=OgdPR2kjToN3T7wB6ydEVDT0ne1KDM88
+```OJO: antes de ejecutar el servidor de yii, ejecutar ese archivo .bat para que las variables de ambiente cargen dentro de la sesion de ese terminal.
+
+Hecho eso ejecutar el servidor yii, ahora ya se puede seguir con la clase y modificar db.php
+
+
+Invocación de variables via Sistema Operativo
+----------------------------------------------
+
+Podemos invocar a las variales desde el sistema operativo
+
+
+La primera es con la funcion
+
+	getenv()
+
+Es una fucnion de php lo que haces es traer del sistema el valor de la variables que se llame db_host
+
+	getenv('db_host')
+o
+	getenv('db_name')
+
+
+Ahora vamos a recibirla mediante una mascara, puede utilizar placeholder especificos ej
+
+%f  ==>Float
+%s 	==> String
+%d  ==> Entero o numerico
+
+Ej
+	sprinf("%f - $s ($d)", 3.1416, "hola como estas, 67")
+
+Devolviendo un estring con el formato especificado.
+
+Este sistema sirve para evitar que codigo malicioso entre como entero, teniendo mucho mayor control que si es util.
+
+Sobre el inut de variables que pueden ser unetes desconocidas
+
+
+Hay una funcion casi hermana que es
+
+	printf()
+
+Devulve a pantalla o consola significando que 
+
+	echo sprintf == printf
+
+Vamos a hora a db.php nuetro archivo de configuración.
+
+
+
+
+
+	<?php
+
+return [
+    'class' => 'yii\db\Connection',
+	'dsn' => sprintf("mysql:host=%s;dbname=%s", 
+        getenv('db_host'), getenv("db_name")),
+	'username' => sprintf("%s", getenv('db_user')),
+	'password' => sprintf("%s", getenv('db_pass')),
+	'charset' => 'utf8',
+
+    // Schema cache options (for production environment)
+    //'enableSchemaCache' => true,
+    //'schemaCacheDuration' => 60,
+    //'schemaCache' => 'cache',
+];
+
+
+	 
+
+Ahora cada vez que invoquemos el proyecto desde la linea de comandos, tenemos nuestro archivo
+
+console.php
+
+Requerimos invocamos y la asignan al componente db de nuestro poryecto
+
+$params = require __DIR__ . '/params.php';
+$db = require __DIR__ . '/db.php';
+...
+
+  'db' => $db,
+    ],
+    'params' => $params,
+
+
+Veamos como se invoca esta configuración, ya que si vamos al ejecutable del shell de yii, es decir al archivo
+
+yii
+
+Vemos cargando la configuración de config/console
+
+$config = require __DIR__ . '/config/console.php';
+
+y por otro lado
+
+web/index.php
+
+Vemos que invoca la configuracion de web.php
+
+$config = require __DIR__ . '/../config/web.php';
+
+
+ si hubiera un tercera forma, tendriamos una tercera configuración y cargariamos esa configuración en consola o via ssh
+
+ De momento se tienen estas dos formas 
+
+Parametros generales
+--------------
+
+Este archivo 
+	/config/params.php
+
+A este archivo se le pueden agragar un monton de cosas, que son generales al sistema pero queno involuvran con el funcionamiento puntual, si se envian emails, a nombre de quien van a ir, de que tamaño seran las paginas de pagnaciones.
+
+Entender de que color es el tieulo del usuario logueado, usuario no logueado.
+
+Parametros que no tienen nada que ver con la ejecución del sistema.
+
+Son cosas que podemos invocar si necesitamos alguna.
+
+
+Por ultimo se trata de un archivo que es parte del metasistema, es decir el composer.json, que es el archivo central del composer, este orquestador de todos los sistemas que involucran nuestro sistema, que no solo es Yii sino Laravel y otros Frameworks de PHP Podemos utilizar centri para logueo de errores, para conectaros con alguna otra base de datos, y necesitamos el drive, este archivo, maneja todas las dependencias, a nivel php.-
+
+Es dedire, por ejemplo si queremos utilizar un php superior, pedimos que por ej. 
+
+	"require": {
+        "php": ">=7.4.0",
+
+Si queremos cambiar  a PHP 8.1.
+
+Este archivo se modifica de diferentes formas, se modifica en forma de texto, o invocarlo en linea de comandos y se hara en su momento cuando se agregue una dependencia adicional.
+
+        
+
+
+
+Lecturas recomendadas
+---------------------
+Variables de entorno:
+	https://learn.microsoft.com/es-es/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.4
+	https://www.genbeta.com/desarrollo/variables-entorno-que-sirven-como-podemos-editarlas-windows-linux
+
+https://www.random.org/
+
+
+
+Lectura:
+
+	Resumen
+
+Las variables de entorno son útiles cuando necesitamos que cierta información prevalezca para poder trabajar más rápido o necesitamos guardar información para no tener que recordarla constantemente.
+Variables de entorno en Linux
+
+En linux hay varias variables de entorno que ya están preestablecidas, para verlas desde la consola es tan simple como usar el comando seguido de la variable de entorno.
+
+Por cierto, todas las variables de entorno se mandan a llamar con un signo de peso por delante, de lo contrario se interpretará como un comando.
+
+| Variable | Contenido | | --- | --- | | HOME | Indica el home del usuario | | PATH | Indica las direcciones de donde están los binarios que usa el sistema | | BASH_VERSION | Indica la versión del bash que estás utilizando | | SHELL | Dirección de la shell que estás utilizando |
+
+Hay muchas más, pero estas son las que te pueden interesar. Por cierto, por convención las variables de entorno se crean en mayúsculas.
+
+
+¿Cómo crear tus propias variables de entorno?
+
+En el home de tu usuario debe haber un archivo oculto llamado ".bashrc", lo puedes ver ejecutando el comando ls -la la opción -a es de all. ls -la 	
+	$ls -la
+		ahi veremos un archivo .bashrc
+
+
+Ábrelo utilizando el comando code .bashrc, si tienes instalado VS Code esto te mostrará el documento en el editor. Si estás en WSL y no te funciona, ve a la cmd, ejecuta el comando wsl y vuélvelo a intentar desde ahí.
+
+Un ejemplo de variable de entorno utilizndo WSL seria:
+	WINDOWS="/mnt/c/users/klvst3r"
+
+Cuando lo abras ten cuidado con lo que tocas, podrías dañar la shell, pero desde ahí puedes crear una variable de entorno, por ejemplo, como yo estoy usando WSL, voy a crear una variable de entorno que me de la ruta de mi carpeta en Windows sin que tenga que escribir toda la ruta.
+
+Ahora guardo el archivo, reinicio la terminal y ejecuto:
+	$ cd $WINDOWS
+	/mnt/c/users/klvst3r$
+
+cd $WINDOWS 
+
+
+Pero se puede hacer mejor porque también puedo crear un alias que no se borre cuando cierre la terminal.
+
+#personal alias
+alias cc="cd /mnt/c/users/klvst3r"
+
+
+Ejecutamos
+	$ cc
+	/mnt/c/users/klvst3r$
+
+
+
+Ahora solo tengo que ejecutar cc para ir a mi carpeta en Windows sin necesidad de escribir la variable de entorno.

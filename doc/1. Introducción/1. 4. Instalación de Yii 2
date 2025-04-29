@@ -1,0 +1,258 @@
+4. Instalación de Yii 2
+
+Resumen
+Instalación de dependencias y herramientas para Yii2 en Windows, macOS y Ubuntu
+
+Este tutorial detalla cómo instalar las dependencias y herramientas necesarias para ejecutar el comando composer create-project --prefer-dist yiisoft/yii2-app-basic projectname en Windows, macOS y Ubuntu.
+
+1. Instalación en Windows
+
+Paso 1: Instalar PHP
+
+    Descarga PHP desde windows.php.net/download (recomiendo la versión Thread Safe).
+
+    Extrae el archivo en una carpeta como C:\php.
+
+    Añade la carpeta C:\php al PATH de Windows:
+        Busca “Variables de entorno” en el menú Inicio.
+        Selecciona “Editar las variables de entorno del sistema”.
+        En “Variables del sistema”, selecciona “Path” y haz clic en “Editar”.
+        Añade C:\php y guarda los cambios.
+
+    Verifica la instalación de PHP:
+
+    php -v
+
+Paso 2: Instalar Composer
+
+    Descarga Composer desde getcomposer.org.
+
+    Ejecuta el instalador y sigue las instrucciones.
+
+    Verifica la instalación de Composer:
+
+    composer -V
+
+Paso 3: Instalar MySQL
+
+    Descarga el MySQL Installer desde dev.mysql.com.
+
+    Ejecuta el instalador y selecciona la opción “Developer Default” para instalar MySQL Server, MySQL Workbench y otras herramientas útiles.
+
+    Configura la instalación:
+        Durante la instalación, se te pedirá que configures la contraseña para el usuario root.
+        Selecciona el puerto y otras configuraciones según tus necesidades.
+
+    Verifica la instalación ejecutando MySQL Workbench o usando la línea de comandos:
+
+    mysql -u root -p
+
+Paso 4: Instalar extensiones de PHP
+
+    Abre el archivo php.ini ubicado en C:\php.
+
+    Asegúrate de que las siguientes líneas estén descomentadas (elimina el ; al inicio si está presente):
+
+    extension=mbstring
+    extension=json
+    extension=intl
+    extension=dom
+    extension=pdo_mysql
+    extension=zip
+
+    Guarda los cambios y reinicia cualquier servidor web si es necesario.
+
+Paso 5: Configurar un servidor web
+
+    Puedes instalar XAMPP o WAMP, que vienen con Apache y MySQL preconfigurados.
+    Asegúrate de configurar el servidor web para apuntar al directorio web/ de tu proyecto Yii2.
+
+Paso 6: Crear el proyecto Yii2
+
+Ejecuta el comando en tu terminal (CMD o PowerShell):
+
+composer create-project --prefer-dist yiisoft/yii2-app-basic projectname
+
+2. Instalación en macOS
+
+Paso 1: Instalar Homebrew
+
+Homebrew es un gestor de paquetes para macOS que facilita la instalación de software.
+
+    Abre Terminal.
+
+    Ejecuta el siguiente comando para instalar Homebrew:
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Paso 2: Instalar PHP
+
+    Con Homebrew instalado, ejecuta:
+
+    brew install php
+
+    Verifica la instalación de PHP:
+
+    php -v
+
+Paso 3: Instalar Composer
+
+    Ejecuta los siguientes comandos en Terminal:
+
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php
+    php -r "unlink('composer-setup.php');"
+
+    Mueve Composer para que esté disponible globalmente:
+
+    sudo mv composer.phar /usr/local/bin/composer
+
+    Verifica la instalación de Composer:
+
+    composer -V
+
+Paso 4: Instalar MySQL
+
+    Instala MySQL usando Homebrew:
+
+    brew install mysql
+
+    Inicia MySQL:
+
+    brew services start mysql
+
+    Configura MySQL con la contraseña de root:
+
+    mysql_secure_installation
+
+    Verifica la instalación de MySQL:
+
+    mysql -u root -p
+
+Paso 5: Instalar extensiones de PHP
+
+    Para instalar las extensiones necesarias, ejecuta:
+
+    brew install php@8.0
+    brew install php-json php-mbstring php-intl php-dom php-pdo php-pdo_mysql php-zip
+
+    Asegúrate de que estén habilitadas en tu archivo php.ini.
+
+Paso 6: Configurar el servidor web
+
+    Si no tienes un servidor web instalado, puedes instalar Apache:
+
+    brew install httpd
+
+    Configura Apache para apuntar al directorio web/ de tu proyecto Yii2.
+
+Paso 7: Crear el proyecto Yii2
+
+Ejecuta el comando para crear el proyecto:
+
+composer create-project --prefer-dist yiisoft/yii2-app-basic projectname
+
+3. Instalación en Ubuntu
+
+Paso 1: Instalar PHP
+
+    Abre una terminal y ejecuta los siguientes comandos:
+
+    sudo apt update
+    sudo apt install php php-cli php-json php-mbstring php-intl php-dom php-pdo php-mysql php-zip
+
+    Verifica la instalación de PHP:
+
+    php -v
+
+Paso 2: Instalar Composer
+
+    Ejecuta los siguientes comandos:
+
+    sudo apt install curl
+    curl -sS https://getcomposer.org/installer | php
+    sudo mv composer.phar /usr/local/bin/composer
+
+    Verifica la instalación de Composer:
+
+    composer -V
+
+Paso 3: Instalar MySQL
+
+    Instala MySQL Server:
+
+    sudo apt install mysql-server
+
+    Configura la instalación de MySQL:
+
+    sudo mysql_secure_installation
+
+    Verifica la instalación de MySQL:
+
+    mysql -u root -p
+
+Paso 4: Configurar un servidor web
+
+    Instala Apache:
+
+    sudo apt install apache2
+
+    Configura Apache para que apunte al directorio web/ de tu proyecto Yii2.
+
+Paso 5: Crear el proyecto Yii2
+---------------------
+Ejecuta el comando para crear el proyecto:
+
+composer create-project --prefer-dist yiisoft/yii2-app-basic projectname
+
+Este tutorial incluye la instalación de MySQL y la extensión Zip para PHP, además de estar organizado para comenzar con Windows. Con estos pasos, tendrás todo lo necesario para comenzar a trabajar con Yii2 en cualquiera de estos sistemas operativos.
+
+
+
+
+Ejecutar el servidor, e nuestro caso, con un puerto especifico.
+
+Para yii vamos a utilizar el puerto 7000, entonces:
+
+	$ php yii serve --port=7000
+
+Con esto podremos ir a nuestro navegador e ir a la siguiente URL:
+
+	http://localhost:7000
+
+
+Si ingresamos a la carpeta de la aplicación tendremos muchs comandos disponibles para ser utilizados incluidos en el framework
+
+Ejecutando:
+	$ php yii
+
+
+Comentarios:
+------------
+
+Tal vez ocupes instalar: sudo apt-get install php8.1-xml
+
+	$ sudo apt-get install php8.1-curl
+
+
+Y si quieren cambiar de puerto pueden utilizar:
+
+`php yii serve --port=8081`	
+
+
+
+Usando composer.
+
+Asegurate de tener instalado php y composer
+
+abre VSC nueva terminal y desde ahi puedes verficar con los comandos
+
+👉php -v : para ver si tienes php y la version
+
+👉composer -v : para el mismo objetivo anterior.
+
+luego entonces puedes crear tu proyecto desde la terminal te posicionas donde lo quieres instalar y ejecutas:
+
+👉composer create-project --prefer-dist yiisoft/yii2-app-basic nombre-del-proyecto
+
+👉luego desde la terminal siempre acceder al proyecto cd nombre-del-proyecto > y ejecutas php yii serve

@@ -1,0 +1,417 @@
+5. Estructura de un aaplicación con Yii2
+
+¿Qué es la estructura de archivos en Yii?
+
+Al desarrollar una aplicación web con Yii, una de las primeras tareas es familiarizarse con la estructura de archivos del proyecto. Esta estructura define cómo se organizan los diversos componentes y es crucial para garantizar una gestión eficiente y efectiva del desarrollo. Yii utiliza el patrón de diseño Model-View-Controller (MVC), que facilita mantener un código limpio y organizado. A continuación, desglosamos los componentes esenciales de este sistema.
+¿Cómo se configura el entorno de desarrollo?
+
+Para comenzar con Yii, es necesario instalar el framework en tu sistema, lo cual te proporciona una estructura básica de archivos. Dentro de esta instalación, puedes pasar rápidamente a un entorno de producción añadiendo un archivo llamado PROCFILE. Aunque no necesita hacer nada para desarrollar, este archivo será importante en el futuro.
+
+Es común usar cualquier editor de texto que permita una interacción sencilla con Git y la lectura de directorios de archivos. VS Code y Text Wrangler son opciones viables; sin embargo, la elección dependerá de tus necesidades personales y preferencias.
+¿Qué archivos son cruciales para la configuración?
+
+Uno de los primeros pasos luego de la instalación de Yii es ajustar la configuración del sistema. La carpeta de configuración incluye tres archivos clave:
+
+    Configuración de la base de datos: Un archivo que devuelve la configuración de la base de datos. Aunque se puede trabajar con varias bases simultáneamente, generalmente se inicia con una sola.
+
+    La carpeta a trabajar es:
+        /config
+        -db.php //configurcion de la BD, se da de alta 
+        -web.php  //Cada vez que incoquemos web, que muestra vistas, utilizaremos este archivo de configuración
+        -console.php  //Para utilizar la consola mediante linea de comandos.
+
+
+
+    Archivo Web: Cada vez que se invoca a Yii via web, este archivo gestiona el recorrido del controlador y la vista para generar HTML.
+
+    Archivo Console: Este archivo es llamado cuando se interactúa con Yii desde la línea de comandos.
+
+El archivo que se modifica de acuerdo a nuestra configuración de Bd es el archiov
+    /config/db.php
+
+Proporcionando el nombre de la base de datos, el usuario y la contraseña de nuestro uusuaroi en la base de datos.   Podemos incluir tambien el necodign de la BD
+
+
+El corazon de todo esto es el Modelo, los datos que se van a almacenar todas las clases a crear, cada tabla tendra una correlación directa con su objeto modelo.
+
+
+
+
+¿Cómo se gestiona el modelo y los datos?
+
+En el corazón de cualquier aplicación de Yii está el modelo de datos. Estos se almacenan en una carpeta dedicada exclusivamente a las clases de modelo. Cada tabla de la base de datos tiene una correlación directa con un objeto o clase modelo, lo que facilita la conexión y manipulación de los datos.
+
+La carpeta a utilizar es:
+
+    /models
+        -ContactForm.php
+        -LoginForm.php
+        -User.php
+
+
+¿Qué es un controlador y cómo funciona en Yii?
+
+Yii distingue entre controladores para línea de comandos y controladores de la web.
+
+    Controladores para línea de comandos: Se utilizan para operaciones básicas como insertar o gestionar datos. Ejemplo de ello es el Hello Controller, que puede ejecutarse fácilmente desde la terminal.
+
+Utilizando la carpeta
+    /commands
+        -Hellocontroller.php
+
+Se puede utilizar como un template, que si ejecutmos
+    $ php yii
+
+    Tendremso un comando que se llama
+        hello/index     Listo para ejecutarse
+
+    $ php yii hello/index                    
+
+    Controladores web: Cada controlador web tiene asociada una carpeta con las vistas de ese controlador. Este enfoque evita la duplicación del código al utilizar nombres específicos para cada funcionalidad.
+
+/controllers
+-SiteControllers.php
+
+Aca se Crearan tantos controladores como se requieran, la regla basica es que haya un controlador por cada modelo.
+
+Tendremos tantoc controladores como modelos, mas dos mas,
+
+-SiteController - donde nace el request, ejecuta cualquier request, cada vez que hacemos un refresh a la pagina. CAda Controlador necesitara una vista.
+
+
+¿Cómo se gestionan las vistas?
+
+Las vistas son parte esencial del patrón MVC y se organizan en carpetas por controlador. Los archivos PHP en estas carpetas absorben los datos del controlador y los muestran sin lógica de negocio. Esta separación de responsabilidades ayuda a que el código sea más manejable y fácil de mantener.
+
+/views
+
+Cada controladro tendra su carpeta de vistas, entonces podremos tener 
+
+/views/new.php
+
+En cada uno de los controladores.Par ano confundir cada controladores.
+
+Cada controlador web, tendra su propia carpeta, es decir
+
+Tenemos el controlador
+
+    SiteController.php
+
+Site tiene una carpeta de vistas
+
+Cada una de estas vistas, o archivos php que funciona absorviendo los datos que le manda el controlador y los imprime la inforamción que tenemos.    
+    
+/views/site    
+
+
+Hay dos archivos donde inicia la magia de yii desde la linea de comandos
+
+yii para sistemas unix/linux/mac
+
+el otro es
+yii.bat Para sistemas windows ejecuytar desde consola, es donde se recibe la información de la linea d ecomandos, se invoca a yii  se lanza la aplicación e imprime los outputs
+
+
+
+¿Qué otros componentes son necesarios?
+
+Además de estos elementos, hay varios archivos y directorios cruciales que impulsan un proyecto de Yii:
+
+    Archivos Yii y Yiibat: Servidores Unix, Linux o Mac utilizan Yii, mientras que Windows utiliza Yiibat para ejecutar comandos en consola.
+
+    Directorio Web: Es donde reside el index.php, que lanza las solicitudes vía web. Este directorio es la raíz del servidor web y contiene elementos esenciales como imágenes estáticas y configuraciones de servidor web.
+
+
+La carpeta
+    /web
+    -/assets
+    -/css
+    .htaccess
+    davicon.ico
+    index.test.php
+    index.php
+    robots.txt
+
+En esta carpeta nace el request que son las invoocaciones web criciales para trabajar con el proyecto.
+
+Esta carpeta es la carpeta raiz de nuestro servidor web, es decir, el proyecto da aqui, aca estaran las miagenes los archivos css y js, que se utiien como assets para cualquier proyecto web.
+
+
+
+¿Cómo mejorar la seguridad y gestión de contraseñas?
+
+Se recomienda crear carpetas adicionales para mejorar la seguridad y facilitar el trabajo en equipo.
+
+    Esquema: Carpeta destinada a guardar el SQL de la base de datos.
+
+    Ejecutar
+        $ mkdir schema
+        $ touch schema/schema.sql  //Placeholder sobre el que se trabajara
+
+    Local: Carpeta para información sensible que no se sube al repositorio, preservando así datos críticos como contraseñas y rutas secretas.
+
+        $ mkdir local
+
+Aca estaran los password, las rutas secretas, y despues en un bash o bat estos valores se convertiran en valores que los consume desde la configuracion de yii
+
+
+Estas prácticas no solo promueven buenas costumbres de desarrollo, sino que también aseguran que el código esté listo para usar en diversos entornos de producción.
+
+Este enfoque estructurado hace que Yii sea una herramienta poderosa y flexible para cualquier desarrollador. Al dominar su estructura de archivos, puedes crear aplicaciones robustas y escalables. Así que sigue aprendiendo y explorando para sacar el máximo provecho de tus proyectos en Yii.
+
+
+
+
+Para la plantilla basica, tenemos
+--------------------
+
+    /
+    -/asstes
+    -/commands
+    -/config
+    -/controllers
+    -/mail
+    -/models
+    -/runtime
+    -/test
+    -/vendor
+    -/views
+    -/web
+        /assets
+        /css
+        /js
+            codigo.js
+        .bowerr
+        .gitignore
+        codeoption.yml
+        composer.json
+        composer.lock
+        composer.lock
+        LICENSE.md
+        README.md
+        requirements.php
+        yii
+        yii.abt
+
+
+📁 /
+
+Raíz del proyecto. Contiene el resto de los directorios y archivos clave para la configuración y ejecución del proyecto Yii 2.
+📁 /assets
+
+Contiene los archivos de recursos públicos compilados o publicados (como CSS, JS, imágenes) generados por Yii desde los assets registrados en la aplicación. Yii publica automáticamente estos recursos para que estén accesibles desde el navegador.
+📁 /commands
+
+Aquí se almacenan los comandos personalizados de consola, creados por el desarrollador. Son útiles para tareas programadas, mantenimiento, migraciones, etc. Por ejemplo: php yii my-command.
+📁 /config
+
+Contiene todos los archivos de configuración del sistema, incluyendo la configuración del componente db (base de datos), web.php, console.php, params.php, entre otros.
+📁 /controllers
+
+Aquí se encuentran los controladores de la aplicación. Son responsables de manejar las solicitudes del usuario, procesar datos mediante los modelos y enviar respuestas (usualmente vistas).
+📁 /mail
+
+Generalmente contiene plantillas de correo electrónico que se utilizan cuando la aplicación envía mensajes por email (por ejemplo, confirmaciones, restablecimiento de contraseña, etc.).
+📁 /models
+
+Contiene los modelos de la aplicación, que representan datos y lógica de negocio. Aquí defines las clases que interactúan con la base de datos (ActiveRecord) o que encapsulan lógica específica.
+📁 /runtime
+
+Directorio temporal utilizado por Yii para guardar archivos de caché, logs, archivos generados en ejecución, etc. No se debe modificar manualmente.
+📁 /test (o /tests)
+
+Carpeta destinada a los tests unitarios y funcionales. Si usas herramientas como PHPUnit, aquí es donde se escriben los casos de prueba para asegurar que la aplicación funciona correctamente.
+📁 /vendor
+
+Carpeta gestionada por Composer que contiene todas las dependencias externas de la aplicación, incluyendo el núcleo de Yii y otras librerías utilizadas.
+📁 /views
+
+Contiene las vistas de la aplicación. Estas son plantillas que renderizan el contenido que se muestra al usuario, como HTML, con datos pasados desde los controladores.
+📁 /web
+
+Es el document root o raíz pública del servidor web. Aquí se colocan los archivos accesibles directamente desde el navegador. Incluye:
+
+    index.php: punto de entrada de la aplicación.
+
+    Archivos publicados de assets.
+
+    Imágenes, JS y CSS públicos.
+
+Dentro de /web (archivos y ocultos):
+
+    .bowerrc: configuración para Bower (gestor de paquetes frontend).
+
+    .gitignore: define qué archivos/directorios ignorar en Git.
+
+    codeception.yml: configuración de Codeception (herramienta de testing).
+
+    composer.json: define las dependencias del proyecto.
+
+    composer.lock: bloquea las versiones instaladas de las dependencias.
+
+    LICENSE.md: licencia del proyecto (usualmente BSD o MIT).
+
+    README.md: documentación inicial del proyecto.
+
+    requirements.php: script que verifica los requisitos del servidor para ejecutar Yii.
+
+    yii: script de consola principal de Yii.
+
+    yii.bat: script de consola para entornos Windows.
+
+
+Plantilla avanzada:
+--------------------
+
+La estructura avanzada de Yii 2, conocida como Advanced Template, diseñada para separar el backend y frontend de la aplicación, permitiendo mayor escalabilidad y organización.
+
+Para la plantilla avanzada tenemos
+
+    /
+    -/backend
+    -/commond
+       -/ config
+       -/ fixtures
+       -/mail
+       -/models
+       -/test
+       -/widgets
+            codecepio.yml
+        -/console
+        -/envirenment
+        -frontend
+        -/ vagrand
+        -/vendor
+            .bowerr
+            .gitignore
+            codeoption.yml
+            composer.json
+            composer.lock
+            init
+            init-bat
+            LICENSE.md
+            README.md
+            requirements.php
+            vagrandfile
+            yii
+            yii.abt
+            yii.test
+            yii.test.bat
+
+
+📁 /
+
+Raíz del proyecto. Contiene las carpetas clave del backend, frontend, consola, configuración compartida y archivos de arranque.
+📁 /backend
+
+Contiene la parte administrativa o de gestión del sistema. Aquí están:
+
+    controllers/, models/, views/: exclusivos para backend.
+
+    Su propio web/ (document root del backend).
+
+    Archivos de configuración propios (config/).
+
+📁 /common
+
+Carpeta para archivos compartidos entre el frontend, backend, consola, etc. Aquí usualmente están:
+📁 /common/config
+
+Archivos de configuración compartida: parámetros comunes, configuración general de componentes, etc.
+📁 /common/fixtures
+
+Datos de prueba para pruebas automáticas (tests). Se utilizan con herramientas como Codeception.
+📁 /common/mail
+
+Plantillas de correos reutilizables entre backend y frontend.
+📁 /common/models
+
+Modelos que son compartidos por todas las partes del sistema.
+📁 /common/test
+
+Pruebas comunes.
+📁 /common/widgets
+
+Widgets personalizados reutilizables en la aplicación.
+📁 /console
+
+Contiene la configuración y scripts para ejecutar comandos por consola. Útil para migraciones, tareas cron, utilidades, etc.
+📁 /environments
+
+Contiene configuraciones para diferentes entornos (dev, prod). Se usan con el script init para desplegar la configuración adecuada.
+📁 /frontend
+
+Contiene la parte pública o interfaz de usuario final del sistema. Estructura similar a backend, con sus controladores, vistas, modelos, configuración, y web/ (público para el frontend).
+📁 /vagrant
+
+Scripts de configuración para entornos de desarrollo con Vagrant. Permite virtualizar el entorno completo del sistema para desarrollo.
+📁 /vendor
+
+Manejado por Composer. Contiene el código del framework Yii y otras librerías de terceros.
+
+Archivos y carpetas en la raíz:
+Archivo/Carpeta	Descripción
+.bowerrc	Configuración de Bower (gestor de paquetes frontend).
+.gitignore	Archivos/directorios que no se suben a Git.
+codeception.yml	Configuración de pruebas con Codeception.
+composer.json	Lista de dependencias y configuración de Composer.
+composer.lock	Bloquea las versiones de las dependencias.
+init / init.bat	Script para inicializar el entorno (dev o prod).
+LICENSE.md	Licencia del proyecto (usualmente BSD o MIT).
+README.md	Descripción general del proyecto.
+requirements.php	Script que verifica requisitos del servidor para Yii.
+Vagrantfile	Archivo principal de configuración para Vagrant.
+yii, yii.bat	Scripts de consola para ejecutar comandos Yii (Linux/Windows).
+yii.test, yii.test.bat	Scripts para ejecutar pruebas (Linux/Windows).
+
+
+
+
+Los modelos permanecen entre los controladores, la vista y las bases de datos.
+
+
+Se utilizan para utilizarse con los contrladores y las vistas para establecer una comunicación con la base de datos,
+
+Con esto ya tenemos nuestro proyecto funcionando y sabemos para que sirve de manera general las carpetas de nuestro proyecto.
+
+Por ultimo vamos a indicar cuando utilizar una plantilla basica y cuando utilizar la plantilla avanzada.
+
+La deferencia es la estructura del proyecto, la diferencia mas obvia es que la plantilla avanzado
+
+
+
+La diferencia radica en la estructura del proyecto. La más obvia es que la plantilla avanzada ya cuenta con un backend configurado.
+
+La siguiente tabla muestra las similitudes y diferencias entre las plantillas básica y avanzada:
+
+
+Caracteristicas            |       Basica      |       Avanzada
+------------------------------------------------------------------
+
+Estrcutura del proyecto             si                      si
+Controladores del sitio             si                      si
+Login/logout del usuario            si                      si
+Formularios                         si                      si
+Conexion con la BD                  si                      si
+Comandos de consola                 si                      si
+Paquete de activos (bundle)         si                      si
+pruebas de concepto de codigo       si                      si
+Boostratp                           si                      si
+Apps Front-end y back-end           no                      si
+Listo paa usar modelo de Usuarios   no                      si
+Registro de usuarios y restauracon
+de contraseña                       no                      si
+
+
+
+
+
+Como puede ver, las principales diferencias son:
+
+La plantilla avanzada admite aplicaciones front-end y back-end;
+La plantilla avanzada tiene un modelo de usuario listo para usar;
+La plantilla avanzada admite el registro de usuarios y la recuperación de contraseñas.
+
+Una de las principales diferencias (aparte de la estructura de carpetas para gestionar el front-end y el back-end) es que la plantilla avanzada cuenta con un sistema de autenticación de usuarios funcional, mientras que la plantilla básica tiene a los usuarios codificados en el modelo de usuario. La plantilla avanzada cuenta con la funcionalidad de registro/contraseña olvidada.
+
+No hay diferencia, ya que el código del framework principal subyacente es el mismo.

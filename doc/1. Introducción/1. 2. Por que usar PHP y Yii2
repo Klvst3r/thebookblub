@@ -1,0 +1,86 @@
+2. Por que usar PHP y Yii2
+
+¿Por qué elegir PHP y Yii?
+
+PHP es un lenguaje que, aunque ha recibido opiniones mixtas a lo largo de los años, sigue siendo una opción viable y poderosa para el desarrollo web. Utilizado en el 65% de los sitios web del mundo, su capacidad para permitir tanto malas prácticas como un desempeño increíblemente rápido y eficiente lo hace destacar. Pero, ¿por qué elegir Yii como framework cuando hay tantas opciones disponibles?
+¿Cuáles son las ventajas de PHP?
+
+    Popularidad: Utilizado en una gran mayoría de los sitios web a nivel global.
+    Facilidad de aprendizaje: Ideal para quienes tienen experiencia previa en programación.
+    Flexibilidad: Permite implementar soluciones de diversas formas, aunque esto puede llevar a malas prácticas si no se tiene el cuidado necesario.
+    Actualizaciones frecuentes: Sigue actualizado, mejorando continuamente para satisfacer las demandas del desarrollo moderno.
+
+¿Qué hace a Yii un framework sobresaliente?
+
+Yii es un framework que ofrece un equilibrio perfecto para proyectos de desarrollo web:
+
+    Facilidad de instalación: Comparativamente sencillo de configurar y poner en marcha.
+
+    Profundidad de conceptos: Trabaja con conceptos que son precisos y bien definidos, facilitando el entendimiento y la aplicación, como el modelo MVC (Modelo-Vista-Controlador).
+
+    Documentación excepcional: Proporciona guías detalladas tanto en inglés como en español, siendo extremadamente claras y completas.
+
+    Un aspecto crucial es su API, bien estructurada y comprensible, aunque no esté en español.
+
+¿Qué se puede encontrar en la documentación de Yii?
+
+La documentación de Yii abarca todo el espectro necesario para aprender y aplicar el framework:
+
+    Guía del usuario: Explica desde los conceptos básicos del framework hasta funciones más avanzadas como vistas y controladores.
+    API: Proporciona detalles sobre las clases y métodos disponibles, como Yii\db\Active Record, permitiendo un desarrollo más informado y eficiente.
+
+¿Para quién es ideal Yii?
+
+Yii es especial para desarrolladores que buscan:
+
+    Rapidez de desarrollo: Proyectos que requieran rapidez en la construcción y mantenibilidad.
+    Robustez de aplicación: Necesidad de estructuras bien definidas y fáciles de trabajar.
+    Documentación accesible: Información clara y completa para resolver rápidamente dudas durante el desarrollo.
+
+¿Qué considerar al usar estos recursos?
+
+Elegir PHP y Yii para el desarrollo web supone aprovechar sus inherentemente positivas características como un motor para la innovación. Sin embargo, es importante:
+
+    Conocer bien el lenguaje: Teniendo en cuenta las mejores prácticas de programación en PHP.
+    Explorar la documentación: Utilizar la guía y API de Yii como recursos principales para aprender y mejorar habilidades.
+    Desarrollar con responsabilidad: Adoptar una mentalidad de buenas prácticas para evitar errores comunes y crear código sostenible.
+
+
+   
+ Comentarios:
+-*--------
+
+
+Imagina que la historia de Caperucita Roja es una metáfora para entender la relación entre PHP y Yii2, y por qué deberías aprenderlos.
+Metáfora de Caperucita Roja
+
+PHP como el Bosque: Imagina que PHP es el bosque por el que Caperucita Roja tiene que caminar para llegar a la casa de su abuela. El bosque está lleno de caminos, árboles y vida. Es vasto, diverso y tiene todo lo que necesitas para tu viaje.
+
+Yii2 como el Camino Seguido: Ahora, imagina que dentro de ese bosque hay un camino bien definido que Caperucita Roja puede seguir para llegar a su destino de manera segura y rápida. Este camino es Yii2. Es claro, está bien pavimentado y tiene señales que guían a Caperucita para que no se pierda ni se desvíe.
+Explicación para un Estudiante Muy Jr
+
+PHP (El Bosque):
+
+    Vasto y Rico en Recursos: PHP es como un gran bosque lleno de recursos. Puedes encontrar casi cualquier cosa que necesites para construir un sitio web. Hay muchas funciones integradas y una gran comunidad de desarrolladores dispuestos a ayudarte.
+    Flexibilidad: Como el bosque, PHP te da la libertad de moverte en muchas direcciones diferentes. Puedes elegir cómo quieres construir tu aplicación, qué herramientas usar y cómo estructurar tu código.
+
+Yii2 (El Camino Seguido):
+
+    Guía Clara y Estructurada: Yii2 te ofrece un camino claro a través del bosque de PHP. Te proporciona una estructura organizada (Modelo-Vista-Controlador) que te ayuda a mantener tu código limpio y fácil de mantener.
+    Seguridad y Eficiencia: Como el camino bien pavimentado, Yii2 tiene muchas características integradas de seguridad que protegen tu aplicación de amenazas. También está optimizado para ser rápido, lo que te ayuda a llegar a tu destino (una aplicación web funcional) más rápidamente.
+    Herramientas Útiles: Yii2 te da herramientas como Gii, que actúa como señales en el camino, ayudándote a generar código automáticamente y ahorrándote tiempo en las tareas repetitivas. Esto es especialmente útil cuando estás comenzando y aún no sabes exactamente cómo hacer todo.
+
+¿Por Qué Deberías Aprender PHP y Yii2?
+
+    Base Sólida (PHP): Aprender PHP te da una base sólida en uno de los lenguajes de scripting más populares para el desarrollo web. Es ampliamente utilizado y tiene una gran comunidad, lo que significa que nunca estarás solo en tu aprendizaje.
+    Estructura y Buenas Prácticas (Yii2): Aprender Yii2 te enseña a seguir buenas prácticas de desarrollo y a trabajar de manera más eficiente. Te da una estructura clara y herramientas poderosas que te ayudarán a construir aplicaciones web de manera más rápida y segura.
+    Preparación para el Futuro: Dominar PHP y Yii2 te preparará para proyectos más complejos y te hará un desarrollador más completo. Entender cómo usar un framework te dará una ventaja en el mercado laboral y te permitirá trabajar en proyectos más grandes y emocionantes.
+
+Conclusión
+
+Al igual que Caperucita Roja necesita un camino seguro para llegar a la casa de su abuela a través del bosque, tú necesitas PHP y Yii2 para navegar el mundo del desarrollo web. PHP te da la flexibilidad y los recursos, mientras que Yii2 te proporciona la estructura y las herramientas para hacerlo de manera efectiva y segura. Aprender ambos te equipará con las habilidades necesarias para convertirte en un desarrollador web exitoso.
+
+
+
+
+

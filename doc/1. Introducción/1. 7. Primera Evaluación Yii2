@@ -1,0 +1,19 @@
+7. Primera Evaluación Yii2
+
+1. ¿Qué se debe hacer una vez instanciado un proyecto usando composer y yii2-basic-project?
+	Ubicar cada clase conforme la estructura del proyecto predeterminado lo sugiere.
+
+2.¿Cuál es una de las características más notables de Yii2 con respecto a otros Frameworks?
+	La velocidad de desarrollo de un proyecto de cero a MVP.
+
+3. ¿Cuál es la manera más práctica de crear o inicializar un proyecto usando Yii2?
+
+	Usando Composer:
+
+		$ composer create-project --prefer-dist yiisoft/yii2-app-basic basic
+
+4. ¿En la arquitectura MVC, cuál es la capa responsable de interactuar con la base de datos?
+	Modelo, porque encapsula toda la lógica de acceso y manipulación de datos.
+
+5. ¿Cuál de las siguientes es una de las mayores ventajas de usar información crítica en una variable de entorno?
+	Seguridad de la información crítica.

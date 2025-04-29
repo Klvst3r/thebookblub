@@ -1,0 +1,39 @@
+3. Arquitectura Modelo-Vista-Controlador
+
+Resumen
+¿Qué es la arquitectura modelo-vista-controlador (MVC)?
+
+La arquitectura MVC es una de las más clásicas y probadas en el desarrollo de software. No solo es popular, sino que ha sido la base de innumerables aplicaciones en el mundo entero, y se caracteriza por dividir la responsabilidad de la aplicación en tres componentes bien definidos:
+
+    Modelo: Es la capa encargada de gestionar y empaquetar la información. Garantiza que todas las capas de la aplicación vean los mismos recursos, atributos y funciones.
+
+    Vista: Se encarga de presentar y recopilar información de los usuarios o agentes externos. Esta capa nunca accederá a la base de datos directamente, su función es más bien la interacción con el usuario.
+    
+    Controlador: Interpreta los datos que vienen desde la vista, los procesa y se los envía al modelo para aplicar las reglas de negocio, y luego envía la información de vuelta a la vista para su despliegue.
+
+¿Cuáles son las responsabilidades de cada componente en MVC?
+
+Entender claramente las responsabilidades de cada capa es crucial para desarrollar aplicaciones mantenibles y eficientes. Cada componente tiene roles específicos:
+
+    Modelo: Accede a los datos y los empaqueta de manera uniforme para todas las capas.
+    Vista: Despliega información y recopila datos del usuario o agentes externos.
+    Controlador: Procesa las solicitudes (requests) y dirige el flujo de datos entre el modelo y la vista.
+
+¿Cómo interactúan las capas en MVC?
+
+Veamos un ejemplo práctico del flujo de una solicitud (request) en una aplicación MVC:
+
+    Inicio en la Vista: El usuario hace una acción, como escribir un término en un campo de búsqueda.
+    Paso al Controlador: La vista envía un objeto request al controlador con la información necesaria.
+    Acción del Controlador: El controlador procesa el request, lo empaqueta y llama al modelo para obtener la información.
+    Respuesta del Modelo: El modelo efectúa una consulta de datos, los empaqueta y retorna la información al controlador.
+    Conversión y envío a la Vista: El controlador convierte el resultado en un objeto response y lo envía a la vista.
+    Despliegue de Información: La vista usa el response para mostrar la información al usuario.
+
+¿Por qué es útil la arquitectura MVC?
+
+La arquitectura MVC es valiosa porque facilita:
+
+    Mantenibilidad: Es más sencillo modificar o mejorar partes específicas de una aplicación sin afectar otras áreas.
+    Futuro crecimiento (Futurizable): Proporciona un marco sólido que puede ser ampliado conforme evolucionan las necesidades de la aplicación.
+    Entendimiento: Provee una organización clara y lógica de código, haciendo el desarrollo y la colaboración más eficiente.

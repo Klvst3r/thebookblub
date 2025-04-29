@@ -1,0 +1,69 @@
+ 
+Resumen
+
+¿Qué es Yii y por qué usarlo?
+
+Yii es un framework para PHP que destaca por su robustez, seguridad y practicidad. Utiliza el modelo vista controlador (MVC), lo que permite desarrollar aplicaciones bien segmentadas rápidamente, sin comprometer el desarrollo ni la seguridad. Su curva de aprendizaje es corta y facilita la creación de aplicaciones desde cero a MVP en cuestión de segundos, como se demuestra en el curso. Una de las grandes ventajas de Yii es la posibilidad de crear aplicaciones robustas y mantenibles con un mínimo de esfuerzo, gracias a la clara asignación de responsabilidades.
+
+
+MVC
+
+Usuario   <------------> Usuari interactivo <-------------->        Vista
+                        con la vista                                |   ^
+                                                Proceso desolicitud |   |   Renderizado del contenido
+                                                                    v   |
+
+                                                                controlador
+
+                                                                    |   ^
+                                                Pidiendo al Modelo  |   |   Devolviendo los
+                                             Que proporcione datos  v   |   datos
+
+                                                                                Solicitando datos a la base de datos
+                                                                    Modelo      ------------------------------------>   [ BD ]
+                                                                                <-----------------------------------
+                                                                                    Datos de respuesta de la BD
+
+
+
+Beneficios clave de usar Yii
+
+Yii ofrece diversas ventajas desde el momento de su instalación, satisfaciendo la mayoría de las necesidades de desarrollo de un proyecto web:
+
+    Comunidad amplia y activa: Con 10 años de existencia, Yii cuenta con una extensa comunidad que ofrece numerosos addons y opciones para resolver problemas específicos.
+    Documentación amplia en español: Su amplia documentación, también disponible en español, facilita mucho el aprendizaje y adopción del framework.
+    Facilidades integradas: Sin necesidad de configuraciones complicadas, Yii ofrece un Active Record potente, múltiples niveles de caché y APIs RESTful, todo listo para usar.
+
+
+
+    ¿Qué es un framework y cómo ayuda al desarrollo?
+
+Un framework, como Yii, es un conjunto de scripts organizados bajo una filosofía de desarrollo específica que facilita la creación de aplicaciones, encargándose de tareas repetitivas o complejas. Ejemplos de funciones que un framework gestiona son:
+
+    Conexiones a bases de datos: Simplificando la conexión a bases de datos mediante configuraciones sencillas.
+    Manejo de sesiones y usuarios: Permitiendo la gestión eficaz de sesiones y administración de usuarios.
+    Envío de correos electrónicos: Simplificando la integración con proveedores de correo para el envío de emails.
+
+La utilización de frameworks permite a los desarrolladores centrarse en la lógica del negocio y los modelos de datos, siguiendo ciertas pautas para conseguir aplicaciones robustas, rápidas y seguras en menos tiempo.
+
+
+Experiencia y visión del curso
+
+Este curso es impartido por Alberto Alcocer, conocido como Beko. Con más de 25 años de experiencia en tecnología, 20 de los cuales dedicados a PHP y bases de datos como MySQL, Beko ofrece un enfoque práctico y accesible al enseñar Yii. Su participación en cursos como expresiones regulares y MySQL en Platzi es una referencia de su calidad pedagógica.
+
+@Beko promete llevar a los estudiantes a una comprensión profunda del framework Yii, mediante proyectos que exploran desde los fundamentos hasta la creación de APIs opinadas. El objetivo es capacitar a los desarrolladores para crear aplicaciones sostenibles y elegantes de manera eficiente, capitalizando la experiencia y el conocimiento acumulado en el uso de PHP y Yii.
+
+Si estás buscando una forma potente y eficaz de desarrollar tus habilidades en PHP, este curso te proporcionará las herramientas necesarias para llevar tus proyectos al siguiente nivel.
+
+
+Observaciones:
+
+Lo que pude observar es que:
+
+Se basa en el patrón MVC preferible, pero es flexible lo que indica que puede adaptarse a otro patrón arquitectónico.
+
+Posee excelente desempeño con esto quiere decir que es rápido(uso de caché, la optimización de consultas etc)
+
+Es seguro, brinda protección CSRF y XSS entre otros.
+
+Tiene documentación en varios idiomas

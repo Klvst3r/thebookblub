@@ -1,0 +1,79 @@
+7. Creación de una Biblioteca Personal con Yii2 y Base de Datos
+
+Proyecto: the Book Club
+
+Caracteristicas:
+
+1. Crear usuarios
+2. Tener tu biblioteca personal
+3. Agregar libros
+4. Agregar autores
+
+
+
+¿Cómo crear un proyecto de biblioteca personal con Yii?
+
+Sumérgete en el emocionante mundo del desarrollo web creando un proyecto único: una biblioteca personal que te permite explorar y gestionar tus libros y autores favoritos. En este curso, te llevaré de la mano a través de un proyecto práctico que, aunque sencillo, es potente y profundo en términos de gestión y relación de datos. Este sistema te permitirá crear usuarios, gestionar bibliotecas, y calificar libros, todo utilizando el framework Yii2. ¡Vamos a profundizar!
+¿Qué características vamos a implementar en el proyecto?
+
+Vamos a diseñar y desarrollar un sistema para la gestión de bibliotecas personales, donde cada usuario podrá:
+
+    Crear un usuario individual: Cada usuario tendrá una cuenta personalizada para gestionar su biblioteca.
+    Gestionar una biblioteca personal: Podrán agregar y calificar libros y autores de manera personalizada.
+    Interacción con los datos: Ver un listado completo de libros y sus calificaciones. Además, se podrán realizar acciones desde la línea de comandos para buscar autores o libros específicos.
+
+¿Cómo se estructuran los datos y las relaciones en Yii?
+
+Una de las partes más emocionantes y desafiantes del proyecto es la gestión de datos y las relaciones entre ellos. Aprenderás a:
+
+    Crear bases de datos y tablas: Organizar y estructurar nuestros datos de manera lógica y eficiente.
+    Establecer relaciones entre tablas: Entender cómo conectar tus datos en distintas tablas y simplificar estas composiciones complejas.
+    Desarrollar modelos, controladores y vistas: Hacer uso de todas las herramientas que Yii proporciona para crear aplicaciones robustas.
+
+¿Qué ventajas tiene Yii2 al implementar este tipo de proyectos?
+
+Yii2 es un framework full-stack que, a pesar de su robustez, ofrece facilidades increíbles para el desarrollo frontend. En este proyecto, exploraremos:
+
+    Feedback visual con flashes: Aprende a mostrar mensajes informativos, de éxito o alerta en la interfaz de usuario.
+    Comodidades para el manejo de errores: Aprovecha los mensajes y flashes para presentar información correcta o incorrecta.
+    Interacción desde la línea de comandos: Ejecutar comandos Yii que te permitirán obtener información puntual sobre autores y libros.
+
+¿Qué tips y consejos se ofrecen para este tipo de desarrollo?
+
+Con más de 20 años de experiencia en desarrollo web, te proporcionaré tips valiosos sobre qué hacer y qué no hacer en el desarrollo web, incluyendo:
+
+    Cómo depurar errores: Estrategias para identificar y resolver problemas en tu código.
+    Dónde buscar soluciones: Recursos y comunidades que pueden ser útiles durante el desarrollo.
+    Prácticas recomendadas: Consejos sobre la escritura de código limpio y organizado.
+
+
+Algo notable en esta sección es que desde la linea de comandos vamos a poder tutilzar mediante el caondo yii
+
+La creación de las sguientes acciones
+
+- klvst3r   comando pasa clase, de prueba
+
+    klvst3r/ author
+    klvst3r/book
+    klvst3r/books
+    klvst3r/suma       Suma los valores de los dos parametros.
+
+
+Esto estara en nuestro controlador klvst3r
+
+Par apoder escribir el siguiente comando:
+
+    yii klvst3r/author 44
+
+         Indicando el autor e información puntual..
+
+Con este proyectos se creatarm
+- Modelos
+- base de datos
+- Controladores             
+- Vistas
+
+
+Ademas se tendran tipos con 20 años de experiencia en desarrollo web. que hacer y que no hacer, y errores a los que nos enfrehtaremos con este proyecto.
+
+
