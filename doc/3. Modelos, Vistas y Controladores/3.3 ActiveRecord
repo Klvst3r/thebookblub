@@ -1,0 +1,587 @@
+Active Record
+
+    Integración de Base de Dattos en Frameworks PHP y Ruby
+
+¿Qué es ActiveRecord y por qué es tan poderoso?
+
+El ActiveRecord es una de las características más impresionantes de los frameworks modernos, y su implementación puede encontrarse en diferentes lenguajes y plataformas como Yii en PHP, Ruby on Rails, y Django. Este patrón ofrece una manera de sincronizar nuestro sistema de clases y objetos con nuestra base de datos, reflejando en cada tupla una representación directa de un modelo en nuestro sistema.
+¿Cómo funciona ActiveRecord?
+
+ActiveRecord permite que lo que hagas en la base de datos se refleje automáticamente en el sistema y viceversa. Al hacer cambios en el sistema, esos cambios son válidos en la base de datos, siguiendo ciertas reglas básicas. Esto no solo ahorra tiempo, sino que también simplifica el desarrollo al ofrecer una estructura más clara y unificada.
+¿Cómo implementar ActiveRecord en Yii?
+
+Para poner en marcha ActiveRecord en Yii, es fundamental hacer unas configuraciones iniciales correctas:
+
+    Conectar con la base de datos: Aunque la conexión ya está establecida de manera invisible, debemos configurar cómo buscar y relacionar los datos.
+
+    Cambios en la clase modelo:
+        Cambiaremos la extensión de model a ActiveRecord.
+        Definimos la tabla a la que se asociará el modelo usando public static function tableName().
+        Yii asume que nuestras tablas contienen una columna ID, lo cual puede ser sobreescrito si nuestra estructura es distinta.
+
+    Guardar cambios en la base de datos: Una vez instanciado un nuevo objeto de un modelo, con ActiveRecord podemos guardar los datos simplemente llamando al método save().
+
+public static function tableName() {
+    return 'books';
+}
+
+// Guardar un nuevo registro
+$book = new Book();
+$book->title = "Nuevo libro";
+$book->save();
+
+¿Qué errores comunes podrías encontrar?
+
+Durante la implementación pueden surgir ciertos errores como:
+
+    Falta de valores por defecto: Si una columna en la base de datos no permite valores nulos, debe tenerse un valor predeterminado. Por ejemplo, si author ID necesita un valor, puedes asignar 1 temporalmente en desarrollo.
+
+    Columnas y lenguajes cruzados: Es crucial asegurarse de que las columnas usadas y los lenguajes aplicados concuerden con las definiciones establecidas.
+
+    Restricciones de caracteres: Si el título del libro excede la definición del varchar, deberías ajustar el esquema de la base de datos o controlar el valor desde el código.
+
+ALTER TABLE books MODIFY COLUMN title VARCHAR(500);
+
+¿Por qué explorar más allá de ActiveRecord?
+
+Una vez que entiendas cómo funciona ActiveRecord, puedes realizar operaciones más complejas, como traer, modificar y guardar información de la base de datos, proporcionando una capa de abstracción que permite desarrollar aplicaciones más robustas y escalables.
+
+    Recuperación y manipulación de datos: Puedes operar con datos que provienen directamente de la base de datos, ofreciendo una flexibilidad impresionante en el manejo de información.
+
+    Modificaciones eficientes: Al realizar operaciones directamente en el modelo, se minimiza el código y se mantiene la lógica centralizada y eficiente.
+
+Este es solo el comienzo del inmenso potencial que ActiveRecord puede ofrecer. 
+
+
+
+Archivos:
+----------
+
+klvst3rController.PHP
+
+
+
+<?php
+
+namespace app\commands;
+
+use yii\console\Controller;
+use yii\console\ExitCode;
+
+use app\models\Book;
+
+/**
+ * Comando para clase, de prueba
+ */
+class PlatziController extends Controller {
+
+  /**
+   * Suma los valores de los dos parÃ¡metros
+   */
+  public function actionSuma($a, $b = 17) {
+    $result = $a + $b;
+    printf("%0.2f\n", $result);
+    return ExitCode::OK;
+  }
+
+  public function actionBooks ($file) {
+    $f=fopenï¼ˆ$fileï¼Œ "r"ï¼‰ï¼›
+    while(! feof($f)) {
+      $data = fgetcsv($f);
+      if !empty($data[1]) && !empty($data[2])) {
+      $book = new Book;
+      $book->title = $data[1];
+      $book->author_id = 1;
+      $book = save();
+      printf("%s\n", $book->toString());
+      }
+    fclose($f);
+    return ExitCode::OK;
+    ï½
+  ï½
+
+
+  Modelo Book.php
+
+  <?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Book extends ActiveRecord {
+  public $title; 
+  public $author;
+
+  public static function tableName() {
+    return 'books';
+  }
+
+  public function getId() {
+    return $this->book_id;
+  }
+
+  public function toString () {
+    return sprintf("(%d) %s", $this->id, strtoupper($this->title));
+  }
+}
+
+
+
+alter.sql
+
+    alter table books modify column title varchar(500);
+
+
+
+Referencias:
+------------
+
+
+https://www.yiiframework.com/doc/guide/2.0/es/db-active-record
+
+
+Comentarios:
+------------
+
+
+Saludos estaba con problemas de conexión a la BD si persiste revisen primero si tienen activado la opción a la BD, por favor, esto es con el siguiente comando:
+
+php -m | grep pdo_mysql
+
+sudo apt update
+
+sudo apt install php-mysql
+
+Esto es en WSDL no tenía activado el controlador de MYSQL.
+
+
+
+
+
+Destaco dos puntos importantes en esta clase.
+
+Ocurrio un “Teachable Moment” (Momento de ensenanza) demasiado importante cuando la data se trunco y se modifico manualmente la tabla de la base de datos.
+
+En un ambiente de trabajo cuando esto sucede se debe recurrir a una solución que mantenga a tu equipo de trabajo informado o por lo menos que se deje constancia de lo sucedido.
+
+    Entonces podemos recurrir a las migraciones, devolver la creación de la tabla, corregir la migración y volver a migrar las tablas.
+    O otra opción crear una nueva migración que altere la tabla y corrija el tamaño del campo.
+
+El segundo punto es que me queda un sin sabor con respecto a Yii, apenas lo estoy aprendiendo, pero considero que el modelo debió prevenir la carga de una parte de los registros e informar del truncamiento antes que ocurriera. Mediante un COMMIT TRANSACTION o algo por el estilo.
+
+
+
+
+
+ActiveRecord es un patrón de diseño utilizado en el ámbito del desarrollo de software, especialmente en el contexto de aplicaciones que interactúan con bases de datos. En este patrón, cada clase representa una tabla en la base de datos, y cada instancia de la clase representa una fila en dicha tabla. Las clases ActiveRecord proporcionan métodos para realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) directamente sobre las filas de la base de datos, lo que simplifica la manipulación de datos y mejora la legibilidad del código.
+
+Así se define un ActiveRecord:
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Post extends ActiveRecord
+{
+    // Especificamos el nombre de la tabla asociada a este modelo
+    public static function tableName()
+    {
+        return 'post';
+    }
+
+    // Definimos las reglas de validación para los atributos
+    public function rules()
+    {
+        return [
+            [['title', 'content'], 'required'],
+            [['title'], 'string', 'max' => 255],
+            [['content'], 'string'],
+        ];
+    }
+}
+
+```namespace app\models;
+
+
+
+use yii\db\ActiveRecord;
+
+
+
+class Post extends ActiveRecord
+
+{
+
+       // Especificamos el nombre de la tabla asociada a este modelo
+
+       public static function tableName()
+
+       {
+
+           return 'post';
+
+       }
+
+
+
+       // Definimos las reglas de validación para los atributos
+
+       public function rules()
+
+       {
+
+           return \[
+
+               \[\['title', 'content'], 'required'],
+
+               \[\['title'], 'string', 'max' => 255],
+
+               \[\['content'], 'string'],
+
+           ];
+
+       }
+
+}
+
+
+
+
+Seguimiento de archivos:
+
+ActiveRecord
+Es la capacidad de imitar un modelo en nuestro sistema directamente en la bd, y que exista unicidad en cada tupla y un modelo que se instancia y se crea.
+
+Todo lo que se tenga en la bd se vea reflejado en el sistema.
+
+Todolo que se cree en el sistema desarrollando, se vea reflejado en la bd.
+
+
+Se deja de extendar a model 
+
+
+use yii\db\ActiveRecord;
+
+class Book extends ActiveRecord
+{
+    // public $title;
+    // public $author;
+
+
+    public static function tableName(){
+        return 'books';
+    }
+
+    public function getID(){
+        return $this->id;
+    }
+    
+    public function toString() {
+        return sprintf("(%d) %s", $this->id, ucapitalize($this->title));
+    }
+}
+
+
+con esto ya tenemos un arelacion uno  auna en la bd desde nuestro sistema
+
+
+Por lo tanto en el controlador 
+
+ public function actionBooks ($file) {
+        $f=fopen($file, "r"); //Se abre el archivo
+        while(!feof($f)) {
+          $data = fgetcsv($f);
+
+          //si existen elementos vacios se filtra mediante un if
+          if(!empty($data[1]) && !empty($data[2])) {
+            //print_r($data);
+            //Se crea un nuevo book
+            $book = new Book; //Se instancia un book, creando un active record
+
+            $book->title = $data[1]; //se le agnga el titulo
+            //$book->author = $data[2]; //esta relacion se hara despues
+
+            //Regresamos invocamos a la funcion quick y despues lo imprime
+            //$book = $this->quick($book);
+
+            //Es necesario guardar la información, para ello.
+            $book->save();//se salva
+
+            printf("%s\n", $book->toString());
+
+
+          } 
+
+
+Para ello en la bd
+
+
+mysql> select * from books;
+
+Verificar que esta vacio.
+
+Ejecutamos nuestro comando
+    $ php yii klvst3r/books local/books.csv
+
+
+En el modelo se intenta utilizar mayusculas pero marca error.
+
+ public function toString() {
+        return sprintf("(%d) %s", $this->id, ucapitalize($this->title));
+    }
+
+Para devolver a mayusculas pero me infica error
+ChatGPT said:
+
+Gracias por compartir el fragmento. El error ocurre porque estás utilizando una función ucapitalize() que no existe en PHP por defecto ni en Yii. Si deseas poner en mayúscula solo la primera letra de la cadena, deberías usar la función nativa de PHP ucfirst().
+Solución
+
+Cambia esta línea:
+
+return sprintf("(%d) %s", $this->id, ucapitalize($this->title));
+
+Por:
+
+return sprintf("(%d) %s", $this->id, ucfirst($this->title));
+
+¿Qué hace ucfirst()?
+
+Convierte solo la primera letra del string en mayúscula. Por ejemplo:
+
+ucfirst("ejemplo") // devuelve "Ejemplo"
+
+Si lo que quieres es convertir todas las letras a mayúsculas, usa strtoupper():
+
+strtoupper("ejemplo") // devuelve "EJEMPLO"
+
+¿Quieres que la primera letra de cada palabra esté en mayúscula (como en un título)? Entonces usa ucwords():
+
+ucwords("ejemplo de texto") // devuelve "Ejemplo De Texto"
+
+
+
+
+El ejecutar:
+
+ php yii klvst3r/books local/books.csv
+Exception 'yii\db\Exception' with message 'SQLSTATE[HY000] [2002] No such file or directory'
+
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/Connection.php:648
+
+Error Info:
+Array
+(
+    [0] => HY000
+    [1] => 2002
+    [2] => No such file or directory
+)
+
+Caused by: Exception 'PDOException' with message 'SQLSTATE[HY000] [2002] No such file or directory'
+
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/Connection.php:722
+
+
+
+Marca error
+
+
+Vams a solucionar en el controlador de la siguiente manera:
+
+
+Hay un error ya que la llongitud de la bd en el titulo de los libros debe ser mayor de 100 caracteres.
+
+
+Modificaremos la BD
+    mysql> alter table boks modify column title varchar(500)
+
+
+En la ejecución nos genero un error derivado a diversas causas que indicaremos:
+
+Tomando en consideración que el primer error fue:
+
+    SQLSTATE[HY000] [2002] No such file or directory
+
+1. significa que Yii no puede conectarse a tu base de datos MySQL porque no encuentra el socket o dirección del servidor.
+
+Este error es común cuando:
+
+    Estás usando localhost como host en vez de 127.0.0.1 en sistemas Unix-like.
+
+    PHP (y por tanto Yii) busca el socket de MySQL en un lugar distinto al que realmente está.
+
+    MySQL no está corriendo.
+
+La solución es     
+
+Edita tu archivo de configuración de base de datos (normalmente: config/db.php) y asegúrate de que el host sea 127.0.0.1 en lugar de localhost.
+Antes:
+
+'dsn' => 'mysql:host=localhost;dbname=thebookclub',
+
+Después:
+
+'dsn' => 'mysql:host=127.0.0.1;dbname=thebookclub',
+
+Esto forzará la conexión TCP en lugar del socket.
+
+
+Pero en nuestro caso el archivo de configuración se encuentra en 
+
+    local/variables_local.sh
+
+
+2. al estar las variables de configuración aisladas. probablemente no estan definidas correctaente y eso es por que entre la definicion de las variables y su valor dejamos espacios, modificamos nuestro archivo de variables de configuración:
+
+    export db_host=127.0.0.1  # En sistemas unix no llevan simbolo de $ para dar de alta las variables
+    export db_name=thebookclub
+    export db_user=klvst3r
+    export db_pass=desarrollo
+    export bd_port=3306
+
+    # Obtenido de https://www.random.org/strings/ 
+    export salt=uAh2hbHUPao10OyQsTz2vYym0fgmea!K # cadena de caracteres aleatoria servira posteriormente para hasear datos
+
+3. Podemos observar que cambiamos     
+
+de localhost a 127.0.0.1 directamente en las variables de entorno:
+
+Verifica cómo estás definiendo tus variables de entorno. Si usas un archivo .env (o exportas en la terminal), asegúrate de que db_host sea:
+
+db_host=127.0.0.1
+
+    No uses localhost a menos que quieras usar sockets.
+
+
+Asi entonces ya teiendo deifnidas nuestras variables vamos a cargarls 
+
+yuna solución rapida es no cargar variables de entorno:
+
+colocamos la directiva en db.php la conexión:
+
+return [
+    'class' => 'yii\db\Connection',
+    'dsn' => 'mysql:host=127.0.0.1;dbname=thebookclub',
+    'username' => 'tu_usuario',
+    'password' => 'tu_contraseña',
+    'charset' => 'utf8',
+];
+
+
+Esto aislará el problema a la conexión sin depender de variables de entorno.
+
+
+Pero si queremos utilizar las variables de entorno, continuamos:
+
+Perfecto, si tienes tus variables definidas en un archivo llamado local/variables_local.sh, puedes cargarlas en tu entorno actual de terminal con el siguiente comando:
+
+source local/variables_local.sh
+
+    ✅ Esto funciona si estás en la raíz de tu proyecto y la ruta local/variables_local.sh es relativa desde ahí.
+
+📌 Asegúrate de que el archivo esté bien estructurado
+
+El archivo variables_local.sh debe tener el formato:
+
+export db_host=127.0.0.1
+export db_name=thebookclub
+export db_user=root
+export db_pass=tu_contraseña
+
+Cada variable debe estar exportada, de lo contrario getenv() no las podrá acceder desde PHP.
+🔁 ¿Y si quiero que se carguen automáticamente al abrir la terminal?
+
+Puedes agregar esta línea a tu archivo ~/.bashrc, ~/.zshrc o ~/.profile dependiendo de tu shell:
+
+source /ruta/completa/a/local/variables_local.sh
+
+
+
+Como estamos utilizando fish 
+
+Opción 1: ⚠️ Corregir el archivo .sh para bash y usarlo temporalmente desde bash
+
+Si solo lo necesitas para correr yii ocasionalmente:
+
+bash -c "source local/variables_local.sh && php yii ..."
+
+Pero primero corrige el archivo variables_local.sh para que sea compatible con bash:
+
+export db_host=127.0.0.1
+export db_name=thebookclub
+export db_user=klvst3r
+export db_pass=desarrollo
+
+Sin espacios alrededor del =.
+
+Opción 2: 🐟 Adaptar tus variables para fish shell
+
+Crea un archivo local/variables_local.fish con contenido así:
+
+set -gx db_host 127.0.0.1
+set -gx db_name thebookclub
+set -gx db_user klvst3r
+set -gx db_pass desarrollo
+
+Y luego ejecútalo así:
+
+source local/variables_local.fish
+
+🔁 Recomendación general
+
+Ya que estás usando fish, considera mantener tus variables permanentes usando:
+
+set -Ux db_host 127.0.0.1
+
+Esto las guarda para siempre en el entorno de usuario (puedes verlas con set -U).
+
+
+Y luego volver a ejecutar tu comando:
+
+php yii klvst3r/books local/books.csv
+
+
+Se puede probar sin variables de entorno:
+
+Edita temporalmente tu config/db.php y reemplaza:
+
+'dsn' => sprintf("mysql:host=%s;dbname=%s", getenv('db_host'), getenv("db_name")),
+
+por:
+
+'dsn' => 'mysql:host=127.0.0.1;dbname=thebookclub',
+
+Y deja directamente los datos así:
+
+'username' => 'klvst3r',
+'password' => 'desarrollo',
+
+Si eso funciona, el problema está 100% en cómo se están leyendo las variables de entorno.
+¿Quieres que revisemos si PHP está reconociendo tus variables?
+
+Puedes poner justo antes de que Yii cree la conexión (por ejemplo, en el mismo script donde corres el comando):
+
+var_dump(getenv('db_host'));
+exit;
+
+Es importante que las variables sean exportadas para que se puedan cargar el el frameworks
+podemos hacer asi:
+
+
+1. ⚠️ La variable db_name no está definida o exportada
+
+Asegúrate de haber exportado también db_name, por ejemplo:
+
+set -gx db_name thebookclub
+
+Luego verifica que esté presente:
+
+echo $db_name
+
+
+
+
+finalmente como la inforamción se guardo, y se volvemos a interntar guardar. marcaria un error
+
+Con sto cada vez que se crea un objeto y se guarde en el codigo, sin hacer algo mas se almacene en la Bd.
+

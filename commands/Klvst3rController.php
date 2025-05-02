@@ -34,13 +34,13 @@ class Klvst3rController extends Controller {
       }
 
 
-      private function quick($book) {
-        $book->title = sprintf("#sffff", $book-> title);
-        return $book;
-      }
+      // private function quick($book) {
+      //   $book->title = sprintf("#sffff", $book-> title);
+      //   return $book;
+      // }
 
       public function actionBooks ($file) {
-        $f=fopen($file, "r");
+        $f=fopen($file, "r"); //Se abre el archivo
         while(!feof($f)) {
           $data = fgetcsv($f);
 
@@ -48,15 +48,22 @@ class Klvst3rController extends Controller {
           if(!empty($data[1]) && !empty($data[2])) {
             //print_r($data);
             //Se crea un nuevo book
-            $book = new Book;
+            $book = new Book; //Se instancia un book, creando un active record
 
-            $book->title = $data[1];
-            $book->author = $data[2];
+            $book->title = $data[1]; //se le agnga el titulo
+            //$book->author = $data[2]; //esta relacion se hara despues
 
             //Regresamos invocamos a la funcion quick y despues lo imprime
-            $book = $this->quick($book);
+            //$book = $this->quick($book);
+
+            $book->author_id = 1;
+
+            //Es necesario guardar la información, para ello.
+            $book->save();//se salva
 
             printf("%s\n", $book->toString());
+
+
           } 
 
           

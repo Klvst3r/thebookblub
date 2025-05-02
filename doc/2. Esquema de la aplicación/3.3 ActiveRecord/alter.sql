@@ -1,0 +1,1 @@
+alter table books modify column title varchar(500);
