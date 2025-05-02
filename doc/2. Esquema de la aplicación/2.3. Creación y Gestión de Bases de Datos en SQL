@@ -3,6 +3,29 @@
 Tablas y Buenas Prácticas
 
 
+
+Primeras tabla creatas Author y Books:
+-----------
+
+create database if not exists thebookclub;
+use thebookclub;
+
+create table if not exists books (
+  book_id integer unsigned primary key auto_increment,
+  title varchar(100) not null,
+  author_id integer unsigned not null
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+create table if not exists authors (
+  author_id integer unsigned primary key auto_increment,
+  name varchar(100) not null,
+  nationality varchar(2)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+
+
 Creación de las tablas books y authors
 ---------------------------------------
 
@@ -213,6 +236,8 @@ si acaso ocurre algun problema o queremos devolvernos, tii devuelve de una migra
 yii migrate/down 
 
 Y finalmente comentar que si deseamos mas control (no se si total) de la base de datos, y modificar el charset o el collate etc, tambien se puede, chekense la documentacion.
+
+
 
 
 

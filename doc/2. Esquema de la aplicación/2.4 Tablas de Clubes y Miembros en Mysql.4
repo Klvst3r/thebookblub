@@ -1,0 +1,100 @@
+Tablas de Clubes y Miembros en MySQL
+
+
+Tablas Creadas -- clubs:
+----------------
+
+create table if not exists clubs (
+  club_id integer unsigned primary key auto_increment,
+  name varchar(100) not null unique,
+  description varchar(500),
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+create table if not exists club_members (
+  club_member_id integer unsigned primary key auto_increment,
+  user_id integer unsigned not null,
+  club_id integer unsigned not null,
+  is_admin tinyint not null default 0,
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp,
+  unique key no_rep(user_id, club_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+
+¿Cómo crear tablas para gestionar clubes y miembros en MySQL?
+
+Diseñar una base de datos inteligente es clave para cualquier sistema que pretenda gestionar clubes de lectura de manera eficiente. En este artículo, te guiaré a través de la creación de tablas en MySQL para almacenar datos sobre clubes y sus miembros. Acompáñame para entender la lógica detrás de cada tabla y cómo garantizar la integridad y unicidad de la información.
+¿Qué información debe contener la tabla de clubes?
+
+Al pensar en la estructura de una tabla que albergue datos sobre clubes de lectura, es importante definir correctamente sus columnas para maximizar el valor de la información almacenada.
+
+CREATE TABLE IF NOT EXISTS clubs (
+    club_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(500),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+    Identificación y nombre: Cada club tendrá un club_id único que será incrementado automáticamente. El name del club es un texto que no puede repetirse ni quedar vacío.
+    Descripción: Optativa, permite una longitud considerable que admite campos vacíos.
+    Tiempos de creación y modificación: Cruciales para entender cuándo y cómo evoluciona la información. Usamos CURRENT_TIMESTAMP para anotar automáticamente estos eventos en su ocurrencia.
+
+¿Cómo asegurar la integridad de los datos con claves únicas y fechas?
+
+Es fundamental definir correctamente las propiedades de integridad de las columnas clave para evitar duplicidades y asegurar la integridad de los datos.
+
+    Columnas únicas: El nombre del club se define como único para evitar entradas duplicadas.
+    Fechas automáticas: Marcamos cuándo se crea y modifica con DEFAULT CURRENT_TIMESTAMP y ON UPDATE CURRENT_TIMESTAMP respectivamente, facilitando auditorías o revisiones futuras.
+
+¿Cómo y por qué asociar usuarios y clubes?
+
+Asociar usuarios a clubes implica la creación de una tabla de relación que indica qué usuarios pertenecen a qué clubes y si tienen roles especiales dentro de ellos.
+
+CREATE TABLE IF NOT EXISTS club_members (
+    club_member_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id INTEGER UNSIGNED NOT NULL,
+    club_id INTEGER UNSIGNED NOT NULL,
+    is_admin TINYINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY no_rep (user_id, club_id)
+);
+
+    Roles en el club: La columna is_admin define si un miembro es administrador del club. Se inicia en cero, considerando que usualmente los miembros nuevos no son administradores.
+    Clave única compuesta: La combinación user_id y club_id garantiza que un usuario no pueda unirse varias veces al mismo club con la misma relación, evitando duplicaciones y errores.
+
+¿Por qué usar índices únicos en combinación de columnas?
+
+El uso de un índice único compuesto es esencial cuando trabajamos con dos o más columnas que, en conjunto, deberían ser únicas. Esta práctica es común en tablas de relaciones donde necesitamos evitar repeticiones de parejas de datos (como user_id y club_id en nuestra tabla club_members).
+¿Qué otras tablas son necesarias en nuestro sistema?
+
+Para completar el diseño de la base de datos, es recomendable considerar tablas adicionales:
+
+    Usuarios (Users): Gestiona la información personal de cada miembro.
+    Préstamos (Loans): Controla qué libros se han prestado entre miembros.
+    Libros de los usuarios (User Books): Almacena qué libros posee cada usuario.
+
+
+Estas tablas complementarias se discutirán más adelante en el contexto del modelo user, asegurando un sistema robusto y adaptable a futuras necesidades.
+
+
+Comentarios
+En este espacio, también les quiero dar un tip que se usa en la industria , y es que en Producción el comando Delete está prohibido, porque las tablas deben ser auditables.
+
+Entonces, se maneja un concepto que se llama SoftDelete, en donde a todas las tablas les agregas un campo llmada status_id, que nomalmente viene de la tabla status, con dos valores, 1 para activo y 2 para inactivo.
+
+Así, modelas el sistema para que, en vez de borrar un registro, le cambie el status a 2, y para que solo traiga los registros activos en los listados, es decir, los que tienen status de 1.
+
+Hay muchas formas de hacer Soft Delete, de hecho, laravel agrea un campo que se llama deleted_at, que si es nulo toma el registro como activo y si tiene una fecha lo toma como borrado, Les recomiendo que investiguen un poco sobre el tema.
+
+
+Referencias:
+
+https://www.yiiframework.com/doc/guide/2.0/en/db-migrations
+

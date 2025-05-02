@@ -1,0 +1,12 @@
+¿Por qué es importante el diseño de la base de datos de un proyecto nuevo de Yii2 o cualquier framework que use MVC?
+Será la estructura de datos lógica para toda nuestra aplicación.
+2.
+¿En un caso estándar de una aplicación web con MVC, qué característica debe tener cada tabla de la base de datos?
+Cada tabla será representada por una clase del modelo.
+3.
+
+¿Qué utilidad tiene crear tablas en la base de datos con columnas que tomen un timestamp al crear o modificar un registro?
+
+created_at timestamp not null default current_timestamp, modified_at timestamp not null default current_timestamp
+
+Tener trazabilidad al registrar exactamente cuándo se creó o modificó cada registro. Ayuda en la depuración y resolución de problemas al identificar el momento preciso de los cambios; permite ordenar y filtrar registros por fecha. Es útil para cuando se modifican usuarios, por ejemplo.
