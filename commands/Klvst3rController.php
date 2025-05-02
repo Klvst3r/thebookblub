@@ -5,12 +5,23 @@ namespace app\commands;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
+//Debe traers por que no estan en el mismo namespace, no estan en la misma carpeta, se deben traer otros objetos que estan en otro namespace, cada vez que se utilicen.
+
+use app\models\Book;
 
 
 /**
  * Comando para clase, de prueba
  */
-class PlatziController extends Controller {
+class Klvst3rController extends Controller {
+
+   /**
+   * Saludo
+   */
+  public function actionIndex()
+  {
+      echo "Hola desde Klvst3r!\n";
+  }
 
 
     /**
@@ -23,11 +34,32 @@ class PlatziController extends Controller {
       }
 
 
+      private function quick($book) {
+        $book->title = sprintf("#sffff", $book-> title);
+        return $book;
+      }
+
       public function actionBooks ($file) {
         $f=fopen($file, "r");
         while(!feof($f)) {
           $data = fgetcsv($f);
-          print_r($data);
+
+          //si existen elementos vacios se filtra mediante un if
+          if(!empty($data[1]) && !empty($data[2])) {
+            //print_r($data);
+            //Se crea un nuevo book
+            $book = new Book;
+
+            $book->title = $data[1];
+            $book->author = $data[2];
+
+            //Regresamos invocamos a la funcion quick y despues lo imprime
+            $book = $this->quick($book);
+
+            printf("%s\n", $book->toString());
+          } 
+
+          
         }
         fclose($f);
         return ExitCode::OK;

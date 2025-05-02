@@ -1,0 +1,308 @@
+Modelos en PHP
+
+    Creación y manipulación de Datos
+
+
+
+Los modelos van dentro de la carpeta models
+
+
+En el caso de los modelos, los nombres de los archivos sera en singular, por que cada vez que instanciemos un objeto va a ser un libro, no sera libros.
+
+
+Se tiene un modelo, hasta ahora n se habla d ela conexión a la base de datos, es una instancia que esta sola en si misma.
+
+Solo es el contenedor de información.
+
+S le dan dos atributos.
+
+title
+author
+
+Ahora e el controladores
+
+Se abre el archivo, iteramos sobre las lineas del archiovo se traen en un arreglo.
+
+se crea algo nuevo 
+
+    $book = new Book
+
+
+
+¿Qué es un modelo en programación?
+
+Un modelo es fundamental en la programación, especialmente al tratar con aplicaciones web y bases de datos. Se le describe como un paquete de transporte de datos, reglas de negocio, lógica de negocio y validación. Es considerado el corazón de una aplicación, ya que centraliza toda la lógica y maneja la interacción con otros componentes del sistema.
+
+Los modelos permiten encapsular datos en objetos, siendo cada objeto una representación directa de una estructura que manejamos dentro de nuestra lógica de negocio. Esto facilita el manejo y procesamiento de datos de manera sistemática y organizada.
+¿Cómo se relacionan los modelos y controladores?
+
+La integración de modelos con controladores es crucial para el flujo de una aplicación web. En un entorno de programación como PHP, los modelos están comúnmente almacenados en una carpeta especial, indicada para su manejo específico. Al crear un modelo, como un libro Book.php, se establece una estructura base para el manejo específico de datos.
+
+A continuación, se muestra un ejemplo simple usando PHP:
+
+<?php
+
+namespace app\models;
+
+use yii\base\Model;
+
+class Book extends Model
+{
+    public $title;
+    public $author;
+}
+
+Este código define un modelo de libro con dos atributos: title y author. Sin embargo, dicho modelo no conecta ni almacena datos directamente en bases de datos u otros recursos; su rol es puramente organizativo para manejar datos en la aplicación.
+¿Cómo se instancian y utilizan los modelos?
+
+Al integrar modelos en la lógica de una aplicación, es importante entender cómo se instancian y utilizan:
+
+    Instanciación del modelo: Crear una instancia de un modelo permite manejar datos específicos sobre ese objeto, por ejemplo:
+
+    $book = new Book();
+    $book->title = '1984';
+    $book->author = 'George Orwell';
+
+    Integración con controladores: Los controladores, al manejar la lógica de acciones de la aplicación, como la manipulación y visualización de datos, interactúan estrechamente con los modelos.
+
+        Controlador de ejemplo:
+
+        use app\models\Book;
+
+        $book = new Book();
+        $book->title = $data[0];
+        $book->author = $data[2];
+
+        echo $book->toString();
+
+En el código anterior, toString() imprime una representación del objeto Book, separando claramente la lógica de datos de la presentación, fomentando un diseño limpio y eficiente.
+¿Qué buenas prácticas aplicar al usar modelos?
+
+Al implementar modelos, es esencial seguir ciertas prácticas que mejoren el mantenimiento y comprensión del código:
+
+    Nombres Concisos: Nombrar modelos en singular, como "Book" en lugar de "Books", ayuda a que los objetos instanciados representen individualmente una entidad específica.
+
+    Espaciado de Nombres (Namespaces): Utilizar espaciados de nombres es crucial para evitar conflictos y organizar mejor las clases en una aplicación. Esto ayuda a modularizar y mantener el código.
+
+    Validación y Lógica: Los modelos no solo transportan datos, sino que también pueden incluir lógica de validación, gestionando tanto la entrada como la salida de información.
+
+    Funciones privadas: Permite encapsular lógicas auxiliares específicas a nivel de modelo sin exponerlas fuera de su contexto. Por ejemplo, manipular títulos antes de mostrarlos:
+
+    private function quick(Book $book)
+    {
+        $book->title = sprintf('%s %s', $book->title, 'Extra Info');
+        return $book;
+    }
+
+Los modelos son una pieza clave en estructurar una aplicación robusta y eficiente. Su correcta implementación no solo organiza el código, sino que también mejora significativamente la mantenibilidad y el flujo de datos a través de las distintas capas de nuestra aplicación. 
+
+
+
+Generar información a partir de datos separados. 🔥
+
+Relacionar datos separados (generar asociaciones) para ofrecerle al usuario información para tomar decisiones.
+
+
+La función fgetcsv() devuelve un array que contiene un null ([null]) cuando se encuentra con una línea vacía, como dice la documentación de PHP (https://www.php.net/manual/es/function.fgetcsv.php). Entonces podemos reducir el condicional a:
+
+!empty($data[0])
+
+
+
+
+
+Comentarios:
+    "El Modelo es el corazón de nuestra aplicación." para que no queden dudas.
+
+
+Archivos:
+book.php
+---
+    <?php
+
+namespace app\models;
+
+use yii\db\Model;
+
+class Book extends Model {
+  public $title; 
+  public $author;
+
+  public function toString () {
+    return sprintf("%s - %s", $this->title, $this->author);
+  }
+}
+
+
+
+klvst3rcontroller.php
+------------
+<?php
+
+namespace app\commands;
+
+use yii\console\Controller;
+use yii\console\ExitCode;
+
+use app\models\Book;
+
+/**
+ * Comando para clase, de prueba
+ */
+class PlatziController extends Controller {
+
+  /**
+   * Suma los valores de los dos parÃ¡metros
+   */
+  public function actionSuma($a, $b = 17) {
+    $result = $a + $b;
+    printf("%0.2f\n", $result);
+    return ExitCode::OK;
+  }
+
+  private function quick($book) {
+    $book->title = sprintf("%sffff", $book->title);
+    return $book;
+  }
+
+  public function actionBooks ($file) {
+    $f=fopenï¼ˆ$fileï¼Œ "r"ï¼‰ï¼›
+    while(! feof($f)) {
+      $data = fgetcsv($f);
+      if !empty($data[1]) && !empty($data[2])) {
+      $book = new Book;
+      $book->title = $data[1];
+      $book->author = $data[2];
+      $book = $this->quick($book);|
+      printf("%s\n", $book->toString());
+      }
+    fclose($f);
+    return ExitCode::OK;
+    ï½
+  ï½
+
+
+
+
+Referencias:
+
+    https://www.yiiframework.com/doc/guide/2.0/es/structure-models
+
+
+
+contexto de desarrollo
+
+
+1. Se crea el modelo:
+
+
+<?php
+
+namespace app\models;
+
+use yii\base\Model;
+
+
+class Book extends Model
+{
+    public $title;
+    public $author;
+    
+     public function toString() {
+        return sprintf("%s - %s", $this->title, $this->author);
+    }
+}
+
+
+2. Se modifica el controladores
+ public function actionBooks ($file) {
+        $f=fopen($file, "r");
+        while(!feof($f)) {
+          $data = fgetcsv($f);
+          //print_r($data);
+          //Se crea un nuevo book
+          $book = new Book;
+
+          $book->title = $data[0];
+          $book->author = $data[2];
+
+          printf("%s\n", $book->toString());
+        }
+        fclose($f);
+        return ExitCode::OK;
+    }
+    
+
+3. Se ejecuta en la termina.
+    php yii klvst3r/books local/books.csv
+
+
+aunque la ejecución se realiza es importante que se corrijan los errores.
+
+Por ello se modificar el filrado del controlador.
+
+public function actionBooks ($file) {
+        $f=fopen($file, "r");
+        while(!feof($f)) {
+          $data = fgetcsv($f);
+
+          //si existen elementos vacios se filtra mediante un if
+          if(!empty($data[1]) && !empty($data[2])) {
+            //print_r($data);
+            //Se crea un nuevo book
+            $book = new Book;
+
+            $book->title = $data[1];
+            $book->author = $data[2];
+
+            printf("%s\n", $book->toString());
+          } 
+
+          
+        }
+        fclose($f);
+        return ExitCode::OK;
+    }
+
+Para filtrar aquellos que no estan vacios en el campo title
+
+con esto se filtra el archivo, si se puede leer, en el modelo ya se tiene un forma diferente diferente de traer los datos que se estan trayendo, ahora si tengo el titulo y el author
+
+
+Lo que tenemos son dos datos seperados y con el modelo estamos generando información.
+
+
+Con esto ayuda a crear asociasiones, que van a ofrecer al usuario final de como actuar o tomar decisiones.
+
+un modelo es un paquete de transporte de datos, los asociamos, los enviamos, los procesamos, se los regresamos a alguien mas pero siempre va a empquetado.
+
+
+Ej.
+
+En el controlador definimos:
+
+private function quick($book) {
+        $book->title = sprintf("#sffff", $book-> title);
+        return $book;
+      }
+
+
+Lo que esta haciendo es recbir un objeto, que es un modelo libro, lo a a recibir, lo va a transformar, y lo vaa regresar.
+
+Entonces.
+
+            //Regresamos invocamos a la funcion quick y despues lo imprime
+            $book = $this->quick($book);
+
+
+ahora ejecutamos
+
+    php yii klvst3r/books ocal/books.csv
+
+
+con este ejemplo cada titulo del archivo tiene una edición agregando fff al final, lo regreso modificado.
+
+
+Cone sto es ejemplificar que un modelo su gran responsabilidaddes, es empaquetar los datos para generar información y traspasarse, sin mayor mutacion entrediferentes elementos en el sistema.
+
+

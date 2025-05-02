@@ -130,3 +130,133 @@ class PlatziController extends Controller {
 Para ejecutar el comando
 
     $ yii klvst3r/books local/books.csv
+
+
+Comentarios:
+
+
+Dejo algunos ejemplos de Commands.
+
+exec:
+
+<?php
+// Ejecutar un comando y obtener la última línea de la salida
+$last_line = exec('ls -la', $output, $return_var);
+
+// Mostrar la última línea
+echo "Última línea: " . $last_line . "\n";
+
+// Mostrar todo el output
+echo "Output completo: \n";
+print_r($output);
+
+// Mostrar el valor de retorno del comando
+echo "Valor de retorno: " . $return_var . "\n";
+?>
+
+```shell\_exec:
+
+```js
+<?php
+// Ejecutar un comando y obtener toda la salida
+$output = shell_exec('ls -la');
+
+// Mostrar la salida
+echo "Output: \n" . $output;
+?>
+
+```system:
+
+```js
+<?php
+// Ejecutar un comando y mostrar la salida en tiempo real
+$last_line = system('ls -la', $return_var);
+
+// Mostrar la última línea
+echo "Última línea: " . $last_line . "\n";
+
+// Mostrar el valor de retorno del comando
+echo "Valor de retorno: " . $return_var . "\n";
+?>
+
+```passthru:
+
+```js
+<?php
+// Ejecutar un comando y mostrar la salida sin procesarla
+passthru('ls -la', $return_var);
+
+// Mostrar el valor de retorno del comando
+echo "Valor de retorno: " . $return_var . "\n";
+?>
+
+
+
+Existe un error en el controlador de la linea de comandos:
+
+En mi proyecto de Yii quiero ejecutar algunos comandos pero al ejecutar:
+php yii
+Exception 'yii\base\UnknownClassException' with message 'Unable to find 'app\commands\Klvst3rController' in file: /home/klvst3r/dev/yii/thebookblub/commands/Klvst3rController.php. Namespace missing?'
+
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/BaseYii.php:296
+
+
+l error que estás viendo:
+
+Exception 'yii\base\UnknownClassException' with message 'Unable to find 'app\commands\Klvst3rController' in file: /home/klvst3r/dev/yii/thebookblub/commands/Klvst3rController.php. Namespace missing?'
+
+significa que Yii2 no puede cargar tu clase Klvst3rController ubicada en commands/Klvst3rController.php porque no encuentra el espacio de nombres (namespace) correcto en ese archivo.
+✅ Cómo solucionarlo
+
+Asegúrate de que tu archivo Klvst3rController.php tenga el siguiente encabezado correcto:
+
+<?php
+
+namespace app\commands;
+
+use yii\console\Controller;
+
+class Klvst3rController extends Controller
+{
+    public function actionIndex()
+    {
+        echo "Hola desde Klvst3r!\n";
+    }
+}
+
+📌 Verifica también:
+
+    Ubicación del archivo: debe estar en commands/Klvst3rController.php dentro del directorio base de tu aplicación (@app).
+
+    Nombre de clase: debe coincidir exactamente con el nombre del archivo (Klvst3rController).
+
+    Nombre del espacio de nombres (namespace): debe ser app\commands, que corresponde a la carpeta commands dentro de tu app base.
+
+    Autoload: asegúrate de no haber modificado las reglas del autoload en composer.json si moviste carpetas o cambiaste estructuras.
+
+Podemos probar si lo detecta con:
+
+   php yii help klvst3r 
+   
+después de corregirlo
+
+
+
+
+Para poder utilizar el archivo books.csv lo colocamos dentro de la carpeta /local
+
+Y ahi entonces podemos ejecutar
+
+yii klvst3r/suma
+
+o saludo
+  yii klvst3r/index
+
+  yii klvst3r/books local/books.scv
+
+con esto se abrio un archivo y se lee en un array
+
+Con el tema d emodelos se va a poder crear tuplas en la Bd.
+
+
+
