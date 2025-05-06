@@ -9,6 +9,8 @@ use yii\console\ExitCode;
 
 use app\models\Book;
 
+use app\models\Author;
+
 
 /**
  * Comando para clase, de prueba
@@ -46,6 +48,24 @@ class Klvst3rController extends Controller {
 
           //si existen elementos vacios se filtra mediante un if
           if(!empty($data[1]) && !empty($data[2])) {
+
+            //Antes de crear u libro vamos a crear un autor,
+            //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
+            $author = Author::find()
+              ->where(['name' => $data[2]])
+              ->one(); //active query
+
+              if(empty($author)) {
+                //si no existe el autor, lo creamos
+                $author = new Author;
+                 $author->name = $data[2];
+                $author->save();
+              }
+
+
+
+
+
             //print_r($data);
             //Se crea un nuevo book
             $book = new Book; //Se instancia un book, creando un active record
@@ -56,7 +76,7 @@ class Klvst3rController extends Controller {
             //Regresamos invocamos a la funcion quick y despues lo imprime
             //$book = $this->quick($book);
 
-            $book->author_id = 1;
+            $book->author_id = $author->id;
 
             //Es necesario guardar la información, para ello.
             $book->save();//se salva
@@ -72,4 +92,19 @@ class Klvst3rController extends Controller {
         return ExitCode::OK;
     }
     
+
+    public function getAuthor($autor_id) {
+      // $author = Author::find()->where(['author_id' => $autor_id])->one();
+      $author = Author::findOne($autor_id);
+
+      if($author) {
+        printf("No existe el autor con id %d\n", $autor_id);
+      } else {
+        return ExitCode::DATAERR;
+      }
+
+      printf("Nombre: %s\n", $author->name);
+      return ExitCode::OK;
+    }
 }
+
