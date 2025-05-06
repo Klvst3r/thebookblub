@@ -9,6 +9,8 @@ use yii\console\ExitCode;
 
 use app\models\Book;
 
+use app\models\Author;
+
 
 /**
  * Comando para clase, de prueba
@@ -46,6 +48,17 @@ class Klvst3rController extends Controller {
 
           //si existen elementos vacios se filtra mediante un if
           if(!empty($data[1]) && !empty($data[2])) {
+
+            //Se verifica que el author no exista en la BD, Indicando:
+
+            //Traeme en el metodo estatico find, where 
+            //ActiveQuery find where, name el author = data [2]
+            //con esto, al modelo de author, estamos extendiendo activeRecord, sifnifica que hay funcionalidades que estan ahi por tener una clase tipo author.
+            $author = Author::find()->where(['name' => $data[2]])->one();
+
+            
+
+
             //print_r($data);
             //Se crea un nuevo book
             $book = new Book; //Se instancia un book, creando un active record

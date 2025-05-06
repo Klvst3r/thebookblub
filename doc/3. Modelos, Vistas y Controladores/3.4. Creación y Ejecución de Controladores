@@ -1,0 +1,303 @@
+3.4. Comandos en Yii: Creación y Ejecución de Controladores en Terminal
+
+¿Cómo usar comandos en Yii?
+
+Al construir aplicaciones web complejas, es vital estar familiarizado con la configuración y operación de diferentes herramientas que un framework como Yii ofrece. Tanto los comandos de línea de comando como los controladores son esenciales para manipular y gestionar recursos del sistema de manera eficiente. Aquí, exploraremos en detalle cómo utilizar comandos dentro del framework Yii, brindándote la capacidad de automatizar tareas desde la terminal.
+¿Qué es un command en Yii?
+
+En Yii, un command es esencialmente un controlador diseñado para ser ejecutado desde la línea de comandos en lugar del ambiente web. Esto es útil para realizar operaciones que no necesitan una interfaz de usuario, como tareas de mantenimiento o automatización. Por defecto, la estructura es similar a la de un controlador web estándar, pero orientada a ejecutar funciones desde la terminal.
+¿Cómo ejecutar comandos básicos?
+
+Al instalar Yii, se proporciona un hello-controller que sirve como ejemplo básico de un command. Este controlador imprime un mensaje simple cuando se invoca desde la terminal. Aquí un ejemplo de cómo ejecutarlo:
+
+php yii hello
+
+Este comando imprimirá "Hello, world!" si no se proporciona otro mensaje. Puedes pasarle un parámetro para personalizar la salida.
+Creando un nuevo controlador de comandos
+
+El siguiente paso es crear tu propio controlador de comandos. Sigue estas instrucciones para crear un controlador simple que efectúe una suma de dos números dados:
+
+    Crea el archivo: En la carpeta de commands, crea un archivo llamado platzi-controller.php.
+
+    Define la clase:
+
+namespace app\commands;
+
+use yii\console\Controller;
+use yii\console\ExitCode;
+
+class PlatziController extends Controller
+{
+    public function actionSuma($a, $b = 17)
+    {
+        $result = $a + $b;
+        printf("El resultado es: %.2f\n", $result);
+        return ExitCode::OK;
+    }
+}
+
+Este sencillo controlador suma dos números y devuelve el resultado. Además, si el segundo número no se proporciona, usa 17 como valor por defecto.
+Ejecutando y probando comandos
+
+Para ver el nuevo controlador en acción, ejecuta el siguiente comando en tu terminal:
+
+php yii platzi/suma 10 5
+
+Este comando sumará 10 y 5, devolviendo "El resultado es: 15.00".
+
+Si omites el segundo número, así:
+
+php yii platzi/suma 10
+
+Se usará 17 como predeterminado, dando como resultado "El resultado es: 27.00".
+Documentación básica en PHP
+
+No olvides documentar tus comandos utilizando el sistema de documentación de PHP. Esto no solo aclara el propósito de tu código, sino que también es una buena práctica para proyectos a largo plazo. Puedes agregar comentarios como los siguientes a tus métodos:
+
+/**
+ * Suma los valores de los dos parámetros.
+ * @param int $a Primer valor a sumar.
+ * @param int|null $b Segundo valor a sumar (opcional).
+ * @return int El resultado de la suma.
+ */
+
+¿Cómo manejar archivos CSV?
+
+Vamos a dar un paso más allá creando una acción que lea un archivo CSV y lo imprima línea por línea. Uno de los usos potenciales de los comandos es gestionar grandes cantidades de datos de forma eficiente.
+
+    Crea la función:
+
+public function actionBooks($file)
+{
+    $handle = fopen($file, "r");
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        print_r($data);
+    }
+    fclose($handle);
+    return ExitCode::OK;
+}
+
+    Ejecuta el comando:
+
+php yii platzi/books path/to/yourfile.csv
+
+Esta acción abrirá el archivo CSV especificado, leyéndolo línea por línea e imprimiendo cada entrada como un array.
+
+
+
+
+Archivos:
+
+klvst3rController.php
+
+
+<?php
+
+namespace app\commands;
+
+use yii\console\Controller;
+use yii\console\ExitCode;
+
+/**
+ * Comando para clase, de prueba
+ */
+class PlatziController extends Controller {
+
+  /**
+   * Suma los valores de los dos parÃ¡metros
+   */
+  public function actionSuma($a, $b = 17) {
+    $result = $a + $b;
+    printf("%0.2f\n", $result);
+    return ExitCode::OK;
+  }
+
+  public function actionBooks ($file) {
+    $f=fopenï¼ˆ$fileï¼Œ "r"ï¼‰ï¼›
+    while(!feof($f)) {
+      $data = fgetcsv($f);
+      print_r($data);
+    ï½
+    fclose($f);
+    return ExitCode:: 0K;
+    ï½
+  ï½
+
+
+
+  Books.csv
+------------
+
+
+
+Referencias:
+
+https://www.yiiframework.com/doc/guide/2.0/en/tutorial-console
+
+
+
+Comentarios:
+------------
+
+Dejo algunos ejemplos de Commands.
+
+exec:
+
+<?php
+// Ejecutar un comando y obtener la última línea de la salida
+$last_line = exec('ls -la', $output, $return_var);
+
+// Mostrar la última línea
+echo "Última línea: " . $last_line . "\n";
+
+// Mostrar todo el output
+echo "Output completo: \n";
+print_r($output);
+
+// Mostrar el valor de retorno del comando
+echo "Valor de retorno: " . $return_var . "\n";
+?>
+
+```shell\_exec:
+
+```js
+<?php
+// Ejecutar un comando y obtener toda la salida
+$output = shell_exec('ls -la');
+
+// Mostrar la salida
+echo "Output: \n" . $output;
+?>
+
+```system:
+
+```js
+<?php
+// Ejecutar un comando y mostrar la salida en tiempo real
+$last_line = system('ls -la', $return_var);
+
+// Mostrar la última línea
+echo "Última línea: " . $last_line . "\n";
+
+// Mostrar el valor de retorno del comando
+echo "Valor de retorno: " . $return_var . "\n";
+?>
+
+```passthru:
+
+```js
+<?php
+// Ejecutar un comando y mostrar la salida sin procesarla
+passthru('ls -la', $return_var);
+
+// Mostrar el valor de retorno del comando
+echo "Valor de retorno: " . $return_var . "\n";
+?>
+
+
+
+Ejercicios:
+------------
+
+
+En el tema anterior se insertaron previa lectura de un archivo csv, visualiando la información en terminal y almacenando el resultado en la BD,
+
+Comando ejecutado 
+
+    mysql> select * from books;
+
+
+Se vacia la BD
+    mysql> truncate books;
+
+Ahor hay nada en ninguna tabla, ya que se trabajara sobre los autores.
+
+
+Trabajo con autores.
+
+
+Se deja los models y sqchema. En local se tiene
+- el archivo, 
+- el modelo de libro books
+- el esquema para referencia
+- el controlador
+
+Son los cuatro archivos que se van a crear y uno mas.
+
+Ahor ase crea u nuevo archivo un nuevo modelo: Author.php
+
+
+Author.php
+
+<?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+
+class Author extends ActiveRecord {
+    
+}
+
+
+Con esto y atenemos un modelo, lo que se hace ahora es inidicar para hacer lo que yii considera, indicando cual es la tabla y cual es la columna.
+
+Para ello:
+
+       public static function tableName(){
+        return 'authors';
+    }
+
+    public function getId(){
+        return $this->author_id;
+    }
+
+
+
+Es con esto como se crea la BD teemos la tabla y una columna que es author_id. Esto ya es un modelo completo.
+
+
+Vamos a volver a utilizar e mismo sistema para leer el csv e ingresarlo a la BD.
+
+Por practicidad no se hara completo, pero que es ilustrativo.
+
+
+Hay un solo titulo de cada libro en el archivo, pero hay libros que tienen el mismo autrho, entonces, si pedimos que el autor fuera unico. y lo vamos a guardar en un tabla y trabajar sobre el autrho antes que se trabaje sobre el tirulo libro.
+
+Para elo se hace lo siguienye en el controlador klvst3rController
+
+ants de crear un libro, vamos acrear un author pero antes de crear un author s everifica que no exista en la base de datos.
+
+
+
+     //Traeme en el metodo estatico find, where 
+            //ActiveQuery find where, name el author = data [2]
+            //con esto, al modelo de author, estamos extendiendo activeRecord, sifnifica que hay funcionalidades que estan ahi por tener una clase tipo author.
+            $author = Author::find()->where(['name' => $data[2]])->one();
+
+
+Indica:
+
+    Traeme en el metodo estatico find, where llamando a esto ActiveQuery, Find -> where name = data[2]
+
+    Es decir, asumiremos que hay uno solo, al molde de author, estamos extendiendo al activeRecord. Tenemos un monton de funcionalidades. 
+
+    Hay una funicon que se invoca estaticamente, que es algo crucial que es, no es la instancia a la que estamos llmadando, es a la fabrica de authores o de objetos authores.
+
+    Esto es lo que se llama estaticamente, es decir. Al molde ve y busca esto, no es a un o en particulos. 
+
+    find se vera detallaadamente, que acepta un where en formato de un arreglo.
+
+    Otra condico = 
+        'author_id' => 3
+
+con esto se puede encadenar un conjunto de valores, en and.
+
+Para que sea facilmente visible lo establecemos asi:
+
+$author = Author::find()
+              ->where(['name' => $data[2]])
+              ->one();
+
+              
