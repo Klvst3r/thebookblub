@@ -1,0 +1,591 @@
+Gestión de Autores y Libros en Yii: Creación y Consulta Eficiente
+
+¿Cómo inicializar la base de datos para trabajar con autores?
+
+Para empezar a trabajar con datos de libros y autores en nuestra base de datos, primero debemos limpiarla. Esto significa vaciarla de cualquier dato previo usando comandos SQL. En este caso, empleamos el comando TRUNCATE para asegurarnos de que tanto la tabla books como la de authors estén vacías antes de ingresar nuevos registros.
+
+TRUNCATE TABLE books;
+TRUNCATE TABLE authors;
+
+¿Cómo crear un modelo de autor desde cero?
+
+La creación de un modelo de autor en Yii es un proceso sencillo pero esencial. Este modelo representará la tabla authors en la base de datos.
+
+    Crea un nuevo archivo llamado author.php dentro de la carpeta models.
+    Define la clase de autor heredando de ActiveRecord.
+
+A continuación se presenta cómo estructurar el modelo:
+
+<?php
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Author extends ActiveRecord {
+    public static function tableName() {
+        return 'authors'; // Nombre de la tabla
+    }
+    
+    public function getID() {
+        return $this->authorID; // Columna del ID
+    }
+}
+
+¿Cómo validar y guardar autores únicos?
+
+Al procesar el archivo CSV, es crucial asegurarse de que no se repitan los autores al ingresarlos en la base de datos. Para esto se utiliza el método find() y el nombre del autor como criterio de búsqueda.
+
+$author = Author::find()->where(['name' => $data[2]])->one();
+
+if (empty($author)) {
+    $author = new Author();
+    $author->name = $data[2];
+    $author->save();
+}
+
+Este código comprueba si el autor ya existe. Si no se encuentra, crea un nuevo registro.
+¿Cómo crear libros con su correspondiente autor?
+
+Una vez que el autor ha sido comprobado o creado, podemos proceder a crear el registro del libro asociándolo al authorID correcto. Esto se garantiza modificando el campo authorID en la tabla de libros:
+
+$book->authorID = $author->id;
+$book->save();
+
+¿Cómo buscar un autor usando ActiveRecord?
+
+Yii ofrece métodos poderosos para manejar operaciones de búsqueda de manera eficiente. Utilizar findOne() es una alternativa elegante a find()->where() cuando se trabaja con claves primarias.
+
+public function actionGetAuthor($authorID) {
+    $author = Author::findOne($authorID); // Shortcut de resumen para búsqueda por ID
+
+    if (empty($author)) {
+        printf("No se encontró el autor.\n");
+    } else {
+        printf("Nombre del autor: %s\n", $author->name);
+    }
+}
+
+¿Cuáles son las ventajas de usar ActiveRecord en Yii?
+
+El uso de ActiveRecord en Yii simplifica la manera de interactuar con la base de datos. Algunos de los beneficios son:
+
+    Simplicidad: Permite crear, leer, actualizar y eliminar registros de manera sencilla.
+    Encadenamiento: Facilita la generación de consultas complejas en pocas líneas de código.
+    Acceso directo: Proporciona métodos como findOne() que operan directamente sobre las claves primarias.
+
+Este enfoque no solo permite escribir operaciones de base de datos de forma más ágil, sino que también contribuye a mantener un código limpio y mantenible, cumpliendo con la promesa de Yii de un desarrollo rápido sin comprometer la seguridad ni la calidad del software.
+
+
+
+Archivos:
+
+book.php
+
+<?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Book extends ActiveRecord {
+  public $title; 
+  public $author;
+
+  public static function tableName() {
+    return 'books';
+  }
+
+  public function getId() {
+    return $this->book_id;
+  }
+
+  public function toString () {
+    return sprintf("(%d) %s", $this->id, strtoupper($this->title));
+  }
+}
+
+
+
+
+
+author.php
+
+<?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+
+class Author extends ActiveRecord {
+
+    public static function tableName() {
+        return 'authors';
+    }
+
+    public function getId() {
+    return $this->author_id;
+    }
+
+}
+
+
+klvst3rController.php
+
+<?php
+
+namespace app\commands;
+
+use yii\console\Controller;
+use yii\console\ExitCode;
+
+use app\models\Book;
+use app\models\Author;
+
+/**
+ * Comando para clase, de prueba
+ */
+class PlatziController extends Controller {
+
+  /**
+   * Suma los valores de los dos parÃ¡metros
+   */
+  public function actionSuma($a, $b = 17) {
+    $result = $a + $b;
+    printf("%0.2f\n", $result);
+    return ExitCode::OK;
+  }
+
+  public function actionBooks ($file) {
+    $f=fopenï¼ˆ$fileï¼Œ "r"ï¼‰ï¼›
+    while(! feof($f)) {
+      $data = fgetcsv($f);
+      if(!empty($data[1]) && !empty($data[2])) {
+        $author = Author::find()
+          ->where(['name' => $data[2]])
+          ->one();
+        if(empty($author)) {
+          $author = new Author;
+          $author->name = $data[2];
+          $author->save();
+        }
+
+        $book = new Book;
+        $book->title = $data[1];
+        $book->author_id = $author->id;
+        $book->save();
+        printf("%s\n", $book->toString());
+      }
+    }
+    fclose($f);
+    return ExitCode::OK;
+    ï½
+  ï½
+
+  public function actionAuthor($author_id) {
+    //$author = Author::find()->where(['author_id' => $author_id])->one();
+    $author = Author::findOne($author_id);
+    if(empty($author)) {
+      printf("no existe el author\n");
+      return ExitCode::DATAERR;
+    }
+    printf("%s:\n", $author->toString());
+    foreach($author->books as $book) {
+      printf(" - %s\n", $book->toString());
+    }
+    return ExitCode::OK;
+  }
+
+
+
+  Referencias:
+
+  https://www.yiiframework.com/doc/api/2.0/yii-db-activequery
+
+
+
+  Comentarios:
+
+
+
+  l sistema se negaba a cargar los datos, despues de repetir 3 veces las dos clases anteriores, encontre el problema.
+
+Falle en retirar estas dos lineas del modelo (y aun no tengo claro por que):
+
+// public $title;
+
+// public $author;
+
+🫣 Y el profesor lo dijo clarito, 'ya no me sirven'
+
+Otro tema a tener en cuenta es el COLLATE de la base de datos, todas las tablas deben tener el mismo.
+
+Entonces, para quienes sigan la clase paso a paso y tengan problemas similares, me funciono asi:
+
+COLLATE=utf8mb4_unicode_ci (para cada una de las tablas)
+
+Y re-codificar el .csv en UTF-8 (viene en ANSI)
+
+
+
+Esto sucede porque el Modelo es una representacion de su tabla, entonces cuando usas return $this -> author_id; en realidad no estas apuntando a un elemento de tu clade Authors sino al campo de tu tabla
+
+
+Procedimiento:
+
+1. Se vacia la Bd de la tabla books. CUIDADO CON ESTE COMANDO, si lo ejecutamos en otra BD borara la informción.
+
+    mysql> truncate books;
+
+2. empezaremos sobre autores.
+
+- Tenemos el archivo boks.csv
+- Books.php
+- sqchema.sqk
+- Klvst3rController.php
+
+son los 4 archivos a trabajar.
+
+Vamos acrear un nuevo modelo
+
+
+author.php
+
+ <?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Author extends ActiveRecord {
+    
+}
+
+Nuestro modelo inicial ya esta
+
+ahora vamos a indicar cual es la tabla y cual es la columna del ids
+
+
+etornamso la tabla y retornamos el id de la tabla authores.
+
+Esto ya es un modelo completo:
+
+<?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Author extends ActiveRecord {
+     public static function tableName(){
+        return 'authors';
+     }
+
+
+     public function getId(){
+        return $this->author_id;
+     }
+
+}
+
+
+Ahora con el mismo sistema leeamos el archivo csv, y almacenarlo a la Bd.
+
+3. Ahora coo hay un solo titulo para cad author en el archivo, Recordaddo que el autor fuera unico.
+    Por parcticidad, hay un solo titulo de cada libro, pero hay libros que tienen el mismo autor, entonces si pedimos que el autor fuera unico, para guardarlo en un bd, de forma unica, se va a filtrar y trabajar sobre el autor anque s que el titulo del libro.
+
+
+Antes de crear u libro vamos a crear un autor,
+
+Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
+
+Se puede hacer con if, con validaciones, cuando en realidad es muy facil, para ello hacemos en el controlador.
+
+
+$author = Author::find()->where([]) //active query
+
+
+El active query 
+
+
+    $author = Author::find()->where(['name' => $data[2]])->one(); //active query
+
+con esto al modelo de autorho estamos extendiendo el active record, por ello tenemos muchas funcionalidades, que estan ahi y se pueden usar, solo por tener un bjeto.
+
+
+Hay una fucion que se invoca estaticamente, no es la instancia a la que estamos llmando. No es el author que se llama fulanito de tal. Es a la fabrica de objetos autores, eso se llama estatiamente que es.
+
+Al molde va y buscame esto, no es en alguno en particulos dentro de muchas funciones tenemos el find, y acepta un where en formato de array, otra condicion podria ser que el author_id
+
+ej
+
+    'author_id' => 3
+
+
+con esto podemos encadenar cualquier tipo condicion de tipo and.
+
+Estamos pidiendo, traeme ahorita, a un ahotr cuyo nombre sea el que tengo en data[2], 
+
+
+     $author = Author::find()
+              ->where(['name' => $data[2]])
+              ->one(); //active query
+
+
+Puede que no haya nadie entocnes
+//Antes de crear u libro vamos a crear un autor,
+            //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
+            $author = Author::find()
+              ->where(['name' => $data[2]])
+              ->one(); //active query
+
+              if(empty($author)) {
+                //si no existe el autor, lo creamos
+                $author = new Author;
+                 $author->name = $data[2];
+                $author->save();
+              }
+
+
+Existen dosexcenarios, 
+
+encontro un autor aqui como esta el data 2 o lo crean y se salva, entonces ya tenemos un autor en cualquiera de los dos cominos.
+
+
+Co esto en mente se crra el libro con el autor id, correcto.
+
+            //print_r($data);
+            //Se crea un nuevo book
+            $book = new Book; //Se instancia un book, creando un active record
+
+            $book->title = $data[1]; //se le agnga el titulo
+            //$book->author = $data[2]; //esta relacion se hara despues
+
+            //Regresamos invocamos a la funcion quick y despues lo imprime
+            //$book = $this->quick($book);
+
+            $book->author_id = $author->id;
+
+
+
+Listo ahora se vera, como se ejecuta esto.
+
+
+Se agrega el modelo de author.
+
+
+use app\models\Author;
+
+
+y en la terminal se ejecutan las configuraciones y comandos
+
+Cooroboramos que no haya nada en libros:
+
+    mysql>select * from books;
+
+
+Autores;
+
+        mysql>select * from authors;
+
+Ejecutamos ahora:
+
+    $ yii klvst3r/books local/books.csv
+
+yii klvst3r/books local/books.csv
+
+Al ejecuar nos genera estos errores, lo cual indica que no esta jalando la configuracion de las variables locales.
+
+
+php yii klvst3r/books local/books.csv
+Exception 'yii\db\Exception' with message 'SQLSTATE[HY000] [1045] Access denied for user ''@'localhost' (using password: NO)'
+
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/Connection.php:648
+
+Error Info:
+Array
+(
+    [0] => HY000
+    [1] => 1045
+    [2] => Access denied for user ''@'localhost' (using password: NO)
+)
+Para ello 
+
+
+Crgamos las variables de nuestro entorno desde l aterminal fish:
+
+
+source local/variables_local.sh
+
+
+y ahora si ejecutamos.
+ $ yii klvst3r/books local/books.csv
+
+
+ Vamos a la pstaña de la bd
+
+ y listamos los autores
+
+    select * from authors;
+
+y los libros
+
+    select * from books;
+
+
+Podemos hacer una sonulta del tipo
+
+    >select * from authors where author_id=88;
+
+select * from authors where author_id=88;
++-----------+--------------------+-------------+
+| author_id | name               | nationality |
++-----------+--------------------+-------------+
+|        88 | Alessandro Baricco | NULL        |
++-----------+--------------------+-------------+
+1 row in set (0.001 sec)
+
+
+el codigo fue minimo,
+
+1. CReamos el modelo de autor;
+
+    <?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class Author extends ActiveRecord {
+     public static function tableName(){
+        return 'authors';
+     }
+
+
+     public function getId(){
+        return $this->author_id;
+     }
+
+}
+
+2. Creamos el modelo del libro
+    <?php
+
+namespace app\models;
+
+//se deja de extender a model
+//use yii\base\Model;
+
+use yii\db\ActiveRecord;
+
+class Book extends ActiveRecord
+{
+    // public $title;
+    // public $author;
+
+
+    public static function tableName(){
+        return 'books';
+    }
+
+    public function getID(){
+        return $this->book_id;
+    }
+    
+    public function toString() {
+        return sprintf("(%d) %s", $this->id, strtoupper($this->title));
+    }
+}
+
+3. Ejecutamos desde el controlador, una busquedauna asignación y guardar:
+
+
+    klvst3rController.php
+
+         public function actionBooks ($file) {
+        $f=fopen($file, "r"); //Se abre el archivo
+        while(!feof($f)) {
+          $data = fgetcsv($f);
+
+          //si existen elementos vacios se filtra mediante un if
+          if(!empty($data[1]) && !empty($data[2])) {
+
+            //Antes de crear u libro vamos a crear un autor,
+            //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
+            $author = Author::find()
+              ->where(['name' => $data[2]])
+              ->one(); //active query
+
+              if(empty($author)) {
+                //si no existe el autor, lo creamos
+                $author = new Author;
+                 $author->name = $data[2];
+                $author->save();
+              }
+
+
+
+
+
+            //print_r($data);
+            //Se crea un nuevo book
+            $book = new Book; //Se instancia un book, creando un active record
+
+            $book->title = $data[1]; //se le agnga el titulo
+            //$book->author = $data[2]; //esta relacion se hara despues
+
+            //Regresamos invocamos a la funcion quick y despues lo imprime
+            //$book = $this->quick($book);
+
+            $book->author_id = $author->id;
+
+            //Es necesario guardar la información, para ello.
+            $book->save();//se salva
+
+            printf("%s\n", $book->toString());
+
+
+          } 
+
+          
+        }
+        fclose($f);
+        return ExitCode::OK;
+    }
+
+4. Ya que estamos en el tema de yii por que no ponemos el controlador en el comando
+
+entonces:
+en el controlador creamos una fucnion:
+
+
+    public function getAuthor($autor_id) {
+      $author = Author::find()->where(['author_id' => $autor_id])->one();
+    }
+
+Hay un shortcut en el active recod que estas dos cosas son equivalentes:
+
+        $author = Author::find()->where(['author_id' => $autor_id])->one();
+        $author = Author::findOne($autor_id);
+
+Estas dos lineas son los mismo, funcionan con columna id de dicha tabla entonces para acordarnos de esto se deja comentada la primera
+
+    public function getAuthor($autor_id) {
+      // $author = Author::find()->where(['author_id' => $autor_id])->one();
+      $author = Author::findOne($autor_id);
+
+      if($author) {
+        printf("No existe el autor con id %d\n", $autor_id);
+      } else {
+        return ExitCode::DATAERR;
+      }
+
+      printf("Nombre: %s\n", $author->name);
+      return ExitCode::OK;
+    }
+
+ahora en la terminal ejecutamos    
+
+    
+min 12:56
+

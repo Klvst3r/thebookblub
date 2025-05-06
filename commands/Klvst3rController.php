@@ -49,6 +49,7 @@ class Klvst3rController extends Controller {
           //si existen elementos vacios se filtra mediante un if
           if(!empty($data[1]) && !empty($data[2])) {
 
+<<<<<<< HEAD
             //Se verifica que el author no exista en la BD, Indicando:
 
             //Traeme en el metodo estatico find, where 
@@ -57,6 +58,23 @@ class Klvst3rController extends Controller {
             $author = Author::find()->where(['name' => $data[2]])->one();
 
             
+=======
+            //Antes de crear u libro vamos a crear un autor,
+            //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
+            $author = Author::find()
+              ->where(['name' => $data[2]])
+              ->one(); //active query
+
+              if(empty($author)) {
+                //si no existe el autor, lo creamos
+                $author = new Author;
+                 $author->name = $data[2];
+                $author->save();
+              }
+
+
+
+>>>>>>> mvc
 
 
             //print_r($data);
@@ -69,7 +87,7 @@ class Klvst3rController extends Controller {
             //Regresamos invocamos a la funcion quick y despues lo imprime
             //$book = $this->quick($book);
 
-            $book->author_id = 1;
+            $book->author_id = $author->id;
 
             //Es necesario guardar la información, para ello.
             $book->save();//se salva
@@ -85,4 +103,19 @@ class Klvst3rController extends Controller {
         return ExitCode::OK;
     }
     
+
+    public function getAuthor($autor_id) {
+      // $author = Author::find()->where(['author_id' => $autor_id])->one();
+      $author = Author::findOne($autor_id);
+
+      if($author) {
+        printf("No existe el autor con id %d\n", $autor_id);
+      } else {
+        return ExitCode::DATAERR;
+      }
+
+      printf("Nombre: %s\n", $author->name);
+      return ExitCode::OK;
+    }
 }
+
