@@ -50,7 +50,10 @@ class Klvst3rController extends Controller {
           if(!empty($data[1]) && !empty($data[2])) {
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 4f98800 (Relaciones con modelos en yii)
             //Se verifica que el author no exista en la BD, Indicando:
 
             //Traeme en el metodo estatico find, where 
@@ -59,6 +62,9 @@ class Klvst3rController extends Controller {
             $author = Author::find()->where(['name' => $data[2]])->one();
 
             
+<<<<<<< HEAD
+>>>>>>> 4f98800 (Relaciones con modelos en yii)
+=======
 >>>>>>> 4f98800 (Relaciones con modelos en yii)
             //Antes de crear u libro vamos a crear un autor,
             //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
