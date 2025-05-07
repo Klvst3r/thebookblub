@@ -49,6 +49,17 @@ class Klvst3rController extends Controller {
           //si existen elementos vacios se filtra mediante un if
           if(!empty($data[1]) && !empty($data[2])) {
 
+<<<<<<< HEAD
+=======
+            //Se verifica que el author no exista en la BD, Indicando:
+
+            //Traeme en el metodo estatico find, where 
+            //ActiveQuery find where, name el author = data [2]
+            //con esto, al modelo de author, estamos extendiendo activeRecord, sifnifica que hay funcionalidades que estan ahi por tener una clase tipo author.
+            $author = Author::find()->where(['name' => $data[2]])->one();
+
+            
+>>>>>>> 4f98800 (Relaciones con modelos en yii)
             //Antes de crear u libro vamos a crear un autor,
             //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
             $author = Author::find()
@@ -93,7 +104,7 @@ class Klvst3rController extends Controller {
     }
     
 
-    public function getAuthor($autor_id) {
+    public function actionAuthor($autor_id) {
       // $author = Author::find()->where(['author_id' => $autor_id])->one();
       $author = Author::findOne($autor_id);
 
@@ -106,5 +117,21 @@ class Klvst3rController extends Controller {
       printf("Nombre: %s\n", $author->name);
       return ExitCode::OK;
     }
+
+
+    public function actionBook($book_id) {
+      //traemelo por el id
+      $book = Book::findOne($book_id);
+
+      if(empty($book)) {
+        printf("No existe el libro con id %d\n", $book_id);
+        return ExitCode::DATAERR;
+      }
+      printf("Titulo: %s\n", $book->toString());
+      return ExitCode::OK;
+    }
+
+
+
 }
 
