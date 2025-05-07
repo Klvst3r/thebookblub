@@ -1,0 +1,239 @@
+Relaciones ActiveRecord en Yii: Conectar Libros y Autores
+
+
+Resumen
+¿Cómo gestionar relaciones en Yii con ActiveRecord?
+
+En el mundo del desarrollo web, gestionar relaciones entre entidades en una base de datos es crucial. Uno de los frameworks de PHP más robustos, Yii, hace que esto sea posible de una manera extremadamente sencilla y eficiente mediante la implementación de ActiveRecord. En esta guía, exploraremos cómo gestionar las relaciones entre entidades utilizando ActiveRecord en Yii.
+¿Qué es ActiveRecord?
+
+ActiveRecord es un patrón de diseño que permite el acceso a los datos de una base de datos a través de objetos. En Yii, cada tabla de la base de datos se asocia con una clase, y cada fila de esa tabla se representa como un objeto de esa clase. Esto facilita la manipulación de los datos, ya que trabajan directamente con objetos en lugar de consultas SQL abstractas.
+¿Cómo definir una relación en ActiveRecord?
+
+Para definir relaciones entre modelos en Yii, utilizamos dos métodos mágicos: hasOne y hasMany. Estas funciones permiten especificar cómo los modelos están conectados entre sí mediante claves foráneas u otros criterios.
+Ejemplo práctico con hasOne
+
+Veamos cómo definir una relación en la que un libro tiene un único autor:
+
+public function getAuthor()
+{
+    return $this->hasOne(Author::class, ['authorId' => 'authorId']);
+}
+
+Aquí, estamos especificando que un libro pertenece a un autor, indicando que el authorId del autor debe coincidir con el authorId del libro. Así de sencillo, se establece una relación uno a uno.
+¿Cómo ejecutar acciones con esta relación?
+
+Una vez establecida la relación, podemos fácilmente recuperar datos relacionados sin la necesidad de escribir consultas complejas. Consideremos la implementación de una función para obtener detalles de un libro y su autor:
+Función para obtener libro y autor
+
+public function actionBook($bookId)
+{
+    $book = Book::findOne($bookId);
+    
+    if (empty($book)) {
+        return 'No existe el libro';
+    }
+    
+    printf("%s, por %s\n", $book->toString(), $book->getAuthor()->name);
+}
+
+En este código, buscamos un libro por su bookId. Si el libro existe, imprimimos su información y la del autor asociado. La función getAuthor() nos devuelve un objeto Author, desde el cual podemos obtener atributos como name.
+¿Por qué elegir Yii para gestionar bases de datos?
+
+Yii se destaca en el manejo de bases de datos por su capacidad de simplificar operaciones comunes. Mediante ActiveRecord, se minimiza la necesidad de escribir manualmente consultas SQL complicadas como joins, lo que reduce significativamente el tiempo de desarrollo y posibilidad de errores.
+
+Al implementar relaciones como hasOne, Yii nos permite centrarnos en la lógica de negocio sin preocuparnos por la complejidad de las bases de datos subyacentes. Esto, junto a su rendimiento eficaz y su comunidad activa, lo convierte en una elección ideal para desarrolladores que buscan eficiencia.
+
+
+
+
+Comentarios:
+
+
+// Comparto por aqui una forma de organiacion del modelo, porque en la medida que se pone 'gordo'(muchos metodos) puede salirce de control.
+
+class Book extends ActiveRecord
+{
+
+	/*
+    |----------------------------------------------------------------------------------
+    | GLOBAL VARIABLES
+    |----------------------------------------------------------------------------------
+    */
+
+	// public $title;
+	// public $author;
+
+	public static function tableName()
+	{
+		return 'books';
+	}
+
+	public function getId()
+	{
+		// Este es por defecto el Id de las tablas
+		return $this->id;
+	}
+
+
+	/*
+    |----------------------------------------------------------------------------------
+    | FUNCTIONS
+    |----------------------------------------------------------------------------------
+    */
+
+	// public function toString()
+	// {
+	// 	return sprintf("(%d) %s", $this->id, strtoupper($this->title));
+	// }
+
+	/**
+	 * Funcion modificada para traer al author mediante la relacion
+	 * @return string
+	 */
+	public function toString()
+	{
+		return sprintf(
+			"(%d) %s - %s",
+			$this->id,
+			$this->title,
+			$this->getAuthor()->name
+		);
+	}
+
+
+	/*
+    |----------------------------------------------------------------------------------
+    | RELATIONS
+    |----------------------------------------------------------------------------------
+    */
+
+	public function getAuthor()
+	{
+		return $this
+			->hasOne(Author::class, ['id' => 'author_id']) // esta es la relacion author.id / book.author_id
+			->one();
+	}
+}
+
+
+
+
+Lecturas recoendadas
+
+    https://www.yiiframework.com/doc/guide/2.0/es/db-active-record#relational-data/
+
+
+
+
+Por un lado tenemos el active record de libro y tenemos el modelo que es un active record de author.
+
+
+Estos logicamente estan conectado por que en la tabla de book tenemos author_id, eso implica que hay una relcion inversa que hay un autor de varios libros
+
+
+Un libro tiene un autor.
+
+en una bd, se tendria que implementar un select con un join con inner-join o un left_join para entender los puntos que estan encontacto enteestos dos modelos.
+
+
+
+Lo veremos como se hace en yii.
+
+Las funciones magicas que tienen el active record es this_has_one this_has_may
+
+
+en book, un libro tiene un author,
+
+por lo tanto creamos.
+
+
+public function getAuthor(){
+        return $this->hasOne(Author::class, ['author_id' => 'author_id']);
+    }
+
+
+Necesitamos mandarle el string de la clase para que se instancie dinamicamente y aca es donde viene la relación, el autor_id de la tabla author, que es su id principal, tiene que corresponder con el author_id de mi tabla book_id
+
+Asi decimos que de todo lo que me traigas dame uno
+
+
+ con esto ya tenemos una relación
+
+
+    return $this
+            ->hasOne(Author::class, ['author_id' => 'author_id'])
+            ->one();
+
+con esto un libro ya sabemos quien es su autho, esta primera instancia del arreglo de la condición
+
+
+'author_id' =>
+
+
+es la clase de alla el id con que se va a relacionar al segundo putno que es la clase de aqui book_id y con esa relación ya hay magia.
+
+ahora vamos a los comandos para crear una nueva accion.
+
+le vamos a dar el id de libro y lo va a aimprimir el libro y el author.
+
+
+public function actionBook($book_id) {
+      //traemelo por el id
+      $book = Book::findOne($book_id);
+
+      if(empty($book)) {
+        printf("No existe el libro con id %d\n", $book_id);
+        return ExitCode::DATAERR;
+      }
+      printf("Titulo: %s\n", $book->toString());
+      return ExitCode::OK;
+    }
+
+
+Como se tiene ahorita el toString simplemente lo trae a mayuscula, y se acabo.
+
+Ejecutamos en la consola
+
+    $ php yii klvst3r/book 1
+
+Para que nos de cual es el libro 1
+
+Podemos ocn esto quitar las mayusculas en el modelo Book.pbp
+
+
+public function toString() {
+        return sprintf("(%d) %s", $this->id, $this->title);
+    }
+
+ decimes de quien es este lbro, necesitamos el author
+
+
+ public function toString() {
+        return sprintf("(%d) %s - %s", 
+            $this->id, 
+            $this->title,
+            $this->getAuthor()->name,
+        );
+    }
+}    
+
+
+Con esto al objeto que soy yo mismo que es this, le esoty pidiendo que me trauiga la funcion getauthor, lo que esta le devuelva que es:
+
+ return $this
+            ->hasOne(Author::class, ['author_id' => 'author_id'])
+            ->one();
+
+
+A ese me de el nombre, es decir como a ca me va a traer una clase una instancia de la clase author le voy a poder pedir el nombre aunque author no tiene nombre, yo esoy seguro que va a ir a la bd 
+
+    mysql> select * from authors where author_id = 88;
+
+Traera el name, que no esta escribto en ningun lado, y por otro lado esta trayendo la relación directa..
+
+
+    $ php yii klvst3r/book 1 
+
+Me rae el titulo y su author, trae información que proviene de otro modelo que es el de author, de una forma sencilla, sin un select, sin un inner join, ni un left join, sin cruzar datos de diferentes bd, cimemente indicemos que este objeto hasOne tiene 1 de este modelo y la relacion es esta has la magia.
+

@@ -586,6 +586,51 @@ Estas dos lineas son los mismo, funcionan con columna id de dicha tabla entonces
 
 ahora en la terminal ejecutamos    
 
-    
-min 12:56
+Solo que el nombre de las acciones tiene que ser action(algo). Por lo tanto si ponmos
 
+public function getAuthor($autor_id) {
+
+Se va a escribir algo como platzi_get_author.
+
+
+Asi que queda:
+
+    public function actionGetAuthor($autor_id) {
+
+Para ejecutar:
+
+
+    $php yii klvst3r/get-author 88
+
+
+De esta manera consultamos el registro 88 desde la consola    
+
+
+Lo que se hace es jugar con las palabras
+
+    Getauthor minusculas todos para que escriba => get-author
+
+
+O se puede dejar con una sola palabra que seria
+
+    public function actionAuthor($autor_id) {
+
+
+tendriamos ahora el comando
+
+    php yii klvst3r/author
+
+
+nos estamos adentrando con el tema de los modelos klvst3r/record que se tienen con yii, y es increiblemente poderoso.
+
+Esto es una forma sencilla de buscar en dos lineas.
+
+
+Se esta asignando puntualmente variables que se representan inmediatamente en la bd, se estan encontrando algunos shortcuts, que poco a poco seran mas puntuales y mas comunes.
+
+Con esto se entreve el gran motor para programar de una manera muy sencilla.
+
+Con la promesa d eprogrmar rapido, sin que sea a costa de seguridad, de mantenimiento de codigo.
+
+
+Poco a poco respetando las responsabilidad de cada capa en sus controladores, sus vistas, entre los comandos se tendra una capacidad de desarrollo potente y al mismo tiempo rapida.
