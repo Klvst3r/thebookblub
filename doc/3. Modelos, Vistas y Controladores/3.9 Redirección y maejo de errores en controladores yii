@@ -1,0 +1,89 @@
+Redirección y manejo de errores en controladores Yii
+
+Resumen
+¿Cómo gestionar las redirecciones en un controlador?
+
+Cuando trabajamos con controladores en un framework web como Yii, no solo se trata de devolver cadenas de texto. Algunas situaciones requieren que redireccionemos al usuario a diferentes acciones o páginas. Por ejemplo, surge la necesidad de redirigir si un recurso solicitado, como un libro, no existe.
+
+En Yii, para manejar las redirecciones, se utiliza la función redirect. Debes suministrar la nueva URL en el formato de un arreglo, especificando el controlador, la acción y, opcionalmente, los parámetros que necesites enviar.
+
+return $this->redirect(['site', 'home']);
+
+Recuerda siempre devolver el response con return, ya que solo así se ejecuta efectivamente la redirección.
+
+Además, Yii ofrece un atajo con $this->goHome(), que redirige directamente a la página de inicio.
+¿Cómo gestionar mensajes flash en Yii?
+
+Una de las formas de mejorar la interacción del usuario es mediante mensajes flash, que son breves notificaciones que la aplicación muestra al usuario. En Yii, puedes establecer mensajes flash así:
+
+Yii::$app->session->setFlash('error', 'Ese libro no existe');
+
+Este método setFlash requiere dos parámetros: el tipo de mensaje (usualmente un color basado en Bootstrap) y el mensaje en sí mismo. Bootstrap ofrece colores estándar como success, warning, error, entre otros, que puedes utilizar para que el mensaje se presente de forma coherente y visualmente agradable.
+
+Cuando el mensaje se almacena en la sesión, no necesitas devolverlo explícitamente; Yii se encargará de mostrarlo en el siguiente ciclo de vida de la aplicación.
+¿Cómo crear un controlador de autores?
+
+Desarrollar un controlador dedicado para manejar autores permite organizar mejor las funcionalidades de nuestra aplicación. En este caso, se necesita un controlador AuthorController que gestiona dos acciones principales:
+
+    Detalle de un autor: Mostrará detalles de un autor específico basado en su id.
+
+    Listado de autores: Recuperará y mostrará todos los autores disponibles.
+
+Para lograr esto, primero creamos el controlador. Podríamos copiar la estructura básica de otro controlador existente, como BookController, y adaptar las funciones actionDetail y actionAll.
+
+class AuthorController extends Controller
+{
+    public function actionDetail($id)
+    {
+        $author = Author::findOne($id);
+        if (empty($author)) {
+            Yii::$app->session->setFlash('warning', 'No existe ese autor');
+            return $this->redirect(['author', 'all']);
+        }
+        return $author->toString();
+    }
+
+    public function actionAll()
+    {
+        $authors = Author::find()->all();
+        return serialize($authors);
+    }
+}
+
+En este contexto, serialize($authors) es útil para mostrar los datos en un formato que luego se puedan manejar fácilmente.
+
+Además, es posible incluir una funcionalidad de búsqueda que permita filtrar autores por nombre. Para implementar esto, añadimos una variable search:
+
+public function actionAll($search = null)
+{
+    if ($search !== null) {
+        $authors = Author::find()->where(['like', 'name', $search])->all();
+    } else {
+        $authors = Author::find()->all();
+    }
+    return serialize($authors);
+}
+
+Esta implementación busca dentro de los nombres de los autores aquellos que coincidan parcialmente con el término de búsqueda proporcionado usando SQL LIKE.
+¿Qué beneficios ofrece el uso de Yii para controladores?
+
+Yii hace que implementar controladores sea una tarea simple y poderosa a la vez. La estructura MVC del framework es clara, y su integración con componentes como Bootstrap para estilos visuales y sesiones para mensajes flash proporciona un entorno de desarrollo robusto y altamente adaptable.
+
+El uso de métodos abreviados y soluciones integradas simplifica el desarrollo sin sacrificar la flexibilidad y el rendimiento. Y, con el conocimiento básico de cómo manejar modelos, vistas y controladores, los desarrolladores pueden avanzar para crear aplicaciones web más complejas y orientadas al usuario final de manera eficiente
+
+
+
+Referencias:
+
+https://getbootstrap.com/docs/4.0/utilities/colors/
+
+
+
+Comantarios:
+
+
+Proceso:
+
+
+
+
