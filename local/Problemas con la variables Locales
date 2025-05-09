@@ -1,0 +1,261 @@
+En mi entorno de linux voy a ytrabajar con yii y conexion a la bd, lacarga de los parametros de conexion hacia la bd se hace mediante carga de variables locales, situadas en
+local/variables_local.sh
+export db_host=127.0.0.1  # En sistemas unix no llevan simbolo de $ para dar de alta las variables
+export db_name=thebookclub
+export db_user=klvst3r
+export db_pass=desarrollo
+export bd_port=3306
+
+# Obtenido de https://www.random.org/strings/ 
+export salt=uAh2hbHUPao10OyQsTz2vYym0fgmea!K # cadena de caracteres aleatoria servira posteriormente para hasear datos
+
+dentro del fgramework de yii en el archivo db.php tengo
+<?php
+
+return [
+    'class' => 'yii\db\Connection',
+	'dsn' => sprintf("mysql:host=%s;dbname=%s", 
+        getenv('db_host'), getenv("db_name")),
+	'username' => sprintf("%s", getenv('db_user')),
+	'password' => sprintf("%s", getenv('db_pass')),
+	'charset' => 'utf8',
+
+    // Schema cache options (for production environment)
+    //'enableSchemaCache' => true,
+    //'schemaCacheDuration' => 60,
+    //'schemaCache' => 'cache',
+];
+en la tarminal esoty utiizando fish, y cargo las variables con:
+source local/variables_local.sh 
+
+pero al imprimir algo como  echo $bd_name
+no carga los valores en mi entorno de desarrollo
+
+
+Solución aplicada
+--------------------
+
+Se harcodeo temporalmente en el archivo config/db.php
+
+-----
+return [
+    'class' => 'yii\db\Connection',
+    'dsn' => 'mysql:host=127.0.0.1;dbname=thebookclub',
+    'username' => 'klvst3r',
+    'password' => 'desarrollo',
+    'charset' => 'utf8',
+];
+
+----
+
+Se carga ahora por ejemplo los libros contenidos en la bd
+
+http://localhost:8080/index.php?r=book/all
+
+siendo exitosa esta solucipón en entorno de desarrollo
+
+
+Continuación de contexto de solucion:
+
+
+
+El problema es que estás utilizando el shell fish, pero el script variables_local.sh está escrito para bash/zsh/sh, no para fish. En fish, el comando export no es compatible, y la sintaxis para definir variables de entorno es diferente.
+¿Por qué source local/variables_local.sh no funciona en fish?
+
+Porque:
+
+    fish no entiende la sintaxis export VAR=valor.
+
+    source en fish solo funciona con scripts escritos para fish.
+
+✅ Solución 1: Convertir el archivo a sintaxis fish
+
+Crea un archivo nuevo llamado variables_local.fish con este contenido:
+
+set -x db_host 127.0.0.1
+set -x db_name thebookclub
+set -x db_user klvst3r
+set -x db_pass desarrollo
+set -x bd_port 3306
+set -x salt uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+Y luego cárgalo con:
+
+source local/variables_local.fish
+
+Después, puedes verificar:
+
+echo $db_name
+
+✅ Solución 2: Usar bash para cargar el archivo temporalmente
+
+Si no quieres mantener dos archivos, puedes ejecutar el script en bash y exportar las variables al entorno actual, por ejemplo:
+
+bash -c 'source local/variables_local.sh; env' | while read -l line
+    set -l key (echo $line | cut -d= -f1)
+    set -l val (echo $line | cut -d= -f2-)
+    set -x $key $val
+end
+
+Eso cargará temporalmente las variables desde el script bash y las exportará a fish.
+
+¿Quieres que te genere automáticamente una versión .fish del archivo .sh para tu entorno?
+You said:
+ahora quiero ejecutar el metodo siguiente a a traves del navegador web:
+Que esl el controladore de los libros qeu devuelve la información de todos los libros
+<?php
+
+namespace app\controllers;
+
+use yii\web\Controller;
+
+use app\models\Book;
+
+class BookController extends controller {
+    public function actionAll(){
+        $books = Book::find()->all();
+        return serialize($books);
+    }
+}
+
+en el navegador cargamos con:
+http://localhost:8080/index.php?r=book/all
+
+Pero genera un error:
+Database Exception – yii\db\Exception
+SQLSTATE[HY000] [1045] Access denied for user ''@'localhost' (using password: NO)
+Error Info: Array
+(
+    [0] => HY000
+    [1] => 1045
+    [2] => Access denied for user ''@'localhost' (using password: NO)
+)
+↵
+Caused by: PDOException
+SQLSTATE[HY000] [1045] Access denied for user ''@'localhost' (using password: NO)
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/Connection.php at line 722
+ChatGPT said:
+
+El error que estás viendo:
+
+Access denied for user ''@'localhost' (using password: NO)
+
+indica que Yii no está recibiendo las variables de entorno para conectarse a la base de datos. En concreto:
+
+    usuario está vacío: user = ''
+
+    contraseña está vacía: password = ''
+
+Esto ocurre porque cuando ejecutas Yii desde el navegador web (Apache/Nginx o PHP built-in server), las variables de entorno no se cargan automáticamente desde tu terminal. Los getenv('...') en db.php dependen de que esas variables estén definidas en el entorno del proceso web, no en tu shell.
+✅ Soluciones posibles
+🔸 Opción 1: Definir las variables de entorno en .env y cargarlas en Yii (recomendado)
+
+    Instala la librería vlucas/phpdotenv (si no la tienes):
+
+composer require vlucas/phpdotenv
+
+    Crea un archivo .env en la raíz del proyecto:
+
+DB_HOST=127.0.0.1
+DB_NAME=thebookclub
+DB_USER=klvst3r
+DB_PASS=desarrollo
+DB_PORT=3306
+SALT=uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+    En web/index.php agrega antes de cargar Yii:
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+    En config/db.php, sigue usando getenv('DB_USER'), etc.
+
+🔸 Opción 2: Exportar variables de entorno globalmente (menos recomendable)
+
+Puedes definir tus variables en un archivo como /etc/environment, pero esto afecta a todo el sistema y no es buena práctica para desarrollo.
+🔸 Opción 3: Hardcodear temporalmente las credenciales en db.php (solo para pruebas)
+
+return [
+    'class' => 'yii\db\Connection',
+    'dsn' => 'mysql:host=127.0.0.1;dbname=thebookclub',
+    'username' => 'klvst3r',
+    'password' => 'desarrollo',
+    'charset' => 'utf8',
+];
+
+Esto funciona, pero no debes dejar credenciales en el código en producción.
+
+¿Quieres que te ayude a integrar phpdotenv paso a paso en tu proyecto Yii?
+You said:
+quiero utilizar la opcion 2, tengo mis vairbales de entorno en un archivo para ejecutarlas o cargarlas mediante la terminal fish
+Mi archivo de variables ocales:
+esta en 
+local/variables_local.fish
+--
+set -x db_host 127.0.0.1
+set -x db_name thebookclub
+set -x db_user klvst3r
+set -x db_pass desarrollo
+set -x bd_port 3306
+set -x salt uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+Cargo mis variables con:
+source local/variables_local.fish
+intento visualizar el contenido via navegador:
+http://localhost:8080/index.php?r=book/all
+ChatGPT said:
+
+Gracias por aclararlo. El problema persiste porque cuando accedes a Yii a través del navegador, las variables de entorno cargadas con:
+
+source local/variables_local.fish
+
+solo viven en tu sesión de terminal (shell interactivo). Pero el servidor web (como php -S, Apache o Nginx + PHP-FPM) se ejecuta en un entorno distinto, y no hereda esas variables.
+✅ Soluciones posibles para seguir usando tu archivo variables_local.fish
+🔸 Opción A: Lanzar el servidor PHP embebido desde la misma terminal fish donde cargaste las variables
+
+    Abre tu terminal fish.
+
+    Carga las variables:
+
+source local/variables_local.fish
+
+    Luego, lanza el servidor integrado de PHP desde esa misma terminal (en la carpeta web de Yii):
+
+php -S localhost:8080
+
+    Ahora accede a:
+
+http://localhost:8080/index.php?r=book/all
+
+✅ En este caso, como php se ejecuta en la misma sesión donde cargaste las variables, getenv() sí podrá acceder a ellas.
+🔸 Opción B: Exportar las variables a nivel de sistema (solo desarrollo)
+
+Si quieres que siempre estén disponibles para cualquier proceso PHP (incluso fuera del shell), puedes agregarlas a:
+
+    ~/.config/fish/config.fish (para fish)
+
+    O mejor aún: usar un wrapper para lanzar el servidor PHP con variables:
+
+env (cat local/variables_local.fish | sed 's/set -x/export/' | sed 's/ /=/') php -S localhost:8080
+
+Este comando convierte temporalmente las líneas set -x ... a export ...=... y ejecuta el servidor con esas variables.
+⚠️ Advertencia importante
+
+La causa del error "Access denied for user ''@'localhost'" es que las variables no están definidas en el proceso del servidor web.
+
+Yii usa:
+
+getenv('db_user') // etc.
+
+Y si getenv() devuelve false, usará una cadena vacía: ''.
+✅ Verificación rápida
+
+Agrega temporalmente esto en db.php para depurar:
+
+error_log('USER: ' . getenv('db_user'));
+
+Y revisa tu archivo de log o salida de PHP. Si ves:
+
+USER:
+
+(significa vacío) → el entorno del servidor no está heredando las variables.

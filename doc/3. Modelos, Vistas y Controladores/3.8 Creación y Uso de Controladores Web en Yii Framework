@@ -122,3 +122,98 @@ class BooksController extends Controller
 Procedimiento:
 
 
+Anteriormente trabajamos con comandos que son controladores para  reques via linea de ocmandos, tienen acceso a todos los recursos, toca el turno a los controladored web, los que utilizaremos mas continuamente.
+
+Los controladores cLI y los controladores web son sumanente similares, casi lo mismo, tienen diferencias.
+
+Los controladores de consola:
+
+    - Regresan un codigo numerico que el SO interpreta como esta bien, faltaron datos, no puedo loguear, el usuario no tiene permisos. y un catalogo extenso
+
+El controller web 
+
+- Devuelve un sing que tiene caracteres como ok, si, nmbre el author o un string tan largo como puede ser el html del sitio que quieras estarviendo.
+
+
+Dos contorladores se genetara u paraa ahotr y otro para libro.
+
+
+No hay una regla especifica que dicte que se tiene que crer uno por modelo, o uno por ciclo o poraccion.
+
+En lo personal es comodo hacerlo por modelo
+- Book new
+- author new
+
+
+A veces dependede las acciones que uno quiera realizar, las acciones que se tienen expeustas 
+
+
+Controler por modelo.
+
+en la carpeta de controlers se tiene uno de ejemplo.
+
+Viene con la instalacion basica.
+
+1. Creamos
+    BookController.php
+
+El nombre del archivo tenga el mismo nombre de la clase, la clase se llame generamlmente es el nombre del modelo, camel case controller    
+
+
+<?php
+
+namespace app\controllers;
+
+use yii\web\Controller;
+
+class BookController extends controller {
+    public function actionAll(){
+        return 1;
+    }
+}
+
+2. Necesitamos prendel el servidor web
+
+3. Verificamos las variables de entorno
+
+    echo $db_host
+
+5. source local/cARGAMOS LAS VARIABLES LOCALES AL entorno
+
+    source local/variables_local.sh
+
+
+6. Encendemos el Servidor web en local
+      php yii serve --port=8080
+
+7. Verificar en el browser      
+    http://localhost:8080/
+
+    Esto pintara un entorno de yii
+
+
+que pasa si por ejemplo cARGAMOS
+    http://localhost:8080/index.php?r=book
+
+Es un error, ya se esta viendo con un error, con un error 404, not gfound
+
+Estamos abriendo el index con una pariable en la varieble r cargando el controlador All
+entonces cargamos ese metodo 
+
+    http://localhost:8080/index.php?r=book/all
+
+Le eestamos mandando la ruta que debe devolver. 
+
+Pero lo que quiero es todos los libros, necesitamso traer 
+
+public function actionAll(){
+        $books = Book::find()->all();
+        return serialize($books);
+    }
+
+Este metodo devuelve stirngs para poder convertir un arreglo en string
+
+
+en el navegador
+
+http://localhost:8080/index.php?r=book/all

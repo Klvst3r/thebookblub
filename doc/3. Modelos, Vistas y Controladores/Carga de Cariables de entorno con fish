@@ -1,0 +1,44 @@
+Cuando tenemos un entorno y queremos utilizar la carga de las variables desde un entorno con Linux,
+
+En nuestro caso nuetra termiinal tenemos fish y las variables locales lo tenemos via sh, por lo cual no las carga.
+
+El problema es que estás utilizando el shell fish, pero el script variables_local.sh está escrito para bash/zsh/sh, no para fish. En fish, el comando export no es compatible, y la sintaxis para definir variables de entorno es diferente.
+¿Por qué source local/variables_local.sh no funciona en fish?
+
+Porque:
+
+    fish no entiende la sintaxis export VAR=valor.
+
+    source en fish solo funciona con scripts escritos para fish.
+
+Solución 1: Convertir el archivo a sintaxis fish
+
+Crea un archivo nuevo llamado variables_local.fish con este contenido:
+
+set -x db_host 127.0.0.1
+set -x db_name thebookclub
+set -x db_user klvst3r
+set -x db_pass desarrollo
+set -x bd_port 3306
+set -x salt uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+Y luego cárgalo con:
+
+source local/variables_local.fish
+
+Después, puedes verificar:
+
+echo $db_name
+
+
+Solución 2: Usar bash para cargar el archivo temporalmente
+
+Si no quieres mantener dos archivos, puedes ejecutar el script en bash y exportar las variables al entorno actual, por ejemplo:
+
+bash -c 'source local/variables_local.sh; env' | while read -l line
+    set -l key (echo $line | cut -d= -f1)
+    set -l val (echo $line | cut -d= -f2-)
+    set -x $key $val
+end
+
+Eso cargará temporalmente las variables desde el script bash y las exportará a fish
