@@ -1,0 +1,164 @@
+Relaciones de uno a muchos en Yii: Obtener libros de un autor
+
+Resumen
+¿Cómo establecer una relación entre un autor y sus libros?
+
+En el mundo del desarrollo web, establecer relaciones entre distintos modelos es fundamental para crear aplicaciones robustas y eficientes. Un reto común es vincular autores con sus respectivos libros. Utilizando frameworks como Yii, este proceso puede simplificarse considerablemente al emplear métodos de relaciones. Pero, ¿cómo se hace? Analicemos cómo podemos, no solo representar estas relaciones, sino también visualizar esos vínculos claramente.
+¿Qué métodos de relación se utilizan en Yii?
+
+Cuando trabajamos con modelos en Yii, tenemos varias opciones para establecer relaciones. Uno de los más utilizados para vincular un autor con sus libros es el método hasMany(). Este método resulta esencial cuando un autor puede tener múltiples libros:
+
+public function getBooks()
+{
+    return $this->hasMany(Book::class, ['authorId' => 'authorId']);
+}
+
+    hasMany(): Este método indica la relación de uno a muchos, donde un autor puede haber escrito múltiples libros. Se especifica que el authorId del modelo Book se relaciona con el authorId del modelo de Author.
+
+¿Cómo mostramos en pantalla los libros de un autor?
+
+Una vez establecida la relación, podemos visualizarlos de manera sencilla. Queremos que al imprimir un autor, se muestre no solo su nombre, sino también la cantidad de libros que ha escrito. Esto se logra extendiendo el método toString en la clase de Author:
+
+public function __toString()
+{
+    return sprintf('%s (%d)', $this->name, count($this->books));
+}
+
+Este enfoque hace uso del método count() sobre el arreglo de libros del autor, mostrando claramente cuántos libros posee.
+¿Cómo accedemos a propiedades inexistentes en la base de datos?
+
+Uno de los aspectos más fascinantes de Yii es su capacidad de manejar propiedades que no están presentes físicamente en la base de datos. Esto se logra mediante el uso de los getters, permitiendo obtener y generar propiedades en tiempo real. Por ejemplo, si quisiéramos representar una bandera basada en la nacionalidad, podríamos utilizar un método como el siguiente:
+
+public function getFlag()
+{
+    return 'flags/' . $this->nationality . '.png';
+}
+
+Llamar this->flag es equivalente a invocar this->getFlag(), haciendo que la propiedad parezca parte natural del objeto.
+¿Cómo mostramos todos los libros de un autor?
+
+Para imprimir en la terminal los títulos de cada libro de un autor específico, la lógica de Yii nos permite recorrer fácilmente la relación:
+
+foreach ($author->books as $book) {
+    printf(" - %s\n", $book->title);
+}
+
+Este ciclo itera sobre cada libro asociado al autor y muestra su título en pantalla, ejemplificando una práctica común de visualización de datos.
+¿Qué más podemos hacer con estas relaciones?
+
+Con estas herramientas, podemos no solo listar los libros de un autor, sino también realizar búsquedas avanzadas, como aquellos con ciertas características o que no estén prestados. La capacidad de construir estas relaciones en nuestros modelos es esencial para capturar, procesar y presentar datos de manera efectiva.
+
+Las relaciones entre modelos son clave para desarrollar aplicaciones que escalen y se adapten a nuestros requerimientos. A medida que te adentras más en este mundo, recuerda que cada relación que creas es una pieza crucial para armar un sistema de datos coherente y enriquecedor para tus usuarios.
+
+
+
+Referencias:
+
+https://www.yiiframework.com/doc/guide/2.0/es/db-active-record#relational-data
+
+
+Comentarios:
+
+// Ajaa moment ! En php el tema de los setters y los getters
+// en otro framework a esto se le llama mutators.
+
+class Author extends ActiveRecord {
+
+    /*
+    |--------------------------------------------------------------------------
+    | GLOBAL VARIABLES
+    |--------------------------------------------------------------------------
+    */
+	public static function tableName()
+	{
+		return 'authors';
+	}
+
+	public function getId()
+	{
+		return $this->id;
+	}
+
+    /*
+    |--------------------------------------------------------------------------
+    | FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+	public function toString()
+	{
+		return sprintf("%s (%s)", $this->name, count($this->books));
+	}
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
+
+	public function getBooks()
+	{
+		return $this
+			->hasMany(Book::class, ['author_id' => 'id']) // esta es la relacion book.author_id / author.id
+			->all();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MUTATORS
+    |--------------------------------------------------------------------------
+    */
+
+	public function getFlag()
+	{
+		return sprintf("flags/%s.png", $this->name, $this->nationality);
+	}
+
+}
+
+
+
+
+Procedimiento:
+
+Ya tenemos la relación entre libro y autor, ahora hagamos el proceso contrario, autor cuantos libros tiene
+
+Es lo mismo solo que en lugar de un hasone sera con un has hasMany
+Para eso 
+
+en el modelo Author.php
+
+----
+
+public function getBooks(){
+      return $this
+         ->hasMany(Book::class, ['author_id' => 'author_id'])
+         ->all();
+     }
+
+Pedimos que traiga todos, yo soy un autor entonces this has many traeme todos los que sean un objeto tipo libro instancialos como un objetio libro, 
+
+Que coincida esta llave author_id que es el id de esa tabla y d ela mia y traelos alineados en un arreglo
+
+Que s esto
+
+Ahora tengo que el autor tiene dos libros
+
+Veamos que pasa si  al autor le hacemos un:
+
+
+public function toString(){
+      return sprintf("%s (%s", $this->name, count($this->books));
+     }
+
+
+quiero que me regrese el nombre con el numero de libros que tiene.
+
+Que sea el nombre con un entero con el numero de libros que tiene.
+
+ahora nuestro controller
+
+klvst3rController cuando le decimos actionAuthor($author_id)
+
+En vez de imprimir nombre vamos a imprimir lo siguiente
+

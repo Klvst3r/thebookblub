@@ -1,0 +1,4 @@
+set -gx db_host 127.0.0.1
+set -gx db_name thebookclub
+set -gx db_user klvst3r
+set -gx db_pass desarrollo
