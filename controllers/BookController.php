@@ -11,4 +11,14 @@ class BookController extends controller {
         $books = Book::find()->all();
         return serialize($books);
     }
+
+    public function actionDetail($id){
+        $book = Book::findOne($id);
+
+        if(empty($book)){
+            //TODO: Error
+            return "Libro no encontrado";
+        }
+        return $book->title;
+    }
 }

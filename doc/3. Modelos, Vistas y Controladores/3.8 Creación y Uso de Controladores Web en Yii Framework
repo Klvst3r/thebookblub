@@ -217,3 +217,78 @@ Este metodo devuelve stirngs para poder convertir un arreglo en string
 en el navegador
 
 http://localhost:8080/index.php?r=book/all
+
+
+Aca tuvimos un problema que solucionamos cargando las variables en entorno de desarrollo
+
+
+Aca el arreglo de objetos que devuelve de los libros, serializado en un formatp php serialize, un array que tiene 215 elementos.
+
+objeto 0 que tiene 15 elementos, se tiene un string de 7 carcateries que es book_id, un enteo 2 title.
+
+Esto es ya es información nuestra de la Bd con 2 lineas
+
+Todo el mecanismo que es
+La conexion a la bd, la busqueda, el query, y demas yii lo hace por nosotros d emanera eficiente.
+
+Por ejemplo podremos despues vucar con un termino, algo en el titulo.
+
+
+Continuamos en elcontrolador y creamos u nuevo metodo.
+
+ public function actionDetail($id){
+        $book = Book::findOne($id);
+
+        if(empty($book)){
+            //TODO: Error
+            return "Libro no encontrado";
+        }
+        return $book->title;
+    }
+
+
+Aca si existe el libro regresamos el libro con su titulo.
+
+Recibo un ID busco un libro con ese id y si no existe mandara un error.
+
+Regreso el titulo
+
+
+En el browser;
+
+    http://localhost:8080/index.php?r=book/detail&id=5
+
+
+
+Esto significa ejecuta la ruta book/detail y de ahi manda el parametro id=5
+
+Tenemos ellibro numero 5 es 
+    inumerancy
+
+Podemos hacerlo en nuestro bd pero como tenemso ya creada nuestrso controladores de comando entonces:
+
+
+$ php yii klvst3r/book 5
+
+Devolviendo:
+    (5) inumerancy - John Allen Paulos
+
+
+Estamos en lo correcto y tenemos una forma de invocar y mandarle por paratetros controlador accion y variables.
+
+Algo mas que comentar es:
+
+que pasa si ponemos un id que no existe por ejemplo
+
+
+http://localhost:8080/index.php?r=book/detail&id=5555
+
+
+La respuesta es
+    Libro no encontrado
+
+Los tratamiento de errores de veran posteriormente
+
+
+El controlador junta todo lo que tenemos con nuestras ideas para presentarlas de manera clara al usuario.
+
