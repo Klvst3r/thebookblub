@@ -15,7 +15,7 @@ class Author extends ActiveRecord {
      }
 
      public function toString(){
-      return sprintf("%s (%s", $this->name, count($this->books));
+      return sprintf("%s (%s)", $this->name, count($this->books));
      }
 
      public function getBooks(){
@@ -24,4 +24,6 @@ class Author extends ActiveRecord {
          ->all();
      }
 
+
+   
 }

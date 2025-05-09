@@ -162,3 +162,230 @@ klvst3rController cuando le decimos actionAuthor($author_id)
 
 En vez de imprimir nombre vamos a imprimir lo siguiente
 
+  public function actionAuthor($author_id) {
+        // $author = Author::find()->where(['author_id' => $author_id])->one();
+  
+        $author = Author::findOne($author_id);
+        if(empty($author)){
+          printf("No existe el author\n");
+          return ExitCode::DATAERR;
+        }
+        printf("%s\n", $author->toString());
+        return ExitCode::OK;
+      }
+en la terminal
+ ejecutamos
+    $ php yii klvst3r/author 88      
+
+
+
+Ok nos devuelve una salida correcta:
+
+    Alessandro Baricco (3)
+
+
+ Al ver esto es realmente sencillo es invreiblemente potente. Por ejemplo habiamos solicitado que trajera los libros que trajertan cubierta verde.
+
+ O lis libros que trajerar pagina impar.
+
+ Podemos inventaros cualquier escenarios.
+
+ Trame todos los libros que estan en esta bibliotea de este author pero que estan en las repisas, es decir que no esten prestados.
+
+
+ Asi se puede ir construyendo relaciones de datos para generar toda esta informacion. que queremos:
+
+ - Presentar 
+ - Procesar
+ - Capturar
+ - Generar
+
+ Con esto las relaciones son elementales.
+
+ Regreando al parentesis anterior 
+
+
+ Podemos ver que en  la funcion de nuestro modelo Author.php
+
+ Donde en la Clase Author,
+
+ si consultamos en la bd:
+
+  desc authors;
++-------------+------------------+------+-----+---------+----------------+
+| Field       | Type             | Null | Key | Default | Extra          |
++-------------+------------------+------+-----+---------+----------------+
+| author_id   | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name        | varchar(100)     | NO   |     | NULL    |                |
+| nationality | varchar(2)       | YES  |     | NULL    |                |
++-------------+------------------+------+-----+---------+----------------+
+
+
+Nos damos cuenta que no tenemos ningun campos que sea books, lo mas cercano que tenemos a eso es qla funcion:
+
+public function getBooks(){
+      return $this
+         ->hasMany(Book::class, ['author_id' => 'author_id'])
+         ->all();
+     }
+
+Aca entontramos una magia de yii, es el get property cada vez que yo en un modelo escribo,
+
+getX
+
+por ejemplo
+getNationality
+
+getFlag,
+
+tenemos entonces que definir algo como
+
+public function getFlag(){
+      return sprintf("flags/%s.png", $this->nationality);
+  }
+
+
+
+Lo que tenemos es que tenemos una funcion flag que no me trae nada de la bd, uiiza algo de la bd pero no va por ahi, se puede invocar en cualquier otro lugar que es exactamente lo mismo
+
+
+//$this->flag === $this->getFlag()
+
+
+Es decir que puedo traer como una propiedad como u atributo, cualquier cosa que tenga un getter.
+
+Es decir si tengo getFlag ya es un atributo aunqueno este en la bd, por ende es una propiedad pero puedo utilizarlo.
+
+Regrando y borrando este segemento del cogio en el modelo
+
+
+
+  public function getFlag(){
+      return sprintf("flags/%s.png", $this->nationality);
+  }
+
+  //$this->flag === $this->getFlag()
+
+
+
+Pero podemos ver que en la linea.
+
+ public function toString(){
+      return sprintf("%s (%s)", $this->name, count($this->books));
+     }
+
+
+Estamos haciendo el conteo del arreglo que se llama $this->books
+
+Es cecir seria exactamente lo mismo que esto:
+
+    return sprintf("%s (%s)", $this->name, count($this->getBooks()));
+
+
+Ahora se tiene considerado l aprimera forma donde es un atributo.
+
+En book podriamos cambiar la siguientes lineas.
+
+$this->getAuthor()->name,
+
+
+Podemos cambarlo por:
+
+    $this->author->name,
+
+Que hace exatamente lo mismo que es una funcion ahora que se convierte en atributo, para ello hay que definirlo
+
+
+ejemploejecutamos
+
+
+    $ php yii klvst3r/author 88
+
+Asi entonce en el controladore Klvst3rController definimos nuestro metodo
+
+public function actionBook($book_id){
+        $book = Book::findOne($book_id);
+        
+        if (empty($book)) {
+            printf("No existe el libro\n");
+            return ExitCode::DATAERR;
+        }
+    
+        // Mostrar información del libro
+        printf("%s\n", $book->toString());
+        return ExitCode::OK;
+    }
+
+En el modelo Book tenemos el metodo ToString para visualizar la información
+public function toString() {
+    return sprintf("(%d) %s - %s", 
+        $this->id, 
+        $this->title,
+        $this->author ? $this->author->name : 'Autor desconocido'
+    );
+}
+
+
+Esto es una tribunto o una funcion que se convierte en atributo
+
+Todo funciona increible cambiando 
+
+//$this->getAuthor()->name,
+
+por
+$this->author->name
+
+
+Como ultima parte vamos a entender cuales son los libros d eun autor.
+
+si nos vamos al controladore
+
+vamos a ser graficos de como traemos información de manera grafica y eficientes y util.
+
+Por ello vamos a imprimir que no solo qe tenga tres libros cierto autor, sino imrpimir cuales son los titulos de este libro.
+
+
+Para ello en nuestro controladore
+modificamos
+
+
+printf("%s\n", $author->toString());
+
+
+printf("%s\n", $author->toString());
+        foreach($author->books as $book){
+          printf(" - %s\n", $book->toString());
+        }
+        return ExitCode::OK;
+
+Con esto lo que hacemos es traernos los libros que ya estan en el objeto instanciado de author, ya estan ahi referenciados y los imprimo
+
+Ahora ejecutamos:
+
+ ⚡klvst3r ❯❯ php yii klvst3r/author 88
+Alessandro Baricco (3)
+ - (117) La Esposa joven - Alessandro Baricco
+ - (210) Seda - Alessandro Baricco
+ - (211) Océano mar - Alessandro Baricco
+
+
+Podemos mejorar el formato
+
+printf("%s:\n", $author->toString());
+
+volvemos a ejecutar y nos da la siguiente salida:
+
+$  php yii klvst3r/author 12
+
+Jack London (3):
+ - (16) El combate del siglo - Jack London
+ - (17) White Fang - Jack London
+ - (107) La llamada de lo salvaje - Jack London
+
+
+Estamos trabajando en linea de comando auqneu toda esta magia se puede exportar de manera sencilla a web, agragando una vista html, que se entienda y si se hace una api con una aplicacion de front end es cssi tan sencillo siempre y cando se entiendan los conceptos
+
+Por ello el modelo es el corazon de nuetra aplicaciṕon, los datos y las relaciones entre ellos, que nos funcionaran para hacer crecer nuestra aplicaciṕon hacia donde queramos.
+
+Podemos relacionar dos objetos cualesquiera.
+

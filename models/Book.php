@@ -32,7 +32,10 @@ class Book extends ActiveRecord
         return sprintf("(%d) %s - %s", 
             $this->id, 
             $this->title,
-            $this->getAuthor()->name,
+            //$this->getAuthor()->name,
+            //$this->author->name
+            $this->author ? $this->author->name : 'Autor desconocido' //protegemos el acceso a $this->author->name en caso de que no haya relación
+            //Esto evitará errores si el author_id del libro no tiene coincidencia en la tabla authors.
         );
     }
 }

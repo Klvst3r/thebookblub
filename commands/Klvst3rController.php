@@ -41,6 +41,36 @@ class Klvst3rController extends Controller {
       //   return $book;
       // }
 
+
+      public function actionAuthor($author_id) {
+        // $author = Author::find()->where(['author_id' => $author_id])->one();
+  
+        $author = Author::findOne($author_id);
+        if(empty($author)){
+          printf("No existe el author\n");
+          return ExitCode::DATAERR;
+        }
+        printf("%s:\n", $author->toString());
+        foreach($author->books as $book){
+          printf(" - %s\n", $book->toString());
+        }
+        return ExitCode::OK;
+      }
+
+      public function actionBook($book_id){
+        $book = Book::findOne($book_id);
+        
+        if (empty($book)) {
+            printf("No existe el libro\n");
+            return ExitCode::DATAERR;
+        }
+    
+        // Mostrar información del libro
+        printf("%s\n", $book->toString());
+        return ExitCode::OK;
+    }
+    
+
       public function actionBooks ($file) {
         $f=fopen($file, "r"); //Se abre el archivo
         while(!feof($f)) {
@@ -54,24 +84,11 @@ class Klvst3rController extends Controller {
             //Traeme en el metodo estatico find, where 
             //ActiveQuery find where, name el author = data [2]
             //con esto, al modelo de author, estamos extendiendo activeRecord, sifnifica que hay funcionalidades que estan ahi por tener una clase tipo author.
-            $author = Author::find()->where(['name' => $data[2]])->one();
-
-            
-            //Antes de crear u libro vamos a crear un autor,
-            //Antes de crear un autor, vamos a ver si ese autor, no existe en la bd.
             $author = Author::find()
               ->where(['name' => $data[2]])
-              ->one(); //active query
+              ->one();
 
-              if(empty($author)) {
-                //si no existe el autor, lo creamos
-                $author = new Author;
-                 $author->name = $data[2];
-                $author->save();
-              }
-
-
-
+             
 
 
             //print_r($data);
@@ -84,7 +101,7 @@ class Klvst3rController extends Controller {
             //Regresamos invocamos a la funcion quick y despues lo imprime
             //$book = $this->quick($book);
 
-            $book->author_id = $author->id;
+            $book->author_id = 1;
 
             //Es necesario guardar la información, para ello.
             $book->save();//se salva
@@ -99,36 +116,7 @@ class Klvst3rController extends Controller {
         fclose($f);
         return ExitCode::OK;
     }
+
     
-
-    public function actionAuthor($autor_id) {
-      // $author = Author::find()->where(['author_id' => $autor_id])->one();
-      $author = Author::findOne($autor_id);
-
-      if($author) {
-        printf("No existe el autor con id %d\n", $autor_id);
-      } else {
-        return ExitCode::DATAERR;
-      }
-
-      printf("Nombre: %s\n", $author->name);
-      return ExitCode::OK;
-    }
-
-
-    public function actionBook($book_id) {
-      //traemelo por el id
-      $book = Book::findOne($book_id);
-
-      if(empty($book)) {
-        printf("No existe el libro con id %d\n", $book_id);
-        return ExitCode::DATAERR;
-      }
-      printf("Titulo: %s\n", $book->toString());
-      return ExitCode::OK;
-    }
-
-
-
+    
 }
-
