@@ -12,6 +12,8 @@ return $this->redirect(['site', 'home']);
 Recuerda siempre devolver el response con return, ya que solo así se ejecuta efectivamente la redirección.
 
 Además, Yii ofrece un atajo con $this->goHome(), que redirige directamente a la página de inicio.
+
+
 ¿Cómo gestionar mensajes flash en Yii?
 
 Una de las formas de mejorar la interacción del usuario es mediante mensajes flash, que son breves notificaciones que la aplicación muestra al usuario. En Yii, puedes establecer mensajes flash así:
@@ -21,6 +23,8 @@ Yii::$app->session->setFlash('error', 'Ese libro no existe');
 Este método setFlash requiere dos parámetros: el tipo de mensaje (usualmente un color basado en Bootstrap) y el mensaje en sí mismo. Bootstrap ofrece colores estándar como success, warning, error, entre otros, que puedes utilizar para que el mensaje se presente de forma coherente y visualmente agradable.
 
 Cuando el mensaje se almacena en la sesión, no necesitas devolverlo explícitamente; Yii se encargará de mostrarlo en el siguiente ciclo de vida de la aplicación.
+
+
 ¿Cómo crear un controlador de autores?
 
 Desarrollar un controlador dedicado para manejar autores permite organizar mejor las funcionalidades de nuestra aplicación. En este caso, se necesita un controlador AuthorController que gestiona dos acciones principales:
@@ -52,7 +56,9 @@ class AuthorController extends Controller
 
 En este contexto, serialize($authors) es útil para mostrar los datos en un formato que luego se puedan manejar fácilmente.
 
-Además, es posible incluir una funcionalidad de búsqueda que permita filtrar autores por nombre. Para implementar esto, añadimos una variable search:
+Además, es posible incluir una funcionalidad de búsqueda que permita filtrar autores por nombre. 
+
+Para implementar esto, añadimos una variable search:
 
 public function actionAll($search = null)
 {
@@ -65,6 +71,8 @@ public function actionAll($search = null)
 }
 
 Esta implementación busca dentro de los nombres de los autores aquellos que coincidan parcialmente con el término de búsqueda proporcionado usando SQL LIKE.
+
+
 ¿Qué beneficios ofrece el uso de Yii para controladores?
 
 Yii hace que implementar controladores sea una tarea simple y poderosa a la vez. La estructura MVC del framework es clara, y su integración con componentes como Bootstrap para estilos visuales y sesiones para mensajes flash proporciona un entorno de desarrollo robusto y altamente adaptable.
@@ -80,10 +88,232 @@ https://getbootstrap.com/docs/4.0/utilities/colors/
 
 
 Comantarios:
+------------
+
+
+Uno de las formas populares de depurar en PHP en donde nos muestre las variables en el navegador, o localización de errores. Laravel tiene una funcion de ayuda corta para mostrar variables 
+    dd() se entiende como "Dump or Die", pero no siempre es conveniente. 
+
+
+Existen otras ipciones:
+
+    Primero indicaremos cual es el primobela con la funcoin dd().
+
+Digamos que queremos obtener todos las filas desde la tabla de la BD y los obtenemos.
+
+    $methods = PaymenMethod::all();
+    dd($methods);
+
+Veremos algo como
+    Collection (#277
+        #items: array:3())    
+
+
+
 
 
 Proceso:
+-------------
+
+
+
+URL:
+
+localhost:7000/index.php?r=site%2Fhome
+
+
+Test:
+localhost:7000/index.php?r=book/detail&id=59999
+
+
+En nuestro BoockController redirigimos al index si no encuentra el identificador correcto:
+
+Para ello agregamos en el metodo actionDetail($id){
+
+}
+
+public function actionDetail($id){
+        $book = Book::findOne($id);
+
+        if(empty($book)){
+            //TODO: Error
+            //return "Libro no encontrado";
+            return $this->redirect(['site/index']);
+        }
+        return $book->title;
+    }
+
+Asi si ahora probamos nuestro test con la url siguiente:
+
+localhost:7000/index.php?r=book/detail&id=59999
+
+Nos redireccionara correctaente hacia el index
+
+Una vez que un usuario inicia con la aplicación ya hay una sesión,ya se tienen a unas cosas como 
+
+Set flash recibe dos para metros
+
+- de que color quieres se vea el mensaje-
+- mensaje
+
+Importamos en el controlador
+
+use Yii;
+
+Y agregamos
+Yii::$app->session->setFlash('error', 'ese libro no existe');
+
+Probamos nuevamente:
+
+localhost:7000/index.php?r=book/detail&id=59999
+
+
+Presenta todo el estabadar de Boostrap, 
+Los colores pueden cambiar a 
+
+error
+warning
+
+
+Vamos a utilizar al controlador 
+
+Creando otro que sea:
+
+
+/controllers/AuthorController.php
 
 
 
 
+Tenemos:
+
+<?php
+
+namespace app\controllers;
+
+
+use Yii; 
+
+use yii\web\Controller;
+
+use app\models\Author;
+
+
+class AuthorController extends Controller {
+
+    public function actionDetail($id){
+        $author = Author::findOne($id);
+        if(empty($author)){
+            Yii::$app->session->setFlash('warning', 'no existe ese autor');
+            return $this->redirect(['author/all']); //listado de todos los autores
+        }
+        return $author->toString();
+    }
+
+    public function actionAll() {
+
+    }
+}
+
+Probamos este controladore de la siguiente manera:
+
+localhost:7000/index.php?r=author/detail&id=43
+
+
+Arrojandome el siguiente resultado
+
+Orhan Pamuk (1)
+
+
+localhost:7000/index.php?r=author/detail&id=49
+
+localhost:7000/index.php?r=author/detail&id=12
+
+La idea es demostrar que ya esta funcionando, no tiene vista elegante pero es funcional.
+
+
+Vamos a crear el controlador de all
+Le indicamos traeme todos y se acabo.
+
+
+class AuthorController extends Controller {
+
+    public function actionDetail($id){
+        $author = Author::findOne($id);
+        if(empty($author)){
+            Yii::$app->session->setFlash('warning', 'no existe ese autor');
+            return $this->redirect(['author/all']); //listado de todos los autores
+        }
+        return $author->toString();
+    }
+
+    public function actionAll() {
+        $authors = Author::find()->all();
+        return serialize($authors);
+    }
+}
+
+
+Revisamos:
+
+
+localhost:7000/index.php?r=author/all
+
+Veremos todos los objetos autor que estan construidos en la Bd,, y enviados al controlador, el controlador los modifica los preenta en la vista con el serialize.
+
+Podemos ir un poco mas al fondo, proponiendo, 
+
+ActionAll($search)
+
+Puede tener la opcion de recbir un link de busqueda.
+
+A vecessi a veces no 
+
+si por ejemplo invocamos 
+
+localhost:7000/index.php?r=author/all
+
+Nos dara un error 400 missing parametros, significa que algo esta faltando.
+
+Un parametro extra
+
+Por ejemplo
+localhost:7000/index.php?r=author/all&search=loquesea
+
+Hace lo mismo, es decir que la funcion es aceptada, con esto podermos ver errores comods.
+
+Ahora para hacer una busqueda, para aceptar que a veces envian el search y a veces no, eto es una sobrecarga de operadore, para ello ponemos
+
+
+      public function actionAll($search = null) {
+        $authors = Author::find()->all();
+        return serialize($authors);
+    }
+
+Al hacer el refresh no hay problema con
+
+
+public function actionAll($search = null) {
+
+        if($search != null){
+            $authors = Author::find()
+                ->where(['like', 'name', $search])
+                ->all();
+        }else {
+
+            $authors = Author::find()->all();
+        }
+        return serialize($authors);
+    }
+
+con esto si es diferente de null complira la busqueda con los parametros de search, pero si es null enviara todos los autores.
+
+Para ver nuestro ejemplo funcionando:
+http://localhost:7000/index.php?r=author/all&search=Jack
+
+
+Tenemos al autor con Jack cons dos arreglos con dos elementos, 
+
+Lo que se acabo de ver el es lo sencillo pero la potencia de los controladores, combinando los elementos de modelo y vista y podremos invocar por ejemplo a un string en las vistas todo el html y el layut y por otro lado devolver un response con un vete a este lado.
+
+Faltans las vistas pero ya es una palicación que va por los datos, busca, y de manera sencilla.

@@ -1,0 +1,87 @@
+3.10.  URLs Amigables -Gestion y creación con URL Manager en PHP
+
+Resumen
+-------
+
+Resumen
+
+¿Por qué son importantes las URLs bonitas en sitios web?
+
+Las URLs bonitas, o "beautified URLs", no solo mejoran el aspecto estético de un sitio web, sino que también ofrecen diversas ventajas en SEO y facilidad de uso. En un contexto digital donde cada detalle cuenta, manejar URLs de una manera eficiente puede marcar una gran diferencia en cómo los usuarios y los motores de búsqueda interactúan con un sitio. Al comprender y aplicar las configuraciones adecuadas, cualquier desarrollador puede transformar URLs complicadas en direcciones limpias y fáciles de entender.
+¿Cómo funciona el URL manager en G?
+
+G proporciona una solución poderosa para la gestión de URLs mediante su URL manager. Al activarlo, permite traducir URLs largas y codificadas en versiones más comprensibles y amigables. Para utilizarlo, se necesita configurar el archivo web.php, habilitando las opciones enablePrettyUrl y showScriptName para simplificar la estructura de las URLs.
+
+'components' => [
+    'urlManager' => [
+        'enablePrettyUrl' => true,
+        'showScriptName' => false,
+        'rules' => [
+            // reglas personalizadas
+        ],
+    ],
+],
+
+¿Cómo usar reglas para transformar URLs?
+
+Las reglas especificadas en el URL manager permiten definir cómo se traducirán ciertas partes de la URL en acciones específicas del controlador. Por ejemplo, puedes redirigir una URL como books para que muestre el contenido gestionado por el controlador book y ejecutar la acción all.
+
+    Crear reglas para direcciones personalizadas: Puedes crear entradas de reglas que especifican qué controlador y acción deben ejecutarse cuando se accede a una URL en particular. Aquí un ejemplo básico:
+
+'rules' => [
+    'books' => 'book/all',
+    'author/<id:\d+>' => 'author/view'
+],
+
+¿Qué considerar al manejar parámetros en URLs?
+
+Cuando se trata de manejar IDs y otros parámetros en las URLs, es crucial establecer expresiones regulares que validen adecuadamente estos componentes. Esto asegura que solo las solicitudes correctas lleguen a los controladores relevantes, evitando así errores inesperados.
+
+    Expresiones regulares para validación de parámetros: Al integrar expresiones regulares, puedes especificar qué tipos de caracteres o patrones son aceptables en ciertas partes de tu URL.
+
+'author/<id:\d+>' => 'author/view',
+'search/<query:\w+>' => 'search/run',
+
+¿Cómo afecta la creación de entidades en SEO?
+
+Las URLs limpias y descriptivas son esenciales para el SEO, ya que facilitan a los motores de búsqueda identificar el contenido del sitio. Utilizar nombres claros y términos relevantes en las URLs mejora la indexación y el posicionamiento en resultados de búsqueda.
+Ventajas prácticas de las URLs bonitas:
+
+    Visibilidad mejorada en motores de búsqueda: Los motores de búsqueda tienden a favorecer URLs limpias que reflejan claramente el contenido del sitio.
+    Facilidad para compartir y recordar URLs: Los usuarios encuentran más fácil compartir y recordar URLs que son cortas y descriptivas.
+    Confiabilidad y profesionalismo: URLs bien estructuradas dan una impresión de profesionalismo y atención al detalle, aumentando la confianza del usuario en el sitio.
+
+Implementar y gestionar URLs bonitas es tanto un arte como una ciencia, pero con G y su URL manager, el proceso se simplifica considerablemente.
+
+
+
+Referencias
+-----------
+https://www.yiiframework.com/doc/guide/2.0/es/runtime-routing
+
+
+
+Comentarios:
+-----------
+
+Buen curso el de expresiones regulares, recomendado!
+
+Un ejemplo de lo que trabajamos alli:
+
+  if(!email.match(/^[a-z0-9_]+\+?[a-z0-9]*@[a-z0-9_]+\.[a-z]{2,6}$/i)) {
+    console.log(email + " is not a valid email address!");
+    go(false);
+    return;
+  }
+
+
+
+
+
+
+Proceso
+-------
+
+
+
+
