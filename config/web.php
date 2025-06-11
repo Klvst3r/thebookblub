@@ -54,6 +54,16 @@ $config = [
                 'author/<id:\d+>' => 'author/detail',
             ],
         ],
+
+       'view' => [
+            'class' => 'yii\web\View',
+            'renderers' => [
+                'tpl' => [
+                    'class' => 'app\components\SmartyRenderer',
+                ],
+            ],
+        ],
+
         
     ],
     'params' => $params,

@@ -1,0 +1,565 @@
+Plantillas Smarty con Yii: Instalación y Uso Básico
+
+Resumen
+¿Qué es Smarty y cómo se instala en Yii2?
+
+Si te interesa mejorar la forma en que manejas las vistas en Yii2, Smarty es una herramienta que te puede ser de gran ayuda. Su capacidad para funcionar con HTML, JavaScript y diversos frameworks lo hace muy versátil. Además, es inmensamente fácil de usar con Yii, lo que agrega valor sin complicar el proceso. A continuación, te mostramos cómo instalar Smarty en tu proyecto Yii utilizando Composer.
+¿Cómo instalar Smarty con Composer?
+
+    Accede al sitio oficial de Yii2: Visita el sitio YiiFramework.com y busca "Smarty" para ver la extensión correspondiente.
+    Uso de Composer: Una vez que ubiques la extensión, utiliza Composer para instalarla. Utiliza el comando composer require --prefer-dist yiisoft/yii2-smarty en tu terminal para añadir la extensión a tu proyecto.
+    Configuración en Yii: Dirígete al archivo de configuración de Yii (web.php) y añade un nuevo componente 'view'. Asegúrate de que la estructura esté bien definida y que todos los corchetes estén correctamente cerrados.
+
+'components' => [
+    'view' => [
+        'class' => 'yii\smarty\ViewRenderer',
+    ],
+    // Otros componentes
+],
+
+¿Cómo funcionan las plantillas Smarty?
+
+Smarty actúa como un motor de plantillas. Simplifica el código envolviendo el contenido en llaves ({}). Cualquier variable que se imprima irá dentro de estas llaves. Esto reduce la complejidad de las vistas y facilita su mantenimiento.
+Ejemplos prácticos de sintaxis con Smarty
+
+A continuación, te mostramos cómo puedes estructurar una plantilla para listar libros utilizando Smarty:
+
+Archivo: all.tpl
+
+<h1>Todos los libros</h1>
+<ol>
+    {foreach $books as $book}
+        <li>{$book.title}</li>
+    {/foreach}
+</ol>
+
+    Foreach: La sintaxis de Smarty para el bucle foreach es muy similar a PHP y permite iterar a través de arrays efectivamente.
+    Impresión de Variables: {$book.title} imprime directamente el título del libro en el elemento de lista.
+
+¿Ventajas de utilizar Smarty?
+
+    Simplicidad: Reduce la cantidad de código PHP en tus vistas.
+    Mantenibilidad: Un código más limpio y organizado facilita el mantenimiento.
+    Compatibilidad: Funciona eficientemente con varios frameworks y tecnologías.
+    Velocidad: Aunque puede añadir ligeramente tiempo a la respuesta, este es casi imperceptible siendo PHP suficientemente potente para interpretar los templates rápidamente.
+
+Integrando lógica condicional: El uso de if
+
+Además de los bucles, Smarty permite utilizar condicionales fácilmente:
+
+{if $title > 2}
+    Muchos
+{else}
+    Pocos
+{/if}
+
+Este fragmento ilustra cómo puedes utilizar lógica simple para condicionar la salida directamente en tus plantillas.
+Consejos prácticos y recomendaciones
+
+    Mantén el servidor web y de base de datos cercanos: Si estás ejecutando aplicaciones grandes, asegúrate de que la latencia no sea un problema.
+    Consistencia en URL: Desde el backend, siempre referénciate usando controlador, acción y parámetros, para mantener homogeneidad en el manejo de rutas.
+
+Ahora que tienes las bases para utilizar Smarty, puedes aprovechar la potencia y simplicidad que ofrece para el desarrollo de aplicaciones con Yii2. 
+
+
+Referencias:
+------------
+https://www.yiiframework.com/extension/yiisoft/yii2-smarty
+
+https://www.yiiframework.com/extension/yiisoft/yii2-smarty
+
+
+Comentarios:
+------------
+
+Para tener soporte de html en los archivos .tpl en visual studio code es necesario agregar la extension smarty template support.
+
+igualmente hay que modificar el settings.json
+
+
+
+Proceso:
+--------
+
+Para los que no les gusta PHP en las vistas existe Template Engine, Smarty es muy sencillo y potente, ayuda a visualizar lo que estamos escribiendo, a final en HTML, se lleva vien con Yii con Js, conmuchos Frameworks que se basan imprimiendo HTML desde el controlador, desde el backend.
+
+
+https://www.yiiframework.com/extension/yiisoft/yii2-smarty
+
+Esta es la pagina de las paginas de las extendiones de Yii2, con Smarty es sencillo muy sencillo instalarlo.
+
+Copiams el require
+
+	$ php composer.phar require --prefer-dist yiisoft/yii2-smarty
+
+En nuestro caso lo invocamos directamente trayendo la libreria extension de yiisoft-smarty
+
+	$ composer require --prefer-dist yiisoft/yii2-smarty
+
+    $ composer require yiisoft/yii2-smarty
+
+composer hace su magia trayendo todas las ibrerias dependientes que necesite smarty y cambia el composer, json para que el proyecto viaje como sea que viaje.
+
+ya instalado, vamos aconfigurarlo en yii.
+
+
+ahora en los components tenemos que crear
+
+
+return [
+    //....
+    'components' => [
+        'view' => [
+            'renderers' => [
+                'tpl' => [
+                    'class' => 'yii\smarty\ViewRenderer',
+                    //'cachePath' => '@runtime/Smarty/cache',
+                ],
+            ],
+        ],
+    ],
+];
+
+
+Se tieneque crear un nuevo con la estructura anterior.
+
+
+Ahora en config/web.php
+
+Dentro de components dejar hasta la parte inferior.
+
+quedando debaje de urlManager
+
+quedando
+
+ 'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'books' => 'book/all',
+                'book/<id:\d+>' => 'book/detail',
+                'authors' => 'author/all',
+                'author/search/<search:\w+>' => 'author/all',
+                'author/<id:\d+>' => 'author/detail',
+            ],
+        ],
+
+        'view' => [
+            'renderers' => [
+                'tpl' => [
+                    'class' => 'yii\smarty\ViewRenderer',
+                    //'cachePath' => '@runtime/Smarty/cache',
+                ],
+            ],
+        ],
+
+
+con esto tenemos un nuevo component que es view, cuyo render es la clase que se instalo
+
+        'class' => 'yii\smarty\ViewRenderer',
+
+ Guardamos.
+ 
+ Para ver si esta bien instalado en os controladores.
+
+ BookController
+
+
+va mos a utulizar este metodo
+ public function actionAll(){
+        $books = Book::find()->all();
+        return serialize($books);
+    }
+
+Regresando la funcion
+
+return $this->render(SCRIPT, [VARIABLES])
+
+
+El Script tendria que indicarse con un archivo como
+
+all.tpl en la carpeta del controlador book
+
+views/book/all.tpl
+
+    en el controlador
+
+    return $this->render('all.tpl');
+
+En el archiovo all.tpl
+
+    <h1> Todos los libros </h1>    
+
+http://localhost:7000/books
+
+Ya tenemos instalado smarty, funcionando correctamente
+
+
+Smarty
+
+
+Que es como nos ayuda, 
+
+en el all.tpl es un archivo html, smarty lo que hace o lo que es es una maquina de templates que todo se tiene que envolver entre corchetes
+
+{ $variables}
+
+Todo lo que se imprima dentro de los llaves, se va a mandar al html.
+
+
+
+<h1> Todos los libros </h1>
+
+<ol>
+-- iterador
+<li>{ $book->title }</li>
+-- cerramos iterdor
+</ol>
+
+
+
+haciendo mas funcionables, hacer un frontend no tan complejo y muy potente.
+
+Estamos haciendo scriptingweb con yii, no tenemos que matar contra un lenguaje yii es un poqco mas lento, pero en milisegundos.
+
+al interpretar el template, lo hace muy rapido, pero con grander difentes y por ello se puede aprovechar la tecnologia de yii
+
+Otra forma seria
+
+
+<ol>
+-- iterador
+<li>{ $book->toString() }</li>
+-- cerramos iterdor
+</ol>
+
+Es estricto
+
+tiene
+
+{  if }
+{ foreach }
+{ assign }
+{ use }
+
+Con esto se resualven el 95% de los casos, ahora vamos a imprimir los libros
+
+Para imprimir todos los libros, se envia un arreglo donde una variable que la vista va a ver con el nombre de books sea books
+
+return $this->render('all.tpl'. ['books' => $books]);
+
+
+a la vista en el template 
+
+<h1> Todos los libros </h1>
+
+<ol>
+{ foreach $boks as $book }
+<li>{ $book->toString() }</li>
+{ /foreach }
+</ol>
+
+
+
+
+
+ahora cargamos en el navegador a todos los libros
+
+
+Hay un problema de renderizado con Smarty ya que lo que esoty viendo —que las llaves { ... } aparecen como texto literal en el navegador— indica que Smarty no está funcionando, y que Yii2 simplemente está tratando el archivo .tpl como si fuera texto plano o HTML sin procesar.
+
+Esto pasa por que la pantilla .tpl con codigo como:
+{ foreach $books as $book }
+<li>{ $book->toString() }</li>
+{ /foreach }
+
+no está siendo interpretada por el motor de plantillas Smarty, sino servida tal cual está.
+
+
+Para solucionar esto, debemos configurar correctamente Smarty en Yii2
+
+Debes asegurarte de que Yii2 sepa que los archivos .tpl deben ser procesados por Smarty. Aquí te dejo los pasos necesarios:
+
+1. Debemos Instalar el componente yii2-smarty
+    composer require yiisoft/yii2-smarty
+
+
+
+De acuerdo a la sintaxis    . Configurar el componente view en config/web.php:
+
+Agrega esto a la sección 'components':
+
+'view' => [
+    'renderers' => [
+        'tpl' => [
+            'class' => 'yii\smarty\ViewRenderer',
+        ],
+    ],
+],
+
+Esto le dice a Yii2 que los archivos .tpl deben ser renderizados por el motor de plantillas Smarty.
+3. Usar correctamente render() en el controlador
+
+Como ya corregimos antes, tu método actionAll() debe verse así:
+
+public function actionAll(){
+    $books = Book::find()->all();
+    return $this->render('all.tpl', ['books' => $books]);
+}
+
+4. Sintaxis correcta de Smarty en tu plantilla
+
+Tu plantilla views/book/all.tpl debe usar esta sintaxis:
+
+<h1>Todos los libros</h1>
+
+<ol>
+{foreach from=$books item=book}
+    <li>{$book->toString()}</li>
+{/foreach}
+</ol>
+
+5. Verificar que el archivo .tpl esté en la ruta correcta
+
+Confirma que esté en:
+
+/views/book/all.tpl
+
+Bien ahora ya renderiza correctamente, el detalle estaba en la sitaxis.
+
+Esto es muy limpio, en un solo lenguaje que sigue siendo un template, ahora vamos a utilizar la clase 
+
+{ use class="yii\helpers\Html" }
+
+<h1>Todos los libros</h1>
+
+<ol>
+{foreach from=$books item=book}
+    <li>{$book->toString()}</li>
+{/foreach}
+</ol>
+
+nos marca un error en el navegador:
+
+ PHP User Deprecated Warning – yii\base\ErrorException
+Using unregistered static method "HTML::a($_smarty_tpl->tpl_vars['book']->value->toString(),array('book/detail','id'=>$_smarty_tpl->tpl_vars['book']->value->id))" in a template is deprecated and will be removed in a future release. Use Smarty::registerClass to explicitly register a class for access.
+
+
+El error que estamos recibiendo es claro:
+
+    ❗ Estamos utilizando una clase PHP (Html) directamente en una plantilla .tpl, lo cual no está permitido por defecto en Smarty.
+
+Para poder usar clases como Html::a() dentro de Smarty, tenemos que registrar explícitamente en la configuración de Yii para que esté disponible en las plantillas .tpl.
+
+Para poder solucionar.
+
+1. Registramos la clase Html en la configuración de ViewRenderer
+
+Abrimos el archivo de configuración (por ejemplo config/web.php) y agregamos la siguiente configuración:
+
+'components' => [
+    'view' => [
+        'renderers' => [
+            'tpl' => [
+                'class' => 'yii\smarty\ViewRenderer',
+                'widgets' => [
+                    // Aquí puedes registrar clases si usaras widgets
+                ],
+                'plugins' => [
+                    // Aquí puedes registrar funciones Smarty personalizadas si gustas
+                ],
+                'globals' => [
+                    'Html' => ['class' => 'yii\helpers\Html'], // 👈 Registro de Html
+                ],
+            ],
+        ],
+    ],
+],
+
+Esto hace que en nuestras plantillas .tpl puedamos usar {$Html::a(...)} sin error.
+
+2. Cambiamos la plantilla all.tpl para usar el helper registrado
+
+<h1>Todos los libros</h1>
+
+<ol>
+{foreach from=$books item=book}
+    <li>{$Html::a($book->toString(), ['book/detail', 'id' => $book->id])}</li>
+{/foreach}
+</ol>
+
+
+R¿Tenemos un nuevo error:
+
+El error que estamos recibiendo:
+
+    Unknown Property – yii\base\UnknownPropertyException
+    Setting unknown property: yii\smarty\ViewRenderer::plugins
+
+significa que estamos intentando configurar una propiedad (plugins) que no existe en la clase yii\smarty\ViewRenderer.
+
+La configuración correcta solo permite globals y widgets, no plugins.
+Entonces en nuestra configuracion
+ config/web.php, cambiamos esto:
+
+ 'components' => [
+    'view' => [
+        'renderers' => [
+            'tpl' => [
+                'class' => 'yii\smarty\ViewRenderer',
+                'globals' => [
+                    'Html' => ['class' => 'yii\helpers\Html'],
+                ],
+            ],
+        ],
+    ],
+],
+
+
+✅ globals → Sí se permite
+✅ widgets → Opcional, si usas widgets en plantillas
+❌ plugins → ❗ No es una propiedad válida
+
+Para poder corregir estos errores en el navegador
+
+ PHP User Deprecated Warning – yii\base\ErrorException
+Using unregistered static method "Html::a($_smarty_tpl->tpl_vars['book']->value->toString(),array('book/detail','id'=>$_smarty_tpl->tpl_vars['book']->value->id))" in a template is deprecated and will be removed in a future release. Use Smarty::registerClass to explicitly register a class for access.
+
+Resumen de la solución:
+--------------------
+
+Registro de la clase Html en Smarty para uso en plantillas .tpl
+
+Objetivo: Permitir el uso de métodos estáticos de yii\helpers\Html (como Html::a()) dentro de plantillas Smarty sin errores ni advertencias deprecadas.
+
+
+Archivo: components/SmartyRenderer.php
+
+    namespace app\components;
+
+    use yii\smarty\ViewRenderer;
+    use yii\helpers\Html;
+
+    class SmartyRenderer extends ViewRenderer
+    {
+        public function init()
+        {
+            parent::init();
+
+            // Registro de la clase Html para uso dentro de las plantillas Smarty
+            $this->smarty->registerClass('Html', Html::class);
+        }
+    }
+
+
+Configuración en config/web.php:
+
+    'view' => [
+        'class' => 'yii\web\View',
+        'renderers' => [
+            'tpl' => [
+                'class' => 'app\components\SmartyRenderer',
+            ],
+        ],
+    ],
+
+Uso en plantilla .tpl:
+
+    <h1>Todos los libros</h1>
+
+    <ol>
+    {foreach from=$books item=book}
+        <li>{Html::a($book->toString(), ['book/detail', 'id' => $book->id])}</li>
+    {/foreach}
+    </ol>
+
+
+Probamos ahora con
+
+localhost:7000/book/4
+
+es decir ahora caa que vayamos al enlace del libro nos dara el resultado especifico del id del libro
+
+(4) A Mathematician Reads the Newspaper - John Allen Paulos
+
+No hay vista del libro, pero avanzamos. y aunque esta en localhost es muy rapido.
+
+La noto puntual de nuestro template especificamente en:
+
+
+<li>{Html::a($book->toString(), ['book/detail', 'id' => $book->id])}</li>
+
+
+de la construccin de la url, la referencia que se va a dar para la url ya sea en un helper de html, o un redirect que tiene el url desde el controller, siempre tiene que ser al controlador -> accion -> parametros.
+
+No a las reglas del url shornet no vamos a utilizarlo a esto:
+
+    'book/<id:\d+>' => 'book/detail',
+
+siempre sera desde el frontend, y va a ser controlar -> accion -> parametros
+
+De esta manera se garantiza que hay una homogenidad en todo el proyecto de como referernos a una controlador -> accion ->parametros
+
+como ultima prubea rapida vamos a utilizar una variable
+En el template
+
+<h1>Todos los libros { $titulo }</h1>
+
+y vamos a mandar desde el controlador
+
+Si ahora nuestra variable le enviamos
+
+return $this->render('all.tpl', ['books' => $books, 'titulo' => 1]);
+
+imrpimira pocos pero si es mayor de 2 enviara el valor de muchos
+
+con est tenemos una capacidad increible para crear mucho con ppoco, ya que es potente es rapida.
+
+con esto tenemos el camino completo de modelos -> vista -> controlador.
+
+Cerramos esta secion para ver la rama de applicacion
+
+
+Podemos entonces aseverar que
+
+¿Cuáles son las principales responsabilidades de una vista?
+Recabar y presentar datos e información
+
+¿Cómo se invoca una acción dentro de un Controlador vía web (de forma directa)?
+Navegar a controlador/accion
+
+¿Para qué está pensada la función hasOne() en Yii2?
+
+elaciones 1:1 (uno a uno)
+
+Por ejemplo, si tienes dos tablas relacionadas donde un usuario tiene un perfil, puedes definir la relación así:
+
+public function getProfile()
+{
+    return $this->hasOne(Profile::class, ['user_id' => 'id']);
+}
+
+Esto indica que un registro de la tabla actual se relaciona con un solo registro de otra tabla.
+
+
+
+¿Cuál es la forma correcta de desarrollar una acción que Yii2 reconozca automáticamente como tal?
+function acctionXXXX
+
+¿Cuál es una de las mayores ventajas de poder modificar las rutas de un controlador/acción?
+SEO y facilidad para el usuario
+
+¿Cómo permite Yii2 acceder a los atributos (por ejemplo, precio) de un modelo?
+$model->getPrecio()
+
+
+
+
+
+
+
+
+
+
+
+

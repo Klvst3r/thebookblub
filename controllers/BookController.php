@@ -12,7 +12,8 @@ use app\models\Book;
 class BookController extends controller {
     public function actionAll(){
         $books = Book::find()->all();
-        return serialize($books);
+        //return serialize($books);
+        return $this->render('all.tpl', ['books' => $books, 'titulo' => 1]);
     }
 
     public function actionDetail($id){
