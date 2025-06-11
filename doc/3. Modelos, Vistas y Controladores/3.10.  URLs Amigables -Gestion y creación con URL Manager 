@@ -82,6 +82,199 @@ Un ejemplo de lo que trabajamos alli:
 Proceso
 -------
 
+|Las beuty url, podemos ir a la seccion de about 
+
+http://localhost:7000/index.php?r=site%2Fabout
+
+Podemos ver %2F es / encodeada
+
+Esto significa que el tring es trata como una sola cosa no se separa / 
+
+contact es otro ejemplo
+http://localhost:7000/index.php?r=site%2Fcontact
+
+
+Busqueda
+http://localhost:7000/index.php?r=author/all&search=Jack
+
+
+index.php?r=author/all&search=Jack
+
+
+Ahora que podemos hacer para que lo anterior se vea como 
+
+
+author/earch/Jack
+
+O que search
+author/12
+book/allbooks
+author
+Para poder hacer esto posible yii ofrece algo potente, simplemente es ir a
+
+config/web.php
+
+vamos a los components url managment
+
+Descomentamos esta sección
+
+    'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+            ],
+        ],
+
+PPOr que con esto se hecha a andar, es un componente que va a tener dos variables encendidas o apagadas,
+
+
+'enablePrettyUrl' => true,
+            'showScriptName' => false,
+
+Las reglas:
+
+Quiero que cada que alguien entre a books nos muestre el book/all
+entonces quiero que interpte el contolador book que ejecute la funciona all
+
+para ello
+
+De momento cuando rules esta vacio, en el sitio normal 
+
+http://localhost:7000/site/index
+
+Cambia por completo
+
+si vamos a contact
+http://localhost:7000/index.php?r=site%2Fcontact
+
+http://localhost:7000/site/contact
+
+
+Es sencillo controlador / acciones
+Hay formas de mandar variables
+
+Vamos a tratar la rega con
+'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'books' => 'book/all',
+            ],
+        ],
+
+Se interpete que el contraldor book, ejecute la acción all, es se ve de la siguiente forma 
+
+http://localhost:7000/books
+
+Es lo mismo que 
+
+http://localhost:7000/index.php?r=book%2Fall
+
+
+La potencia es increible, por que podemos crear entidades para la url es al final sio.
+
+Buscando el detalle de un libro.
+
+
+ 'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'books' => 'book/all',
+                'book/<id>' => 'book/detail',
+            ],
+        ],
+
+Si nos vamos al controlador BookController en el metodo acionDetail($id), se esta tratando que lo que se encuentre como id sera el id y esto lo enviara al controlador que esta pidiendo se ejecute.
+
+Probandolo
+
+http://localhost:7000/book/12
+
+Es un iobro 
+
+modificando el cookcontroller, regresando el title
+
+ public function actionDetail($id){
+        $book = Book::findOne($id);
+
+        if(empty($book)){
+            //TODO: Error
+            //return "Libro no encontrado";
+            //return $this->redirect(['site/index']);
+
+            Yii::$app->session->setFlash('error', 'ese libro no existe');
+
+            // Podemos sustituir con el siguiente shortcut
+            return $this->goHome();
+        }
+        // return $book->title;
+        return $book->toString();
+    }
+
+http://localhost:7000/book/12
+
+Cada que pedimos, asignamos variables con lo que encontramos, peri si vamos un poco mas alla.
+
+Siendo:
+
+en web.php
+
+en las reglas podemos decir que
+
+Il id me lo vas a traer sol si y solo si el id concide con la expresión regulares
+
+'book/<id:\d+>' => 'book/detail',
+
+Vamos a ver que pasa 
+
+Si madamos un aletray espera un digito
+
+enviara un error #404
+
+Si enviamos algo como 
+
+http://localhost:7000/book/5
+
+Vamos a mexclar las cosas, 
+
+en autoes podemos buscr 
+
+'authors' => 'author/all',
+
+Pero si queremos buscar 
+
+'author/search/<search:./>'
+
+Lo que venga mas que suficiente o se pude hacer con letras con mas de una letras
+'author/search/<search:\w+>' => 'author/all',
+
+Que lo interrete
+
+En PHP puedes escribir array() o bien []
+
+Una recomendacion cada vez que el ultimo elemento del arreglo tenga o finalice con una coma para minimizar los cambios
+
+
+Viendo como funcionan
+
+http://localhost:7000/author/search/Jack
+
+http://localhost:7000/author/search/Allan
+
+http://localhost:7000/author/search/Gambia
+
+
+
+Pero si escribimos algo como:
+
+http://localhost:7000/authors
+
+Trae todos los autores.
+
+La potencia de estas reglas y el modulo de url manager, ahora cada vez que utilice el sistema para imprimir una liga, o una url para desplegar en texto, 
+
+Se hablaba de como construir las url, la potencia se ve en las vistas.
 
 
 

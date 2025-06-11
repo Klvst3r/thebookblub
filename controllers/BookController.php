@@ -28,6 +28,7 @@ class BookController extends controller {
             // Podemos sustituir con el siguiente shortcut
             return $this->goHome();
         }
-        return $book->title;
+        // return $book->title;
+        return $book->toString();
     }
 }

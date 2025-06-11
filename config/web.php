@@ -42,14 +42,18 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
+        
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'books' => 'book/all',
+                'book/<id:\d+>' => 'book/detail',
+                'authors' => 'author/all',
+                'author/search/<search:\w+>' => 'author/all',
             ],
         ],
-        */
+        
     ],
     'params' => $params,
 ];
