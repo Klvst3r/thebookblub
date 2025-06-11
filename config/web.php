@@ -51,6 +51,7 @@ $config = [
                 'book/<id:\d+>' => 'book/detail',
                 'authors' => 'author/all',
                 'author/search/<search:\w+>' => 'author/all',
+                'author/<id:\d+>' => 'author/detail',
             ],
         ],
         

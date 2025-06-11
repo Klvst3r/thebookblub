@@ -1,0 +1,286 @@
+Vistas en PHP con Yii y Smarty para Web Apps Sin Frameworks Frontend
+
+
+
+Resumen
+------
+
+
+¿Cómo trabajar con vistas en aplicaciones web usando PHP y Yii?
+
+El desarrollo web con PHP en combinación con Yii te ofrece una poderosa capacidad para crear aplicaciones web robustas. Aquí te explicaremos en detalle cómo trabajar con vistas, específicamente centrándonos en un enfoque sin frameworks en el frontend.
+¿Qué es una vista en Yii y cómo configurarla?
+
+Una vista en Yii es un archivo que representa la capa de presentación de la aplicación. Estas vistas suelen estar escritas en HTML y pueden ser interpretadas por PHP. Cada controlador en Yii tiene su propio directorio dentro de la carpeta de vistas.
+
+    Organización de directorios: Se recomienda crear subcarpetas para cada controlador, como author y book, dentro de la carpeta views.
+    Archivo de vistas: Por ejemplo, para el controlador author, puedes crear un archivo detail.php, para presentar los detalles de un autor específico.
+
+¿Cómo se renderiza una vista?
+
+El método render en Yii es fundamental para mostrar las vistas. Este método proviene del objeto controlador (controller) y acepta dos parámetros: el nombre de la vista y un array de datos para pasar a la vista.
+
+$this->render('detail', ['vistaAutor' => $author]);
+
+    Recibiendo datos: El método render permite pasar datos desde el controlador a la vista a través de un array asociativo. Las teclas del array son los nombres de las variables que podrás usar en la vista.
+
+¿Cómo se integra PHP en las vistas?
+
+Para presentar información dinámica, puedes incrustar PHP directamente en las vistas HTML. A pesar de que algunos desarrolladores tienen sus reservas sobre el uso extensivo de PHP en el frontend, es una práctica común en PHP clásico.
+
+<h1>Detalle de autor</h1>
+<?php echo $vistaAutor->toString(); ?>
+<ol>
+<?php foreach ($author->books as $book): ?>
+    <li><?php echo $book->title; ?></li>
+<?php endforeach; ?>
+</ol>
+
+¿Cómo manejar enlaces y URL dinámicas?
+
+Para navegar de una vista a otra es fundamental construir enlaces de manera dinámica. Yii facilita esto utilizando la clase Html y el método a.
+
+use yii\helpers\Html;
+
+// Creación de un link
+echo Html::a($book->title, ['book/detail', 'id' => $book->id]);
+
+Este método a genera un enlace HTML (anchor) que apunta a la acción detail del controlador book con el ID del libro como parámetro.
+¿Cómo mejorar la generación de plantillas con Smarty?
+
+Aunque no se profundizó en el uso de Smarty, se mencionó que es posible utilizar motores de plantillas externos con Yii para mejorar la presentación y mantener la separación de la lógica de negocio y la presentación.
+
+    Smarty: Es un motor de plantillas de PHP que permite definir estructuras más limpias y menos verbosas. Puede ser una opción ideal para quienes desean un control más fino sobre el HTML que generan.
+
+Yii junto con PHP te ofrece las herramientas para construir aplicaciones web completas, desde la estructura de carpetas hasta la generación dinámica de URL. Aunque el uso directo de PHP en vistas puede no ser del gusto de todos, su utilidad y capacidad para integrarse con herramientas como Smarty lo hacen una potencia a considerar en el desarrollo web. 
+
+
+
+Referencias:
+-------------
+
+¿Cómo mostrar datos de PHP en el navegador?
+
+Mostrar datos de PHP en el navegador es una habilidad clave para cualquier desarrollador web. A través de la interacción entre formularios HTML y scripts PHP, podemos crear aplicaciones dinámicas y enriquecidas. Aquí exploraremos cómo estructurar un proyecto que haga justamente eso.
+¿Cómo crear un formulario HTML?
+
+Para empezar, debemos crear un nuevo documento HTML que servirá como nuestro formulario de entrada. Antes de proceder, es esencial tener una buena comprensión de HTML y CSS, algo que puedes profundizar en cursos adicionales si es necesario.
+
+    Estructura básica de HTML: Utiliza el doctype y elementos como <html>, <head>, y <body>.
+    Elemento <form>: Declara tu formulario con la etiqueta <form>.
+    <input type="text">: Añade un campo de texto para que el usuario ingrese datos. Este input deberá tener un atributo name, por ejemplo, nombre.
+    Botón de enviar: Incluye un botón <input type="submit"> para enviar los datos.
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario</title>
+</head>
+<body>
+    <form action="main.php" method="post">
+        <input type="text" name="nombre" placeholder="Ingrese su nombre">
+        <input type="submit" value="Enviar">
+    </form>
+</body>
+</html>
+
+¿Cómo recibir datos del formulario en PHP?
+
+Ahora crearemos el archivo PHP denominado main.php. Este archivo se encargará de recibir y mostrar los datos enviados desde el formulario.
+
+    Declaración del Script PHP: Usa la extensión .php para el archivo.
+    Uso de $_REQUEST: Esta es una superglobal de PHP que te permite recuperar datos enviados a través de métodos HTTP, ya sea GET o POST.
+
+<?php
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        // Recuperar el dato ingresado en el formulario
+        $nombre = $_REQUEST['nombre'];
+        
+        // Imprimirlo en el navegador
+        echo "Nombre ingresado: " . htmlspecialchars($nombre);
+    }
+?>
+
+¿Cómo funciona la interacción entre HTML y PHP?
+
+Al integrar HTML y PHP, creamos una interacción fluida donde los datos ingresados por el usuario se envían al servidor, se procesan y se devuelve un resultado. Aquí es crucial entender qué pasos seguir:
+
+    Ingreso de datos: El usuario ingresa un valor en el campo de texto del formulario HTML.
+    Envía los datos: Al presionar "Enviar", los datos se envían al script main.php mediante HTTP POST.
+    Procesamiento y visualización: El PHP recibe los datos con $_REQUEST y utiliza echo para mostrarlos.
+
+¿Qué hacer si no funcionan los scripts?
+
+Ante fallos en los scripts, realiza estas verificaciones:
+
+    Revisar rutas: Asegúrate de que la ruta especificada en el 'action' apunte correctamente al archivo PHP.
+    Servicios locales: Confirma que el servidor local esté ejecutándose correctamente.
+    Errores de sintaxis: Verifica el código buscando errores de tipografía o sintaxis.
+
+Este proceso de interacción entre HTML y PHP es solo el comienzo de lo que puedes conseguir con estas tecnologías. Con cada nueva habilidad, avanzas un paso más hacia convertirte en un desarrollador hábil y competente. ¡
+
+
+Comentarios:
+------------
+h2> <?= $author_view -> toString() ?> </h2> <h3>Libros:</h3> <ol> <?php foreach ($author_view -> books as $books): ?> <li> <?= $books -> title ?> </li> <?php endforeach; ?> </ol>
+
+Asi lo hice yo, creo se ve mas ordenado
+
+
+Proceso:
+--------
+
+Tenemos ya el modelos de nuestros autores y nuestros libros, tenemos controladores en web y linea de comandos, ahora trabaharemos en web las vistas con lo que ya tenemos html.
+
+Estas istas no estaran en ningun framework sera una web app donde el click cambiara de estado invocando un controlador o sale del sistema, seran vistas en una clase de concepto de como verlas en php con yii.
+
+Vamos a ver las vistas utilizando php pero no es buena practica php en frontend.
+
+Template de smarty, para avanzar
+
+
+Cada controlador tiene su folder dentro de la carpeta de views
+
+/layouts
+/siste 
+
+No se ha crado la pcarpeta de book, con el controlador de book 
+
+tenemos ahora las vistas author y book en las vistas es decir en una carpeta
+
+comanzando con author, trabajamos con un archivo en php que va a imprimir lo que el controlador mande
+
+En elc ontrolador
+
+Authorcontroller
+
+en actionDetail($serach = null)
+
+De oento
+ public function actionDetail($id){
+        $author = Author::findOne($id);
+        if(empty($author)){
+            Yii::$app->session->setFlash('warning', 'no existe ese autor');
+            return $this->redirect(['author/all']); //listado de todos los autores
+        }
+        return $author->toString();
+    }
+
+se esta devilviendo el string de aauthor to String, cambiando en a impresion web
+return $this->render('detail')
+
+Significa que va a utilizar el archivo detail de la carpeta author para imprimir
+El segundo parametro 
+Se agrega la regla en web.php
+
+
+'author/<id:\d+>' => 'author/detail',
+
+
+Ahora si en la url escribimos:
+
+http://localhost:7000/author/10
+    
+Devuelve lo que escribimos en la vista, 
+
+El segundo parametro de la funcion render es un arreglo, es mandar un arreglo  con la llave y la variable del controlador.
+
+ej.
+
+return $this->render('detail', ['vista_autor' => $author]);
+
+Es todo lo que se necesita, esta variable vista_autor es un objeto modelo de la clase author, es decir en la vista ponemos
+
+http://localhost:7000/author/10
+
+
+    Ian Stewart (1)
+
+Siguiendo con PHP en la vista 
+
+
+<h1><?= $author->toString() ?></h1>
+
+<h2>Libros: </h2>
+<ol>
+<?php foreach($author->books as $book) { ?>
+    <li><?= $book->title?></li>
+
+<?php } ?>
+</ol>
+
+
+
+Esto debe enviar los titulos de los libros de cada autor dado por su id
+http://localhost:7000/author/10
+
+
+Ian Stewart (1)
+Libros:
+
+    Mentes maravillosas: Los matemáticos que cambiaron el mundo
+
+
+http://localhost:7000/author/13
+
+Jon Krakauer (2)
+Libros:
+
+    Into the Wild
+    Into Thin Air: A Personal Account of the Mt. Everest Disaster
+
+
+
+Es uan vista para el detalle de libro y una lista y la manera de ligarlos con una url, para eso tenemos
+
+Teghresando a la vista
+<?php
+use yii\helpers\Html;
+
+?>
+
+<h1><?= $author->toString() ?></h1>
+
+<h2>Libros: </h2>
+<ol>
+<?php foreach($author->books as $book) { ?>
+    <li><?= Html::a($book->title) ?></li>
+
+<?php } ?>
+</ol>
+
+
+
+
+Si recargams
+
+    <li><?= Html::a($book->title, 'http://google.com') ?></li>
+
+    la liga de cada autor nos llevaria a google
+
+Podemos ahora escribir
+
+<li><?= Html::a($book->title, ['book/detail','id' => $book->id]) ?></li>
+
+http://localhost:7000/author/88
+
+El link envia a 
+
+http://localhost:7000/book/117
+
+
+Lo que taer es el book / 117
+
+(117) La Esposa joven - Alessandro Baricco
+
+el detalle solo se eimpriie un string desde el controlador sin vista
+
+Para acelerar se puede hacer uso de un template que se llama smarty.
+
+
+
+
+
+
+
