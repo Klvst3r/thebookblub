@@ -1,7 +1,16 @@
 create database if not exists thebookclub;
 use thebookclub;
 
-create table if not exists users ();
+create table if not exists users (
+  user_id integer unsigned primary key auto_increment,
+  username varchar(100) unique,
+  password varchar(500),
+  auth_key varchar (200),
+  access_token varchar(200),
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 create table if not exists books (
   book_id integer unsigned primary key auto_increment,

@@ -1,0 +1,358 @@
+Creación y Gestión de Usuarios en Aplicaciones Web Seguras
+
+Resumen:
+--------
+
+Resumen
+¿Cómo implementar una tabla de usuarios en una aplicación?
+
+Los conceptos básicos son esenciales en el desarrollo web, pero nada se compara con llevarlos a la práctica. En esta guía, exploraremos cómo implementar una tabla de usuarios en tu aplicación, garantizando un flujo seguro y eficiente para la autenticación. ¡Vamos a ello!
+¿Qué debe incluir una tabla de usuarios?
+
+Para comenzar, es crucial establecer qué elementos son necesarios en tu tabla de usuarios. Aquí una lista con los atributos clave:
+
+    userID: Un identificador único y numérico para cada usuario, que puede ser auto incrementable.
+    username: un VARCHAR con un límite de caracteres, generalmente 100, asegurando que sea único.
+    password: Aunque inicialmente puede ser un VARCHAR, es ideal almacenarlo ofuscado por seguridad.
+    auth key y access token: Usados para distintas formas de autenticación, especialmente en APIs.
+    created_at y modified_at: Para mantener un registro de creación y actualización de los usuarios.
+
+Este set de atributos básicos sentará las bases para un autentificación eficiente en tu aplicación.
+¿Cómo construir la tabla de usuarios?
+
+Una vez claro qué debe incluir nuestra tabla, pasemos a la construcción en la base de datos:
+
+CREATE TABLE IF NOT EXISTS users (
+  userID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(500) NOT NULL,
+  auth_key VARCHAR(200),
+  access_token VARCHAR(200),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+¿Cómo conectar nuestra aplicación con la base de datos?
+
+Con nuestra tabla lista, integramos la lógica de negocio en nuestra aplicación. Aquí resumimos los pasos esenciales:
+
+    Acceso a la base de datos: Asegúrate de tener un modelo de usuario que extienda de ActiveRecord.
+
+    Validación de usuarios: Implementa métodos para validar la información del usuario.
+
+    public static function findIdentity($id)
+    {
+        return self::findOne(['userID' => $id]);
+    }
+
+    Registro y autenticación: Ahora, ajustamos las funciones para operar sobre la base de datos en lugar de listas estáticas.
+
+    public static function findByUsername($username)
+    {
+        return self::findOne(['username' => $username]);
+    }
+
+    public function validatePassword($password)
+    {
+        return $this->password === md5($password . $this->username . $_ENV['SALT']);
+    }
+
+¿Cómo asegurar las contraseñas de los usuarios?
+
+Uno de los aspectos críticos es gestionar las contraseñas de forma segura. La práctica común y segura es ofuscar las contraseñas antes de almacenarlas.
+
+    Ofuscación de contraseñas: Vamos a implementar una función para asegurar mayor seguridad.
+
+    public function ofuscatePassword($password)
+    {
+        return md5(sprintf('%s.%s.%s', $password, $this->username, getenv('SALT')));
+    }
+
+    Almacenamiento seguro: Utiliza esta función cada vez que registres o actualices una contraseña.
+
+    $this->password = $this->ofuscatePassword($inputPassword);
+
+Con estos pasos, garantizamos que las contraseñas almacenadas en la base de datos no estén en texto plano.
+Reflexiones finales
+
+Llevar a cabo una implementación práctica no solo solidifica nuestro entendimiento teórico, sino que también mejora nuestras habilidades como desarrolladores. Cada detalle, desde el diseño de la tabla hasta la seguridad de las contraseñas, juega un rol vital. 
+
+
+Referencias:
+------------
+https://www.yiiframework.com/doc/api/2.0/yii-web-user
+
+
+
+Comentarios:
+------------
+
+create table if not exists users (
+
+user_id integer unsigned primary key auto_increment,
+
+username varchar(100) not null unique,
+
+password varchar(500) not null,
+
+auth_key varchar(200),
+
+access_token varchar(200),
+
+created_at timestamp not null default current_timestamp,
+
+modified_at timestamp not null default current_timestamp
+
+on update current_timestamp
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+
+Proceso:
+--------
+
+Para profundizar en el uso de los conptos aprendidos es creando un apalicación, para esto cuando se creo el esquema de la Bd, se salto el esquema de usuarios por que se vera ahora.
+
+una aplicación, empieza a partir de tener un usuario y unvisitante, cuando se puede hacer esa disticinción generamos generalmente tenemos como empezar a vanzar para temas de atenticación-
+
+
+La clase de usuario viene dentro la instalación basicaa
+
+Models/User.php
+
+En la aplicación Login funciona, como admin admin/admin o demo/demo
+
+Nos podemos logear y se esta logeado, la sesion sabe nuestro nombre, sabe caracteristicas propias, es muy sencillo. 
+
+Ahora apartir de IdentitiInterface podemos guardar en la Bd y lo queq queremos de los usuarios.
+
+Para modificar el pass podremos verificar
+
+app\models\User::$users.
+
+En el modelo user existe la variable estatica que tiene dos usuarios
+ private static $users = [
+        '100' => [
+            'id' => '100',
+            'username' => 'admin',
+            'password' => 'admin',
+            'authKey' => 'test100key',
+            'accessToken' => '100-token',
+        ],
+        '101' => [
+            'id' => '101',
+            'username' => 'demo',
+            'password' => 'demo',
+            'authKey' => 'test101key',
+            'accessToken' => '101-token',
+        ],
+    ];
+
+Tienen los campos, deja claro lo que debe existir en el concepto tabla de usuario.
+abriendo el esquema
+
+app\schema\Schema.sql
+
+create table if not exists users ();
+
+Esta vacia
+
+Creamos el esquema
+
+create table if not exists users (
+  user_id integer unsigned primary key auto_increment,
+  username varchar(100) unique,
+  password varchar(500),
+  auth_key varchar (200),
+  access_token varchar(200),
+  created_at timestamp not null default current_timestamp,
+  modified_at timestamp not null default current_timestamp
+    on update current_timestamp
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+Las dos ultimas variables son para temas avanzados para apis y autentificación de usuarios.
+
+Veremosusername y password.
+
+Tenemosla tabla de usuarios
+
+
+Copiamos y vamos a la Bd
+
+show tables;
++-----------------------+
+| Tables_in_thebookclub |
++-----------------------+
+| authors               |
+| books                 |
+| clubs                 |
++-----------------------+
+
+No tenemos aun users;
+
+Pegamos el esquema
+
+Teniendo esta tabla podremos ahora ir al modelo de usuarios
+ya no necesitamos dar de alta las variables una por una, podemos hacer mas segura la aplicación
+
+El arreglo de usuarios estara en la bd, esto debera estar por fuera
+
+Tenemos apis
+
+coemntamos lo primero, comentando la dificionoin inicial, ahora veremos si hay geter y setters.
+
+La funcion
+
+   public static function findIdentity($id)
+    {
+        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+    }
+
+Veremos que hacia referencia al usuario y poder cambiarlo y haga referencia a la bd
+
+Mucho d elo que hay referenciado al arrglo anterior podemos reutilizar el modelo del active record para traer es ainformación, para eso nos fijaremos, que no extiende a active record, exteiende a baseobject que es el objeto mas basico que tiene yii, que de el se heredan muchas cosas, a su vexz el modelo extiendea active record, hasta abajo, entonces es una cadena, intentaremos hacerlo de una manera mucho mas facil modificamos.
+
+
+Al implementar una interfaz con Active record
+
+
+class User extends ActiveRecord implements \yii\web\IdentityInterface
+
+debemos d eimportar del namespace yii\db\ActiveRecord;
+
+\yii\web\IdentityInterface
+
+
+Extiende o implementa esta interfaz, que operara sobre logins, en a funcion findIdentity
+
+Actualmente  si existe del arreglo el userid regresa eso como un  objeto estatico y si no lo regresa a null
+
+Podemos decirle que estamos buscando unusuario conectado a la base de datos con un objeto self
+a traves de su id 
+si esta vacio $user returna null, 
+
+
+No es necesario asumir las cosas, y puede ser o no ser, por ello es mas fino y elegante util y entendible ser explicitos en lo que queremos hacer, si empty $user, regresame el null que estapidiendo desde aca.
+
+
+Is no regresamoe el usuario.
+
+
+Modelo User.php
+--------------
+
+Quedando entonces:
+
+
+ public static function findIdentity($id)
+    {
+        //return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        $user = self::findOne($id);
+        if(empty($user)){
+            return null;
+        }
+        return $user;
+    }
+
+
+Continuamos:
+
+con 
+
+public static function findIdentityByAccessToken($token, $type = null)
+
+Esto esta llamando al token y untype, entoncees, lo que hace esta funcion es iterar sobre el arreglo si lo encuentra  te devuelve el usuario
+
+
+Esto se puede hacer de la siguiente manera
+
+
+Vamos a estar buscando un suaurio
+
+$user cno findOne que tiene una gran ventaja que s epuede poner un where enyre arreglo de condiciones
+
+Indicando que el token sea igual al token y si esta vacio el usuario devuelve nulo en caso contrario devuelve el usuario
+
+
+  public static function findIdentityByAccessToken($token, $type = null)
+    {
+         $user = self::findOne(['token' => $token]);
+
+         if(empty($user)){
+            return null;
+         }
+         return $user;
+    }
+
+
+
+public static function findByUsername($username)
+
+Regreso el usuario y si no regreso el null
+    public static function findByUsername($username)
+    {
+        
+        $user = self::find()->where(['username' => $username])->one();
+        if(empty($user)){
+            return null;
+        }
+        return $user;
+    }
+
+
+PAra el ultimo necesitamos fijarnos bien proque nuestro usuario    
+
+En los setters y getters
+
+ public function getId()
+    {
+             return $this->user_id;
+    }
+
+
+      */
+    public function getAuthKey()
+    {
+        return $this->auth_key;
+    }
+   
+
+public function validateAuthKey($authKey)
+    {
+        return $this->authKey === $authKey;
+    }
+
+El ultimo
+
+Aca los passwords estan en claro, pero vamos a crear una funcion para ofuscar el pasword y guardarlos ofuscado.
+
+Para comparar el password si es valido o no no sera necesario desofuscar, no desencriptar pero el que vviene en claro, lo vamos a ofuscar y compararlo con el que esta almacenado en la bd.
+
+Es una forma estandar profesional segura de hacerlo
+
+El password sera una cdaena dificil por que el primero sera el password, el nombre de usuario y salts
+
+si vamos a la aplicación e imprimimos 
+
+echo $salt;
+
+Es un sctring no publico que esta para todo el sistema con el que esconde cosas 
+
+
+
+
+
+   public function validatePassword($password)
+    {
+        //return $this->password === $password;
+        return $this->password === $this->ofuscatePassword($password);
+    }
+
+    public function ofuscatePassword($password) {
+
+        return md5(sprintf('%s-%s-%s', $password, $this->username, getenv('salt')));
+    }
+
+
+con esot ya es mas seguro la contraseña y no estar en claro sino ofiscada

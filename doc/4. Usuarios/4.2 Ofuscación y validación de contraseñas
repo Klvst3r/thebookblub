@@ -1,0 +1,602 @@
+Ofuscación y Validación de Contraseñas en Yii Framework
+
+
+Resumen
+-------
+
+Resumen
+¿Cómo asegurar contraseñas en Yii?
+
+El marco de trabajo Yii ofrece múltiples herramientas para manejar de forma segura la información de usuario, especialmente las contraseñas. A través de las funciones before y after en cada paso del modelo, podemos realizar un tratamiento específico de los datos durante su procesamiento. Un ejemplo común es el manejo de contraseñas, donde debemos asegurarnos de que estén ofuscadas antes de guardarlas en la base de datos.
+¿Qué son los métodos before save y after save?
+
+Los métodos before save y after save pertenecen a la clase modelo de Yii y nos permiten ejecutar código antes y después de guardar los datos. Estos métodos facilitan el seguimiento de la información y permiten ejecutar tratamientos especiales, como ofuscar contraseñas.
+
+Para ofuscar contraseñas, primero validamos que contengan los caracteres requeridos, y antes de salvarlos, transformamos el texto claro (por ejemplo, "patito 123") aplicando una función de hash como MD5 combinada con otros parámetros como el nombre de usuario y una "sal" del sistema.
+Implementación de before save para contraseñas
+
+Aquí hay un ejemplo de cómo implementar el método before save para manejar contraseñas:
+
+public function beforeSave($insert)
+{
+    if (parent::beforeSave($insert)) {
+        if ($insert) { // Nuevo usuario
+            $this->password = $this->ofuscatePassword($this->password);
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
+protected function ofuscatePassword($password)
+{
+    $salt = getenv("SALT");
+    if (empty($salt)) {
+        throw new Exception("noSalt");
+    }
+    return md5(sprintf('%s%s%s', $password, $this->username, $salt));
+}
+
+Ejecución y verificación desde línea de comandos
+
+Para probar el manejo de usuarios y contraseñas, utilizamos un controlador en línea de comandos que nos permite crear y verificar usuarios. Así se logra que las contraseñas se almacenen de manera segura y se puedan validar correctamente:
+
+public function actionNew($username, $password)
+{
+    $user = new User();
+    $user->username = $username;
+    $user->password = $password;
+    if ($user->save()) {
+        printf("New user OK, ID: %d\n", $user->id);
+    } else {
+        printf("Problema creando usuario.\n");
+    }
+}
+
+public function actionCheck($username, $password)
+{
+    $user = User::findOne(['username' => $username]);
+    if (!empty($user) && $user->password === $user->ofuscatePassword($password)) {
+        printf("Login válido\n");
+    } else {
+        printf("Nel\n");
+    }
+}
+
+Para verificar que la funcionalidad está implementada correctamente, se pueden ejecutar comandos como:
+
+    Crear un nuevo usuario:
+
+    php yii user/new "username" "password"
+
+    Comprobar el usuario:
+
+    php yii user/check "username" "password"
+
+Beneficios de usar un sistema de hashing
+
+El uso de un sistema de hashing para contraseñas ofrece grandes beneficios en términos de seguridad:
+
+    Protección de datos sensibles: Las contraseñas se almacenan como hashes, no como texto plano. Esto dificulta el acceso a las contraseñas originales por parte de intrusos.
+
+    Mayor seguridad con "sal": La "sal" añade un extra a la seguridad, haciendo que incluso contraseñas idénticas no generen el mismo hash en diferentes cuentas de usuario.
+
+    Integridad en las validaciones: Permite realizar validaciones confiables del lado del servidor asegurando que las credenciales coincidan correctamente con el hash almacenado.
+
+Este enfoque otorga un nivel adicional de seguridad en el manejo de usuarios y contraseñas dentro de un sistema Yii, protegiendo efectivamente la información crítica.
+
+
+Referencias:
+------------
+https://www.yiiframework.com/doc/api/2.0/yii-base-model#behaviors()-detail/
+
+
+Comentarios:
+------------
+
+
+Maestro: ¿Cómo debo vincular el archivo: variables_local.sh que lo tengo en el directorio: local, ya que Yii me marca error y no me reconoce ninguna variable de entorno.
+
+Para que todo me funcione como se indica en este video 22, es necesario que dé alta manualmente, cada variable de entorno al sistema de windows que tengo.
+
+Deseo resolver esta situación para continuar con este Curso tan excelente. Gracias.
+Compan;ero estudiante, por favor chekar nuevamente la clase 6. (Configuración de variables de entorno) Alli en los comentarios encuentras la solucion a como cargar las variables de entorno en un ambiente de desarrollo windows. 
+
+
+Proceso:
+--------
+
+Se esta cambiando completamente el origen de datos, antes de probar se vera:
+
+Cuando una persona indroduce su usuario y pass, el password, ya se manda todo el paquete de información a la maquina, y ese password queda en claro, en ningun momento, se esta pidicendo que se ofisque para guardarlo. simplemete se hace el save y directamente a la bd.
+
+Yii ofirece los before y after en cada paso del modelo, entre que el usuario manda toda la inforamción para crearse el modelo, before validate, after validate, 
+
+Son funciones que vienen desde la clase modelo, y nos ayudan a darle un seguimiento a esta información y  si queremos hacer alguntratamiento puntual ejecutarlo.
+
+En este casoparticular, ara buscar el password necesitamos ofiscarlo, despues de validar, no se esta refiriendo a que el password se al correcto si no que el password tenga la cantidad de caracteres y demas, necesitamos que antes de salvarse cambie, del texto claro, 
+
+pass123 a que pase pro esta funcion de ofiscatedPassword
+
+Que es el md5 del sprinft de las 3 variables que se pusieron, el password, el usarname y la salt que esta en el sistema.
+
+Vamos a hacer antes una cosa mas, 
+
+
+
+
+
+    public function ofuscatePassword($password) {
+
+        if(empty(getenv('salt'))){
+            throw new Exception('no salt');
+        }
+        return md5(sprintf('%s-%s-%s', $password, $this->username, getenv('salt')));
+    }
+
+Para probar creamos
+Si insert es true significa que se esta guardando por primera vez en la bd, si es false significa que esta actualizando algo que ya existia.
+
+
+Este tipo de funciones before, validate, before save, after save, todas devuelven un booleano y es importante que tengamos en cnuenta esto.
+
+Hagamos lo que hagamos, debemos a tomar en cnuenta el parent, 
+
+
+public function beforeSave($insert){
+         return parent::beforeSave($insert);
+    }
+
+Esta funcion no hace albsolutamente nada, pero es correcta significa que yo ejecuto todo y despues si yo voy a mandar un true, necesito, tomar en cuenta al padre que es el modelo como tal.
+
+Por eso si.
+
+ public function beforeSave($insert){
+        if($insert == true){    //significa que esta haciendo la primera vez un usuario
+            $this->password = $this->ofuscatePassword($this->password);
+        }
+         return parent::beforeSave($insert);
+    }
+
+
+Ahora vamos a hacer un usuario desde la linea de comandos    
+
+ 
+
+en el archivo
+commands/UserControler.php
+
+
+<?php
+
+namespace app\commands;
+
+use yii\console\Controller;
+use yii\console\ExitCode;
+
+use app\models\User;
+
+
+class UserController extends Controller {
+
+    public function actionNew($username, $password) {
+
+    }
+
+    public function checkPassword($username, $password) {
+
+    }
+}
+
+
+Empezando a crear un usuario 
+
+
+public function actionNew($username, $password) {
+        $user = new User;
+        $user->username = $username;
+        $user->password = $password;
+        if($user->save()){ //Si logra salvar
+            printf("new user ok, id: %d\n", $username, $password);
+        }else{
+            printf("Problama creando usuario \n");
+        }
+
+        return ExitCode::OK;
+
+
+    }
+
+Ahora en la terminal    
+
+Si escribimos yii debemos ya tener user
+
+Ejecutamos $ php yii veremos que ya tendremos y podremos ejecutar
+
+    - user                         
+    user/new
+
+Entonces
+
+    $ php yii user/new klvst3r desarrollo
+
+
+Antes de dar enter para crear el usuario veremos la bd en la pestaña UserControler
+
+select * from users;
+
+ejecutamos ahora el comando
+
+
+Al crear el usuario genero un error
+
+php yii user/new klvst3r desarrollo
+Exception 'Exception' with message 'no salt'
+
+in /home/klvst3r/dev/yii/thebookblub/models/User.php:140
+
+Stack trace:
+#0 /home/klvst3r/dev/yii/thebookblub/models/User.php(147): app\models\User->ofuscatePassword()
+#1 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/ActiveRecord.php(600): app\models\User->beforeSave()
+#2 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/ActiveRecord.php(570): yii\db\ActiveRecord->insertInternal()
+#3 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/BaseActiveRecord.php(688): yii\db\ActiveRecord->insert()
+#4 /home/klvst3r/dev/yii/thebookblub/commands/UserController.php(17): yii\db\BaseActiveRecord->save()
+#5 [internal function]: app\commands\UserController->actionNew()
+#6 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/base/InlineAction.php(57): call_user_func_array()
+#7 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/base/Controller.php(178): yii\base\InlineAction->runWithParams()
+#8 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/console/Controller.php(180): yii\base\Controller->runAction()
+#9 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/base/Module.php(552): yii\console\Controller->runAction()
+#10 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/console/Application.php(180): yii\base\Module->runAction()
+#11 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/console/Application.php(147): yii\console\Application->runAction()
+#12 /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/base/Application.php(384): yii\console\Application->handleRequest()
+#13 /home/klvst3r/dev/yii/thebookblub/yii(20): yii\base\Application->run()
+#14 {main}
+
+
+Esto ocurre porque la función ofuscatePassword() intenta acceder a una variable de entorno llamada salt, pero esta no está definida.
+
+Solución
+
+Debemos definir la variable de entorno salt. Aquí dos formas para resolverlo:
+
+1. Definir la variable salt en el entorno (recomendado)
+
+Agrega esta línea en el archivo .env en la raíz de tu proyecto (si no existe, créalo):
+
+SALT=mi-sal_secreta
+
+Luego, asegúrate de que Yii esté cargando las variables de entorno. En el archivo config/web.php y config/console.php, debes tener algo así:
+
+// config/console.php
+
+// Al principio del archivo
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+    Si no estás usando vlucas/phpdotenv, instálalo con:
+
+    $ composer require vlucas/phpdotenv
+
+
+Opción 2 (rápida): Definir salt directamente en el entorno de consola temporalmente
+
+Puedes pasarla directamente al ejecutar el comando:
+
+SALT=mi-sal_secreta php yii user/new klvst3r desarrollo
+
+Esto define SALT para ese solo comando. Pero no es persistente ni seguro para producción.
+
+
+
+Opción 3: Definir un valor por defecto en el código (no recomendado para producción)
+
+Puedes modificar el método ofuscatePassword() así:
+
+public function ofuscatePassword($password) {
+    $salt = getenv('salt') ?: 'default_salt';
+    return md5(sprintf('%s-%s-%s', $password, $this->username, $salt));
+}
+
+Esta opción evita el error, pero usar un salt por defecto puede comprometer la seguridad.    
+
+
+Esta tercera opcion funciono y ahora debemos deterr nuestro usuario en la bd
+
+Creamos nuestro usuario
+    php yii user/new klvst3r desarrollo
+
+
+
+Verificamos en la bd
+
+select * from users;
++---------+----------+----------------------------------+----------+--------------+---------------------+---------------------+
+| user_id | username | password                         | auth_key | access_token | created_at          | modified_at         |
++---------+----------+----------------------------------+----------+--------------+---------------------+---------------------+
+|       1 | klvst3r  | fa0be8b7f602bbd62f22585c5ffbe377 | NULL     | NULL         | 2025-06-12 12:07:03 | 2025-06-12 12:07:03 |
++---------+----------+----------------------------------+----------+--------------+---------------------+---------------------+
+1 row in set (0.001 sec)
+
+
+select * from users\G;
+*************************** 1. row ***************************
+     user_id: 1
+    username: klvst3r
+    password: fa0be8b7f602bbd62f22585c5ffbe377
+    auth_key: NULL
+access_token: NULL
+  created_at: 2025-06-12 12:07:03
+ modified_at: 2025-06-12 12:07:03
+1 row in set (0.000 sec)
+
+
+Tomando en cosideración que tenemos variables de entorno configuradas en 
+/local/variables_local.sh
+
+/local/variables_local.fish
+
+Recomendación profesional para producción
+--------------------------------------
+
+
+1. Mantén variables en archivos separados del repositorio
+
+Tu enfoque actual es correcto en términos de mantener las variables en archivos como variables_local.sh y variables_local.fish. Solo asegúrate de que estos archivos:
+
+    No estén versionados en Git: agrégalos a tu .gitignore:
+
+/local/variables_local.sh
+/local/variables_local.fish
+
+Estén cargados al iniciar el entorno, por ejemplo, en tu .bashrc, .zshrc o .config/fish/config.fish:
+
+Para Bash/Zsh:
+
+source /ruta/a/proyecto/local/variables_local.sh
+
+Para Fish:
+
+    source /ruta/a/proyecto/local/variables_local.fish
+
+
+2. Elimina el valor por defecto en producción
+
+Una vez que tengas bien definidas las variables en tu entorno, puedes regresar al método original en tu modelo User.php para evitar valores por defecto inseguros:
+
+public function ofuscatePassword($password) {
+    $salt = getenv('salt');
+    if (empty($salt)) {
+        throw new Exception('no salt');
+    }
+    return md5(sprintf('%s-%s-%s', $password, $this->username, $salt));
+}
+
+Así fuerzas que la variable exista, y evitas caer en una salt por defecto.
+
+3. Producción: usar variables de entorno del sistema o archivo .env
+
+En servidores de producción:
+
+    Puedes definir las variables de entorno en el entorno del sistema (/etc/environment, archivo .bash_profile, supervisor.conf, systemd u otro medio).
+
+    O puedes utilizar la librería vlucas/phpdotenv para cargar desde un archivo .env de forma automática:
+
+# .env
+salt=uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+Con código en config/console.php o config/web.php:
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+Conclusión: combinación recomendada
+
+Entorno	Método recomendado
+
+Desarrollo	variables_local.sh o .env cargado desde .bashrc o phpdotenv
+Producción	Variables de entorno del sistema o .env (nunca en código)
+Código fuente	Nunca incluir valores de salt ni contraseñas
+
+
+
+una de las recomendaciones es utilizar la libreria vlucas/phpdotenv
+
+
+Ya que hemos instalado la librería vlucas/phpdotenv, estamos considero en el camino correcto. A continuación veremos paso a paso cómo crear tu archivo .env, cómo cargarlo correctamente en Yii2 y cómo usar la variable salt de manera segura en tu modelo User.
+
+
+Paso 1: Crear el archivo .env
+
+En la raíz del proyecto (donde están composer.json y la carpeta vendor), crear un archivo .env con este contenido:
+
+# .env
+salt=uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+    ⚠️ No subir este archivo al repositorio. Agregar esto al archivo .gitignore:
+
+
+.env
+
+
+Paso 2: Cargar las variables del .env en Yii2
+
+Debemos cargar el .env antes de que cualquier código que lo utilice se ejecute. Lo más recomendable es hacerlo en index.php (para web) o yii (para consola).
+
+
+web/index.php (para peticiones web)
+
+Debemos Agregar esto antes de crear la aplicación:
+
+require __DIR__ . '/../vendor/autoload.php';
+
+// Cargar variables del archivo .env
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
+
+$ php yii (para comandos de consola)
+
+Agrega esto al inicio del archivo yii (ubicado en raiz del proyecto):
+
+require __DIR__ . '/vendor/autoload.php';
+
+// Cargar .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
+
+Paso 3: Usar la variable salt en tu modelo User
+
+Ahora que las variables están cargadas, puedes utilizar getenv('salt') sin valores por defecto:
+
+public function ofuscatePassword($password) {
+    $salt = getenv('salt');
+    if (empty($salt)) {
+        throw new \Exception('No salt defined in environment');
+    }
+
+    return md5(sprintf('%s-%s-%s', $password, $this->username, $salt));
+}
+
+
+
+Verificar que funciona
+
+Puedes hacer una prueba rápida con un controlador o en una vista:
+
+echo getenv('salt');  // Debería imprimir: uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+
+
+
+
+Bonus: Validación de entorno
+
+Para evitar errores en producción por falta del .env, puedes usar:
+
+if (!file_exists(__DIR__ . '/../.env')) {
+    throw new \Exception('.env file missing');
+}
+
+
+Para crrar una nueva clave salt aleatoria desde la terminal tenemos algunas opciones.
+
+Opción 1: Generar una nueva salt manualmente (desde consola) y pegarla en .env
+
+Ejecuta este comando en tu terminal:
+
+head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32
+
+Este comando generará una cadena aleatoria de 32 caracteres, por ejemplo:
+
+A9fX2mZ7qLkT4vGhR8pJcBsDnYwE0uIq
+
+Luego simplemente abre tu archivo .env y agrega:
+
+salt=A9fX2mZ7qLkT4vGhR8pJcBsDnYwE0uIq
+
+Opción 2: Crear o sobrescribir la variable salt automáticamente en .env con un solo comando
+
+Este comando generará un nuevo valor aleatorio y lo escribirá directamente en el archivo .env. Si ya existe, lo sobrescribe:
+
+echo "salt=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)" >> .env
+
+    ⚠️ Esto agrega una nueva línea al final, lo cual puede causar duplicados si ya existe salt. Para evitar duplicados, usa esta versión que reemplaza o crea la línea correctamente:
+
+salt_value=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
+if grep -q "^salt=" .env; then
+    sed -i "s/^salt=.*/salt=$salt_value/" .env
+else
+    echo "salt=$salt_value" >> .env
+fi
+
+    En macOS, usa sed -i '' en lugar de sed -i.
+
+Confirmar
+
+Una vez agregado el valor, puedes verificar que esté cargado en PHP con:
+
+echo getenv('salt');
+
+
+
+
+
+# Carga de variables
+Aunque ejecutemos el archivo de fish existe una confusión.
+
+
+Lo que ocurre es una confusión entre el entorno del shell (Fish) y el entorno de ejecución del servidor PHP (Apache, PHP-FPM, Laravel, CLI, etc.).
+
+Aunque ejecutemos:
+
+    source variables_local.fish
+
+Y eso defina variables en nuestro terminal Fish, esas variables no estarán disponibles automáticamente para el servidor PHP (ni vía getenv()), a menos que se exporten al entorno global del proceso que ejecuta PHP. Que es lo que queremos realmente
+
+
+¿Qué ocurre realmente?
+
+Cuando haces:
+
+set -x salt uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+-x significa export, pero solo afectamos a procesos hijos del terminal actual. Por ejemplo, si ejecutamos un script PHP desde la terminal como:
+
+    php test.php
+
+Sí estará disponible. Pero si estás usando Laravel con php artisan serve o estás en un servidor Apache/Nginx, PHP no tiene acceso a esa variable porque no es parte de su entorno de ejecución.
+
+Que es lo que nos esta ocurriendo atualmente
+
+
+Recomendaciones
+----
+
+🔹 Para entorno de desarrollo (usando .env con vlucas/phpdotenv)
+
+    En la raíz de tu proyecto Laravel o PHP, crea un archivo .env:
+
+salt=uAh2hbHUPao10OyQsTz2vYym0fgmea!K
+
+    En nuestrp script de arranque (por ejemplo, index.php o el entry point de Laravel), asegúrate de cargar las variables .env con Dotenv:
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+    Ahora puedes acceder a la variable con:
+
+getenv('salt'); // o
+$_ENV['salt'];  // también suele estar disponible
+
+    ✔️ Esto es lo más seguro y recomendado para desarrollo y producción.
+
+🔹 Para uso temporal desde terminal
+
+Si quieres ejecutar un script PHP desde terminal y pasarle la variable directamente sin .env:
+
+env salt=MiClaveSegura php script.php
+
+Dentro de script.php puedes usar:
+
+echo getenv('salt');
+
+🔹 Verifica que tu entorno PHP tenga la variable cargada
+
+Crea un script test.php:
+
+<?php
+echo 'Salt: ' . getenv('salt');
+
+Y ejecútalo:
+
+php test.php
+
+O si es en el navegador (servidor local), asegúrate de tener .env y Dotenv::load() funcionando.
+
