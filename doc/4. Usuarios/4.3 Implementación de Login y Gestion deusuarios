@@ -1,0 +1,63 @@
+Implementación de Login y Gestión de Usuarios en Yii2
+
+Resumen:
+-------
+
+Resumen
+¿Cómo modificar la clase User en Yii?
+
+La clase User que viene con la instalación de Yii es crucial, pero a menudo necesitamos hacer ajustes para personalizar su comportamiento. Las modificaciones que realices en esta clase afectarán, entre otras cosas, a la autenticación de usuarios, permitiendo personalizar el modo en que los usuarios se loguean en la aplicación.
+
+    Username y Password: En este ejemplo se ilustró cómo establecer un Username y Password básicos para loguear. Siendo el Username "Beko" y el Password "Patito123".
+
+    Modelo de usuario: Es importante que cualquier referencia desde este modelo, que verifica contraseñas o implementa logins de terceros, funcione adecuadamente. Al modificar el modelo, conseguimos un sistema de login funcional sin realizar pasos adicionales.
+
+    Utilización de LoginForm: Aunque el LoginForm no es un ActiveRecord, permite guardar datos esencialmente en el momento del login, como Username, Password y la opción Remember Me. Este último determina si el mismo usuario permanece logueado.
+
+¿Cómo funciona el proceso de login en Yii?
+
+El proceso de login es la columna vertebral de la autenticación en aplicaciones. Aquí te explicamos cómo se gestiona este proceso en Yii usando el SiteController y el LoginForm.
+
+    Controlador de sitio: El login se orquesta desde el SiteController usando ActionLogin, el cual crea un LoginForm para trasladar la información desde una vista al controlador.
+
+    Validación de contraseñas: En la lógica de negocio del LoginForm se valida la contraseña usando el método ValidatePassword. Si hay un error, el sistema responderá con mensajes aclaratorios para el usuario.
+
+    Manejo de sesiones: Una vez logueado, el usuario está presente en la sesión y la app, lo que permite una integración continua en la experiencia del usuario.
+
+¿Cómo implementar cambios en las vistas?
+
+Las vistas en Yii se gestionan a través de la carpeta views. Cambiar cómo se presenta la información al usuario es sencillo y potente.
+
+    Cambio de vistas: Desde el SiteController, podemos determinar cuál vista renderear. Por ejemplo, se puede optar por usar index.tpl en vez de index.php, permitiendo significativos cambios visuales con solo cambiar una referencia.
+
+    Smarty y variables del sistema: Usar Smarty permite evaluar condiciones y mostrar contenido dinámico. Por ejemplo, se puede implementar if para verificar si un usuario es invitado o ya está logueado, personalizando así los saludos mostrados al usuario.
+
+    if ($guest) {
+        echo "Hola, invitado.";
+    } else {
+        echo "Hola, " . $username;
+    }
+
+    Contadores y datos en vistas: La integración de contadores, como el número total de libros en un sistema, aunque se despliega en la vista, debe ser manejada por el modelo o controlador, asegurando la lógica se mantiene limpia.
+
+    // En el controlador
+    $book_count = Book::find()->count();
+
+    // En la vista
+    echo "Hay $book_count libros en el sistema.";
+
+La habilidad para modificar modelos, controladores y vistas en conjunto te permite personalizar cómo los usuarios interactúan con tu aplicación. Al aprovechar estas herramientas, podrás ofrecer experiencias adaptadas y eficientes. 
+
+
+Referencias:
+------------
+https://www.yiiframework.com/extension/yiisoft/yii2-app-basic/doc/api/2.0/app-models-loginform
+
+
+Comentarios:
+------------
+
+
+Procedimiento:
+--------------
+

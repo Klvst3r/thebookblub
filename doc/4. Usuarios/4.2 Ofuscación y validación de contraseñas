@@ -600,3 +600,33 @@ php test.php
 
 O si es en el navegador (servidor local), asegúrate de tener .env y Dotenv::load() funcionando.
 
+Con este  sistema de encruiptacion de datos, aunque el password y el usurio sea el mismo, el hash es diferente, 
+
+ahora vamos a crear una accion en el controlador para entender, todo el sistema de seguridad visto desde adentro.
+
+
+ public function actionCheck($username, $password) {
+        $user = User::findOne(['username' => $username]);
+        if(!empty($user)){
+            if($user->password === $user->ofuscatePassword($password)){
+                printf("Login valido \n");
+                return ExitCode::OK;
+            }
+        }
+        printf("Nel \n");
+        return ExitCode::OK;
+    }
+}
+
+Con esto buscamos un usuario que corresponda uno a uno, si el usuario, ya existe, valida que el password guardado, sea exatamente igual ofuscar el password que esta mandando, si es correcto imprime login valido si no es correcto, en cualtuiqer otro caso dime que no.
+
+Al momento de la verdad, en la terminal 
+
+    $ php yii user/check klvst3r desarrollo
+
+php yii user/check klvst3r desarrollo
+Login valido 
+
+
+Con esto tenemos un sistema de tras de bambalinas que es en el modelo de usurio que funciona y funciona bien, puedo crear un usuario de la manera mas sencilla con la linea de comandos, posterior a ello vamos a crear usuarios nuevos pero el sistema para validar que el usuario y el password correponde es corrcto.
+

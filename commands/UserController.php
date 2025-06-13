@@ -25,7 +25,15 @@ class UserController extends Controller {
 
     }
 
-    public function checkPassword($username, $password) {
-
+    public function actionCheck($username, $password) {
+        $user = User::findOne(['username' => $username]);
+        if(!empty($user)){
+            if($user->password === $user->ofuscatePassword($password)){
+                printf("Login valido \n");
+                return ExitCode::OK;
+            }
+        }
+        printf("Nel \n");
+        return ExitCode::OK;
     }
 }
