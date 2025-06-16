@@ -630,3 +630,415 @@ Login valido
 
 Con esto tenemos un sistema de tras de bambalinas que es en el modelo de usurio que funciona y funciona bien, puedo crear un usuario de la manera mas sencilla con la linea de comandos, posterior a ello vamos a crear usuarios nuevos pero el sistema para validar que el usuario y el password correponde es corrcto.
 
+
+
+
+
+Nos genera un error que viene de cómo estás utilizando múltiples atributos en la instrucción de Smarty {ActiveForm begin ...}.
+Error:
+
+    too many shorthand attributes
+
+Esto significa que Smarty no puede interpretar correctamente la sintaxis porque estás usando múltiples atributos sin agruparlos apropiadamente.
+Solución: usar with para pasar múltiples parámetros
+
+En lugar de pasar varios parámetros "inline" (como id=, options=, etc.), debes agruparlos usando la sintaxis with.
+
+
+Código corregido del template:
+------------------------------
+
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{ActiveForm begin with=[
+    'id' => 'new-user',
+    'options' => ['method' => 'post']
+] assign="form"}
+
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+{ActiveForm end}
+
+
+
+Smarty no permite pasar múltiples atributos como en PHP directamente (id="..." options=[...] assign="..."), sino que debes agrupar los parámetros en un solo array usando with=[...].
+
+
+Modificamos la plantilla
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{ActiveForm begin with=array(
+    'id' => 'new-user',
+    'options' => array('method' => 'post')
+) assign="form"}
+
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+{ActiveForm end}
+
+Pero nos maneja aun errores.
+
+
+Utilizamos ahora el codigo para el template
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{block ActiveForm}
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+    <div class="form-group">
+        {Html::submitButton('Guardar', array('class' => 'btn btn-primary'))}
+    </div>
+{/block}
+
+Pero marca un error de 
+
+
+ PHP Warning – yii\base\ErrorException
+Undefined array key "form"
+
+
+
+
+ya estamos muy cerca de la solución final. Ese error:
+
+    PHP Warning – yii\base\ErrorException
+    Undefined array key "form"
+
+Significa que dentro del bloque {block ActiveForm}, Smarty no ha creado la variable $form automáticamente. A diferencia de la sintaxis {ActiveForm begin assign="form"}, que sí la asigna, el bloque {block ActiveForm} no crea $form a menos que tú lo captures.
+✅ Solución
+
+Debes capturar la variable $form tú mismo dentro del bloque. Para hacerlo, cambia:
+
+{block ActiveForm}
+
+por:
+
+{block ActiveForm assign="form"}
+
+Esto le indica a Smarty que el objeto ActiveForm debe asignarse a la variable $form, que luego puedes usar para llamar a field().
+✅ Vista new.tpl corregida
+
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{block ActiveForm assign="form"}
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+    <div class="form-group">
+        {Html::submitButton('Guardar', array('class' => 'btn btn-primary'))}
+    </div>
+{/block}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelector('form').id = 'new-user';
+});
+</script>
+
+🧪 Resultado
+
+    Ya no verás el error del array key form.
+
+    Se mostrará correctamente el campo de usuario.
+
+    El formulario tendrá el id="new-user" gracias al JavaScript.
+
+    El botón de envío será funcional.
+
+
+Aun se presenta el error:
+-------------------------
+
+Dado que el error persiste incluso con {block ActiveForm assign="form"}, vamos a aplicar la solución más estable y compatible con Smarty + Yii2: usar begin() y end() del formulario sin asignar a $form, y en su lugar, usar la forma alternativa de imprimir campos directamente.
+
+Paso a paso: cómo hacerlo sin $form
+
+Smarty con yii\smarty\ViewRenderer no siempre puede manejar objetos complejos como $form dentro de las plantillas. Por ello, lo más robusto es construir el formulario en el controlador y pasar los campos ya renderizados a la vista.
+
+
+Opción 1 (recomendada): Renderizar campos en el controlador
+
+En el controlador (UserController.php):
+
+public function actionNew()
+{
+    $user = new User();
+
+    if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+        Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+        return $this->redirect(['site/login']);
+    }
+
+    // Creamos el formulario aquí y renderizamos los campos para pasarlos como strings
+    ob_start();
+    $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+    echo $form->field($user, 'username');
+    echo Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+    \yii\widgets\ActiveForm::end();
+    $formHtml = ob_get_clean();
+
+    return $this->render('new.tpl', [
+        'formHtml' => $formHtml
+    ]);
+}
+
+En tu views/user/new.tpl:
+
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{$formHtml nofilter}
+
+    🔁 nofilter es necesario para que Smarty no escape el HTML del formulario.
+
+✅ Opción 2 (menos limpia): usar begin/end sin $form
+
+Si quieres seguir usando el enfoque de asignación, aunque limitado, podrías intentar:
+
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{ActiveForm begin assign="formTag"}
+    {php}
+        echo \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+        echo $form->field($user, 'username');
+        echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+        echo \yii\widgets\ActiveForm::end();
+    {/php}
+{ActiveForm end}
+
+Pero esta segunda opción no es fiable por cómo Smarty compila los bloques y no siempre reconoce $form como variable accesible.
+✅ Conclusión
+
+La opción más estable con Smarty es renderizar el formulario completo (o sus partes) en el controlador y pasarlo como HTML puro a la vista, luego imprimirlo con {$formHtml nofilter}.
+
+
+Finalmente la solucion quedo de la siguiente manera:
+
+En  mi controlador: tengo el siguiente codigo:
+
+Smarty ejecuta el bloque ActiveForm esperando que dentro se definan campos desde cero, pero tú ya estás pasando el formulario completo como un string (HTML) generado con ActiveForm::begin() y ActiveForm::end(). Si dejas el bloque, Smarty intentará buscar una variable $form que no existe en la vista, porque esa variable fue usada dentro del controlador.
+
+<?php
+
+namespace app\controllers;
+
+
+use Yii; //Objeto principal de la palicación
+
+use yii\web\Controller;
+
+use app\models\User;
+
+use Exception;
+
+use yii\web\HttpException;
+
+use yii\widgets\ActiveForm;
+
+use yii\helpers\Html;
+
+class UserController extends controller {
+
+   public function actionNew()
+{
+    $user = new User();
+
+    if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+        Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+        return $this->redirect(['site/login']);
+    }
+
+    // Creamos el formulario aquí y renderizamos los campos para pasarlos como strings
+    ob_start();
+    $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+    echo $form->field($user, 'username');
+    echo Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+    \yii\widgets\ActiveForm::end();
+    $formHtml = ob_get_clean();
+
+        //return $this->render('new.tpl', ['user' => $user]);
+        //return $this->render('new.tpl');
+        //return $this->render('new', ['user' => $user]);
+
+     return $this->render('new.tpl', [
+        'formHtml' => $formHtml
+    ]);
+}
+
+}
+
+
+Vista new.tpl
+
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{$formHtml nofilter}
+
+
+
+El bloque:
+
+{block ActiveForm assign="form"}
+    ...
+{/block}
+
+está de más y es lo que sigue provocando errores como:
+
+    Undefined array key "form"
+
+    Html no está definido
+
+    Conflictos de renderización duplicada
+
+Qué debemos hacer
+
+En nuestra plantilla solo necesitamos el siguiente contenido mínimo y funcional:
+
+
+Plantilla views/user/new.tpl corregida:
+
+
+
+
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{$formHtml nofilter}
+
+
+
+
+
+Ya no necesitamos {block ActiveForm} porque el formulario ya fue generado desde el controlador y se pasó como formHtml.
+
+con esto se soluciono el problema de vista y ahora solo falta agregar los demas campos necesarios y el boton veremos como integrarlos.
+
+
+Como ya no estamos trabajando con bloques y para 
+
+
+ara agregar un campo de contraseña (password) al formulario en Yii 2 usando Smarty, recuerda que ya no estás trabajando con bloques {block ActiveForm}, sino que generas el formulario en el controlador y lo pasas como HTML (formHtml).
+
+¿Qué necesitamos modificar?
+
+
+1. Asegúrate de que el modelo User tenga el atributo password
+
+Esto puede venir de una columna en la base de datos o puedes declararlo en el modelo si lo usarás solo para validación temporal.
+
+
+2. Modificar el controlador para incluir el campo de contraseña
+
+
+<?php
+
+namespace app\controllers;
+
+
+use Yii; //Objeto principal de la palicación
+
+use yii\web\Controller;
+
+use app\models\User;
+
+use Exception;
+
+use yii\web\HttpException;
+
+use yii\widgets\ActiveForm;
+
+use yii\helpers\Html;
+
+class UserController extends controller {
+
+    public function actionNew()
+    {
+        $user = new User();
+
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+            Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+            return $this->redirect(['site/login']);
+        }
+
+        ob_start();
+        $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+
+        echo $form->field($user, 'username');
+        echo $form->field($user, 'password')->passwordInput(); // Campo de contraseña
+
+        echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+        \yii\widgets\ActiveForm::end();
+
+        $formHtml = ob_get_clean();
+
+            //return $this->render('new.tpl', ['user' => $user]);
+            //return $this->render('new.tpl');
+            //return $this->render('new', ['user' => $user]);
+
+        return $this->render('new.tpl', [
+            'formHtml' => $formHtml
+        ]);
+    }
+
+}
+
+Nos podemos percatar que para el input del password utilizamos:
+
+echo $form->field($user, 'password')->passwordInput(); // 👈 Aquí el campo de contraseña
+
+
+el boton para guardar:
+echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+        \yii\widgets\ActiveForm::end();
+
+
+y en la plantilla la dejamos talcual:
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{$formHtml nofilter}
+
+
+
+como nota adicional
+    Si queremos guardar la contraseña encriptada, no la guardamos directo como viene. Podemos sobreescribir beforeSave() en el modelo User para aplicar 
+    
+    Yii::$app->security->generatePasswordHash():
+
+public function beforeSave($insert)
+{
+    if (parent::beforeSave($insert)) {
+        if (!empty($this->password)) {
+            $this->password = Yii::$app->security->generatePasswordHash($this->password);
+        }
+        return true;
+    }
+    return false;
+}

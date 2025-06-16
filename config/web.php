@@ -64,7 +64,9 @@ $config = [
             'class' => 'yii\web\View',
             'renderers' => [
                 'tpl' => [
-                    'class' => 'app\components\SmartyRenderer',
+                    //'class' => 'app\components\SmartyRenderer',
+                      'class' => 'yii\smarty\ViewRenderer',
+                      'cachePath' => '@runtime/Smarty/cache', // agregamos
                 ],
             ],
         ],

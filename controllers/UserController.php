@@ -11,29 +11,41 @@ use app\models\User;
 
 use Exception;
 
-class BookController extends controller {
+use yii\web\HttpException;
 
-    public function actionNew(){
-        $user = new User;
+use yii\widgets\ActiveForm;
 
-        if($user->load(Yii::$app->request->post())){
-            //Hay algo en POST que es para mi.
-            if($user->validate()){
-                //Lo que cargue valido bien
-                if($user->save()){
-                    //Lo que vlide se salvo en la BD
-                    Yii::$app->session->setFlash("success", 'usuasrio guardado correctamente');
+use yii\helpers\Html;
 
+class UserController extends controller {
 
-                }else{
-                    throw new Exception("Error al salvar el usuario");
-                    return;
-                }
-            }
+    public function actionNew()
+    {
+        $user = new User();
 
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+            Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+            return $this->redirect(['site/login']);
         }
 
-        return $this->render('new.tpl', ['user' => $user]);
+        ob_start();
+        $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+
+        echo $form->field($user, 'username');
+        echo $form->field($user, 'password')->passwordInput(); // 👈 Aquí el campo de contraseña
+
+        echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+        \yii\widgets\ActiveForm::end();
+
+        $formHtml = ob_get_clean();
+
+            //return $this->render('new.tpl', ['user' => $user]);
+            //return $this->render('new.tpl');
+            //return $this->render('new', ['user' => $user]);
+
+        return $this->render('new.tpl', [
+            'formHtml' => $formHtml
+        ]);
     }
 
 }

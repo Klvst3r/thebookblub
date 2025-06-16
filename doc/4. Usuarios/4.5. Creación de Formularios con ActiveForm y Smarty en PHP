@@ -1,0 +1,652 @@
+Creación de Formularios con ActiveForm y Smarty en PHP
+
+Resumen
+--------
+
+
+¿Cómo crear un controlador y una vista en Smarty para gestionar formularios?
+
+Crear formularios en proyectos web puede ser una tarea complicada, pero gracias a las herramientas y frameworks adecuados, este proceso se simplifica notablemente. En este apartado, se incluye una guía paso a paso para manejar controladores y vistas utilizando Smarty y widgets. Es vital recordar que cada etapa es crucial para lograr que el formulario no solo funcione, sino también para que sea atractivo y fácil de usar.
+¿Cómo implementar un formulario básico con Active Form?
+
+Un formulario necesita tener, al menos, campos para recogida de datos y un botón de envío. Utilizar Active Form a través de Smarty hace que la implementación sea más sencilla y eficaz.
+
+<!-- Llamamos a la clase Active Form -->
+{use class="G.widgets.ActiveForm" type="block"}
+
+<!-- Se crea el formulario con el ID `new_user` -->
+{$form | ActiveForm id="new_user" assign="form"}
+
+<!-- Campo de texto para el nombre de usuario -->
+{$form->field('user', 'username')}
+
+<!-- Campo para la contraseña, con entrada oculta -->
+{$form->field('user', 'password')->input('password')}
+
+<!-- Campo para repetir la contraseña, como retrospectiva y para validación -->
+{$form->field('user', 'password_repeat')->input('password')}
+
+<!-- Biografía del usuario, como un textarea -->
+{$form->field('user', 'bio')->textarea()}
+
+<!-- Botón para enviar el formulario -->
+<input type="submit" value="Guardar">
+
+El código muestra cómo establecer un formulario con campos para el nombre de usuario, contraseña, repetición de contraseña (para validación futura) y biografía con un textarea.
+¿Cómo gestionar los datos del formulario en el servidor?
+
+Una parte clave es cómo manejar eficientemente los datos que se obtienen del formulario. En el script, podemos observar que al crear un nuevo controlador para el usuario, los datos son capturados y procesados. Esto se hace utilizando la lógica de negocio que corresponde al controlador, y se simplifica el proceso usando Active Form en las vistas.
+
+Adicionalmente, al implementar la validación en futuros pasos, se asegura la integridad de los datos y se protege el sistema, ya que errores como el ingreso de contraseñas incorrectas con el campo password_repeat son capturados antes de proceder al almacenamiento de la base de datos.
+¿Cómo asegurar que el formulario solo se pueda usar sin estar logueado?
+
+Algo importante que agregar es la validación de usuario. El formulario no debería estar disponible para usuarios autenticados, pues estos no deberían crear múltiples cuentas. Para ello, se implementa una lógica dentro del controlador:
+
+if (!G.App.User.isGuest()) {
+    G.App.Session.setFlash('warning', 'No puedes crear usuario estando logueado.');
+    return this.goHome();
+}
+
+Esta condición revisa si un usuario está logueado antes de permitirle el acceso a la creación de una nueva cuenta. Si el usuario está logueado, recibe un mensaje de alerta y es redirigido a la página principal, asegurando así que las funciones del formulario se mantengan adecuadamente restringidas a los visitantes.
+¿Qué sigue después de crear un formulario básico?
+
+Con el controlador y la vista en marcha, el siguiente paso es gestionar las validaciones y reglas de negocio. Es crucial implementar un sistema donde se verifique que:
+
+    El nombre de usuario es único.
+    Las contraseñas coinciden.
+    Los datos cumplen con ciertos criterios de validación.
+    Los permisos de guardado de datos están correctamente configurados.
+
+Además, la implementación de estas funcionalidades garantizará que las acciones del usuario se procesen, almacenen y utilicen de manera adecuada.
+
+
+Referencias:
+------------
+
+https://www.yiiframework.com/doc/api/2.0/yii-widgets-activeform
+
+https://www.yiiframework.com/doc/guide/2.0/es/start-forms
+
+
+Comentarios:
+------------
+
+Este widget ActiveForm es practico para crear rapidamente un formulario con sus elementos.
+
+Me trae recuerdos del pasado, en el framework (cuyo nombre no dire, pero que tenemos como referencia) existia algo llamado laravelcollective
+
+Usaba el mismo concepto para crear formulario y sus elementos:
+
+Form::label('email', 'E-Mail Address');
+
+Form::submit('Guardar');
+
+Lo dejaron de usar varias versiones atras no se la razon, pero recuerdo que cuando se le querian poner estilos (Para ajustarlo a una UI especifica y tener una buena UX) era un dolor de cabeza. 
+
+
+
+Procedimiento:
+------------
+
+Ya tenemos la accion en el controldor, y dentro de toda la logica de operación que hay, regresamos a imprimir renderear un template que se llama new.tpl-
+
+public function actionNew(){
+        $user = new User;
+
+        if($user->load(Yii::$app->request->post())){
+            //Hay algo en POST que es para mi.
+            if($user->validate()){
+                //Lo que cargue valido bien
+                if($user->save()){
+                    //Lo que vlide se salvo en la BD
+                    Yii::$app->session->setFlash("success", 'usuasrio guardado correctamente');
+                    return $this->redirect(['site/login']);
+                }else{
+                    throw new Exception("Error al salvar el usuario");
+                    return;
+                }
+            }
+
+        }
+
+        return $this->render('new.tpl', ['user' => $user]);
+    }
+
+
+Que esta en el controlador de User, vamos acrear ese controlador.
+
+en views/ creamos una nueva carpeta que se llama user 
+
+views/user/new.tpl
+
+Al intentar renderizar la vista no marca nada ni error y tampoco muestra contenido del template de smarty por lo que procedemos a verificar que esta corrriendo corretamente smarty:
+
+
+ Verifica que realmente estás usando Smarty con Yii2
+
+La forma correcta de integrar Smarty con Yii2 es mediante la extensión oficial de Yii:
+
+yiisoft/yii2-smarty
+
+Instalación con Composer (si no lo has hecho):
+
+composer require yiisoft/yii2-smarty
+
+✅ 1. Configura Smarty como motor de plantillas en Yii2
+
+En el archivo config/web.php o main.php, asegúrate de tener lo siguiente:
+
+'components' => [
+    'view' => [
+        'renderers' => [
+            'tpl' => [
+                'class' => 'yii\smarty\ViewRenderer',
+                // opcional: especificar rutas de Smarty si quieres
+                // 'cachePath' => '@runtime/Smarty/cache',
+                // 'compilePath' => '@runtime/Smarty/compiled',
+            ],
+        ],
+    ],
+],
+
+Esto le dice a Yii que los archivos .tpl deben ser renderizados usando Smarty.
+✅ 2. Estructura del archivo de vista
+
+Tu archivo debe estar en:
+
+/views/user/new.tpl
+
+Y contener simplemente:
+
+Hola.
+
+✅ 3. Controlador
+
+El método del controlador UserController debe verse así:
+
+public function actionNew()
+{
+    return $this->render('new.tpl');
+}
+
+⚠️ Es crucial incluir la extensión .tpl cuando usas renderers personalizados en Yii2.
+✅ 4. Verifica que Smarty esté funcionando
+
+Si no ves nada en la vista, activa el modo debug en index.php:
+
+defined('YII_DEBUG') or define('YII_DEBUG', true);
+defined('YII_ENV') or define('YII_ENV', 'dev');
+
+Y revisa el archivo de log en:
+
+/runtime/logs/app.log
+
+Allí verás si hay errores al cargar la vista.
+✅ 5. Limpieza y permisos
+
+    Asegúrate de que las carpetas /runtime/Smarty/cache/ y /runtime/Smarty/compiled/ tengan permisos de escritura.
+
+    Borra los archivos en runtime/cache y runtime/Smarty/ si persisten errores.
+
+Estabamos usando
+
+ 'view' => [
+            'class' => 'yii\web\View',
+            'renderers' => [
+                'tpl' => [
+                    //'class' => 'app\components\SmartyRenderer',
+                      'class' => 'yii\smarty\ViewRenderer',
+                ],
+            ],
+        ],
+
+
+ No vamos a usar app\components\SmartyRenderer a menos que hayamos escrito escrito esa clase manualmente.
+
+ aunque SmartyRenderer esta extendiendo correctamente 
+
+
+      de yii\smarty\ViewRenderer.
+
+    Estás registrando Html como clase dentro de Smarty.
+
+    No parece haber errores graves en esa clase.
+
+Sin embargo, si no te está mostrando absolutamente nada en la vista, el problema probablemente está en uno de estos puntos críticos:
+
+Vamos a verificar que la plantilla este en la ruta correcta
+
+Verificamos finalemnte que funcione el archivo .tpl
+
+
+ Lista de verificación final para que funcione tu archivo .tpl
+✅ 1. Asegúrate de que la plantilla esté en la ruta correcta:
+
+views/user/new.tpl
+
+Contenido mínimo:
+
+Hola.
+
+✅ 2. En tu controlador (UserController):
+
+public function actionNew()
+{
+    return $this->render('new.tpl');
+}
+
+✅ 3. Asegúrate de tener instalada la librería de Smarty:
+
+composer show smarty/smarty
+
+Si no aparece, instálala:
+
+composer require smarty/smarty
+
+✅ 4. Smarty debe poder escribir en los directorios de caché
+
+Crea y da permisos a las carpetas necesarias si no existen:
+
+mkdir -p runtime/Smarty/cache
+mkdir -p runtime/Smarty/compiled
+chmod -R 775 runtime/Smarty
+
+✅ 5. Verifica si hay errores en los logs
+
+Abre:
+
+runtime/logs/app.log
+
+O activa errores en index.php (por si algo se está ocultando):
+
+defined('YII_DEBUG') or define('YII_DEBUG', true);
+defined('YII_ENV') or define('YII_ENV', 'dev');
+
+🧪 Prueba mínima desde cero
+
+Si quieres probar con una plantilla completamente limpia para verificar que Smarty esté funcionando:
+Archivo: views/user/new.tpl
+
+<h1>Hola desde Smarty</h1>
+
+Controlador:
+
+public function actionNew()
+{
+    return $this->render('new.tpl', [
+        'mensaje' => 'Smarty funcionando correctamente',
+    ]);
+}
+
+Y en new.tpl puedes probar también:
+
+<h1>{$mensaje}</h1>
+
+✅ Si después de todo esto aún no aparece nada
+
+    Cambia temporalmente la clase en web.php a la nativa:
+
+'view' => [
+    'renderers' => [
+        'tpl' => [
+            'class' => 'yii\smarty\ViewRenderer',
+        ],
+    ],
+],
+
+    Elimina app\components\SmartyRenderer.php de la configuración para aislar el problema.
+
+
+Solucion aplicada
+------------------
+
+Parece que ya se puede renderizar correctamente
+
+ Lista de verificación final para que funcione tu archivo .tpl
+✅ 1. Asegúrate de que la plantilla esté en la ruta correcta:
+
+views/user/new.tpl
+
+Contenido mínimo:
+
+Hola.
+
+✅ 2. En tu controlador (UserController):
+
+public function actionNew()
+{
+    return $this->render('new.tpl');
+}
+
+✅ 3. Asegúrate de tener instalada la librería de Smarty:
+
+composer show smarty/smarty
+
+Si no aparece, instálala:
+
+composer require smarty/smarty
+
+✅ 4. Smarty debe poder escribir en los directorios de caché
+
+Crea y da permisos a las carpetas necesarias si no existen:
+
+mkdir -p runtime/Smarty/cache
+mkdir -p runtime/Smarty/compiled
+chmod -R 775 runtime/Smarty
+
+✅ 5. Verifica si hay errores en los logs
+
+Abre:
+
+runtime/logs/app.log
+
+O activa errores en index.php (por si algo se está ocultando):
+
+defined('YII_DEBUG') or define('YII_DEBUG', true);
+defined('YII_ENV') or define('YII_ENV', 'dev');
+
+🧪 Prueba mínima desde cero
+
+Si quieres probar con una plantilla completamente limpia para verificar que Smarty esté funcionando:
+Archivo: views/user/new.tpl
+
+<h1>Hola desde Smarty</h1>
+
+Controlador:
+
+public function actionNew()
+{
+    return $this->render('new.tpl', [
+        'mensaje' => 'Smarty funcionando correctamente',
+    ]);
+}
+
+Y en new.tpl puedes probar también:
+
+<h1>{$mensaje}</h1>
+
+✅ Si después de todo esto aún no aparece nada
+
+    Cambia temporalmente la clase en web.php a la nativa:
+
+'view' => [
+    'renderers' => [
+        'tpl' => [
+            'class' => 'yii\smarty\ViewRenderer',
+        ],
+    ],
+],
+
+    Elimina app\components\SmartyRenderer.php de la configuración para aislar el problema.
+
+Parece wue el renderizado con la plantilla web.tpl funciona correctamente.
+
+
+Ahora ya vemos que se imprime el hola, sobre este vamos a trabajar.
+
+Yii tiene un concepto realmente interesante que son los widgets que es codigo reusable desde diferentes puntos de la vista, no importa si es con smarty o no es con smarty o php directamente.
+
+Vamos a trabajar con algo potente 
+
+activeform
+----------
+
+Vamos a involuvrar en smarty
+
+{use class="yii\widgets\ActiveForm" type="block"}
+
+{ActiveForm id="new-user" assign="form"}
+    {$form->field($user, 'username')}
+{/ActiveForm}
+
+Crea el form type metod id etc, se puede hacer de forma muy sencilla que es con el acive form, 
+
+el id sirve despues para que con Js, con cualquier libreria tiene jQuery instalado y se puede acceder directamente, y assign = form
+
+cerrams para eviatr errores.
+
+El assign form significa que lo que estamos creando a partir de ahora va a estar guardado en un avariable que se llama form, es directorio
+si quiero hacerun campo
+
+{$form->field($user, 'username')}
+
+Es decir queremos hacer un campo, el modelo que vamos autilizar con $user, un string con el nombre del atributo que queremos tratar ahi, que es username.
+
+
+Debe de visualizarse ya en el formulario como un campo viible, donde podemos escribir. 
+
+
+Seguramente nos dara error y os vamos a anticipar a ello por que.
+
+
+Codigo correcto
+---------------
+En Yii2 con Smarty, la lógica del formulario y la asignación de variables debe manejarse principalmente desde el controlador, y la vista (.tpl) solo debería encargarse de mostrar el contenido.
+
+Vamos paso a paso a estructurarlo correctamente para que podamos generar un formulario de creación de usuario (User) en Yii2 con Smarty.
+
+1. Controlador: UserController.php
+
+Aquí vamos a preparar el modelo y el formulario para enviarlo a la vista:
+
+use Yii;
+use app\models\User;
+use yii\web\Controller;
+use yii\widgets\ActiveForm;
+
+class UserController extends Controller
+{
+    public function actionNew()
+    {
+        $user = new User();
+
+        // Este fragmento es útil si vas a procesar el formulario también desde aquí.
+        if ($this->request->isPost && $user->load(Yii::$app->request->post()) && $user->save()) {
+            return $this->redirect(['view', 'id' => $user->id]);
+        }
+
+        return $this->render('new.tpl', [
+            'user' => $user,
+        ]);
+    }
+}
+
+Quedando nuestro controlador integrado de la siguiente manera:
+
+
+
+<?php
+
+namespace app\controllers;
+
+
+use Yii; //Objeto principal de la palicación
+
+use yii\web\Controller;
+
+use app\models\User;
+
+use Exception;
+
+use yii\web\HttpException;
+
+use yii\widgets\ActiveForm;
+
+
+
+class UserController extends controller {
+
+    public function actionNew()
+    {
+        $user = new User;
+
+        if ($user->load(Yii::$app->request->post())) {
+            // Hay algo en POST para este modelo
+            if ($user->validate()) {
+                // Validación exitosa
+                if ($user->save()) {
+                    Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+                    return $this->redirect(['site/login']);
+                } else {
+                    throw new HttpException(500, "Error al salvar el usuario.");
+                }
+            }
+            // Si no pasa la validación, caerá a la vista para mostrar errores
+        }
+
+        //return $this->render('new.tpl', ['user' => $user]);
+        //return $this->render('new.tpl');
+        //return $this->render('new', ['user' => $user]);
+
+        return $this->render('new.tpl', [
+            'user' => $user
+        ]);
+    }
+
+}
+
+
+¿Qué cambia?
+
+    Estamos enviando el modelo $user a nuestra vista new.tpl, como lo espera el formulario {ActiveForm} para poder acceder a $form->field($user, 'atributo').
+
+    Manejamos la excepción de forma más específica con HttpException.
+
+
+
+
+2. En la Vista: views/user/new.tpl
+
+El archivo .tpl debe ser limpio, solo con la lógica de presentación. Aquí está un ejemplo básico del formulario usando la extensión Smarty para Yii:
+
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{ActiveForm begin id="new-user" options=['method' => 'post'] assign="form"}
+
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+    <div class="form-group">
+        {$form->field($user, 'email')}
+    </div>
+
+    <div class="form-group">
+        {$form->field($user, 'password')->passwordInput()}
+    </div>
+
+    <div class="form-group">
+        {Html::submitButton('Guardar', ['class' => 'btn btn-primary'])}
+    </div>
+
+{ActiveForm end}
+
+
+
+Vamos a utilizar la siguiente vista para construir el formulario de registrando
+-------------------------------
+
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{ActiveForm begin id="new-user" options=['method' => 'post'] assign="form"}
+
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+    <div class="form-group">
+        {$form->field($user, 'email')}
+    </div>
+
+    <div class="form-group">
+        {$form->field($user, 'password')->passwordInput()}
+    </div>
+
+    <div class="form-group">
+        {Html::submitButton('Guardar', ['class' => 'btn btn-primary'])}
+    </div>
+
+{ActiveForm end}
+
+
+
+Iniciamos con el primer campo
+----------------------------
+
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{ActiveForm begin id="new-user" options=['method' => 'post'] assign="form"}
+
+    <div class="form-group">
+        {$form->field($user, 'username')}
+    </div>
+
+
+{ActiveForm end}
+
+
+
+
+
+
+Notas importantes:
+
+        Smarty reconoce los bloques de clases Yii con {use}.
+
+        Usamos assign="form" en {ActiveForm begin} para usar $form en los campos.
+
+        No necesitamos inicializar nada de Smarty a mano en este caso si ya está configurado el ViewRenderer.
+
+
+3. Configuración: config/web.php
+
+Tu configuración se ve casi correcta, pero asegúrate que yii\smarty\ViewRenderer está bien cargado:
+
+'view' => [
+    'class' => 'yii\web\View',
+    'renderers' => [
+        'tpl' => [
+            'class' => 'yii\smarty\ViewRenderer',
+            'cachePath' => '@runtime/Smarty/cache',
+        ],
+    ],
+],
+
+Y si quieres usar una clase personalizada (SmartyRenderer), asegúrate de extender correctamente:
+
+
+De momento este codigo sifuiente no lo utilizamos
+
+
+
+namespace app\components;
+
+use yii\smarty\ViewRenderer;
+
+class SmartyRenderer extends ViewRenderer
+{
+    public function init()
+    {
+        parent::init();
+        // Puedes registrar clases aquí si lo necesitas
+    }
+}
+
+✅ 4. Enlace en navegador
+
+Accede en el navegador:
+
+http://localhost:7000/user/new
+
+Y se debería renderizar tu formulario correctamente.
+
+
