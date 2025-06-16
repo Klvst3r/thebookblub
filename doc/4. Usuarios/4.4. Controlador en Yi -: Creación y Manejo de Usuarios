@@ -1,0 +1,268 @@
+Controlador en Yii: Creación y Manejo de Usuarios
+
+
+Resumen:
+---------
+¿Cómo manejar el input del usuario en una aplicación web?
+
+La interacción con usuarios es un elemento crucial en el desarrollo web, especialmente cuando se trata del manejo de entrada de datos. Este proceso implica desde la recepción hasta la validación y almacenamiento de información. Hoy exploraremos cómo lograr esto de manera efectiva utilizando el framework Yii.
+¿Qué es el controlador y cómo se utiliza?
+
+El controlador es una pieza fundamental en el framework Yii, encargado de manejar las solicitudes HTTP y dictar la lógica que se ejecutará. En nuestro caso, el controlador manejará la creación de un nuevo usuario.
+
+    Creación de un controlador: Se genera un controlador sencillo llamado UserController. Este controlador tendrá acciones específicas para manejar las solicitudes relacionadas con los usuarios, como la creación de uno nuevo al acceder a la URL: miAplicacion.com/user/new.
+
+    class UserController extends Controller {
+        public function actionNew() {
+            $user = new User(); // Crear un usuario en blanco
+            return $this->render('new', ['user' => $user]);
+        }
+    }
+
+    Renderizar vistas: A través del método render, se envía un "placeholder" a la vista para que ésta sepa qué información pedir al usuario, típicamente un username y password.
+
+¿Cómo se procesa la solicitud POST?
+
+Cuando el formulario es enviado, se debe procesar la información capturada desde el frontend para gestionar distintos escenarios, como el fallo en la validación o errores en el guardado.
+
+    Verificación de datos en POST:
+        Cuando se envían datos de un formulario, estos llegan a través de un método POST. La acción New del controlador comprobará si hay información relevante y actuará en consecuencia.
+
+    if ($user->load(Yii::$app->request->post())) {
+        // Hay datos en POST relevantes para el modelo User
+        if ($user->validate() && $user->save()) {
+            Yii::$app->session->setFlash('success', 'Usuario guardado correctamente');
+            return $this->redirect(['site/login']);
+        } else {
+            // Manejo de errores de validación
+            throw new \Exception('Error al salvar el usuario');
+        }
+    }
+
+    Validación y guardado:
+        Se utiliza el método validate() para asegurarse de que los datos entrantes cumplen con las reglas del modelo.
+        Luego, save() intenta almacenar la información en la base de datos u otra entidad de persistencia definida.
+
+¿Qué hacer ante errores?
+
+Es esencial tener una estrategia para lidiar con errores para mejorar la experiencia de usuario y asegurar la integridad de la aplicación.
+
+    Errores de validación: Si validate() falla, automáticamente se redirige al usuario al formulario con los campos anteriores llenos y los errores visibles.
+    Excepciones: En caso de que save() falle, por ejemplo, por un error de conexión con la base de datos, se lanza una excepción.
+
+El manejo eficaz del input del usuario en una aplicación web no sólo mejora la interacción sino que también contribuye a una experiencia de usuario robusta y fluida. A medida que se avance en el tema de validaciones en próximas lecciones, se podrá consolidar un flujo completo y funcional en el manejo de datos de usuario. La práctica y exploración continua son claves para dominar estas técnicas.
+
+
+
+Referencia:
+-----------
+https://www.yiiframework.com/doc/guide/2.0/es/start-forms
+
+
+Comentarios:
+------------
+este modelo es interesante, porque en laravel la validacion de los request no la hace el modelo sino el controlador.
+
+Cuando hago comparaciones entre Laravel y Yii, no me interesa cual framework es mejor, sino entender patrones de diseño y buenas practicas.
+
+esa es la magia de aprender varios frameworks.
+
+
+Proceso:
+--------
+
+Con lo que se tiene hasta ahora es coo acceder a la bd, imprimir información, el viaje de esta infrmacion manipularla, guardarl desde linea de comandos.
+
+Ahora vamos a las custiones criticas de una palicaci´+on que es el user input.
+
+Esto lo vamos a ver en tres sesiones.
+
+La primero sera en el controlador User input,
+
+
+Despues vamos a ver una forma co todas las ventajas de este framework que es el active form
+    Formulario de usuario con Active Record
+
+Despues veremos la validacion de los datos del usuario
+    Validación de datos del usuario
+
+Para esto lo hacermos a la par con un usuario nuevo, tenemos dos campos username y password, suficiente para ender o que necesitamos hacer para no solamente capturar la inforamción sino validarla, tratar de meternos codigo y guardarla en la bd.
+
+
+
+Paso 1:
+Construyendo el controlador
+----------------------------
+
+
+
+Primero vamos a usar un controlador nuevo 
+
+controllers/UserController.php
+
+
+Nos apoyamos de bookController
+
+<?php
+
+namespace app\controllers;
+
+
+use Yii; //Objeto principal de la palicación
+
+use yii\web\Controller;
+
+use app\models\User;
+
+class BookController extends controller {
+    
+
+}
+
+Con esto tenemos un controlador basico, lo elemental para tener un controlador. Ahora tenemos varias acciones
+
+Ahora cada vez que acceda a mi miAplicacion
+
+    miapp.com/user/new
+Va  mostrar loque decidamos que muestre en este controlador. y en esta accin.
+
+La logica es muy clara.
+
+
+Empezando por la parte final, donde regresamos un template new.tpl, vamos a mandar al placeholder, una variable que se llame user que traiga un usuario.
+En a parte de arriba, necesitaremos crear un usuario en blanco.
+
+Lo que hace yii, creamo desde e controlador un placeholder, es un sobre vacio, ya que habiamos comentado que un modelo es un sobre vacio, de inforacion y de datos.
+
+Llamado user y se lo mandaremos al template para que el template sepa que tiene que pedirle al usuario, el template necesitara un userame y un passowrd.Despues cuando el template creee la forma y capture los datos por parte del usuario, ese formulario lo mandara desde la vista y enviara el destino con ese action de esa forma en html, va a regresar al new por defecto.
+
+Es decir todo formulario va a tener como action el mismo controlador y la misma accion de la que fue invocado por via post, elget se trabajara con las ligas de una forma muy diferente, se trabajara un ejemplo.
+
+A este acintoni new, podemos llegar con post o sin post, es decir, sin post cuando en el navegador, escribimos 
+miapp.com/user/new
+
+No tenemos nada de post en el request. habra un avez que ya tengamos el formulario lleno y se invoque con algo de post en el request. Para esto.
+
+Los atributos y funciones que tienen los modelos por defecto en yii, veremos lo potente queson.
+
+Lo primero que tenemos que hacer en yii,es ver si viene algo en el post para nosotros. Lo va a hacer el mismo nmodelo el mismo user va a determinar si si o si no con el siguienye if
+
+class BookController extends controller {
+
+    public function actionNew(){
+        $user = new User;
+
+        if($user->load(Yii::$app->request->post())){
+            
+        }
+
+        return $this->render('new.tpl', ['user' => $user]);
+    }
+
+}
+
+Puedes traer información que te corresponda a ti que venga en yii app request post.
+
+Aqui significa que hay algo en post que es para mi.
+
+
+Entnces tenemos que empezaremos a tratr, eso sginifica que ya se guardo un formulario, una forma que trae datos para el modelo usuario.
+
+Repitiendo.
+
+Si puedo cargar información que viene de post en el request y puedo cargarlo en mi modelo, significa que hay un formuario que se invoco para mi, lo que tengo que hacer es invcar y salvar.
+
+Entonces lo que tenbemos que hacer.
+
+ public function actionNew(){
+        $user = new User;
+
+        if($user->load(Yii::$app->request->post())){
+            //Hay algo en POST que es para mi.
+            if($user->validate()){
+                //Lo que cargue valido bien
+                if($user->save()){
+                    //Lo que valide se salvo en la BD
+                }
+            }
+
+        }
+
+        return $this->render('new.tpl', ['user' => $user]);
+    }
+
+Si si se valida, entonce intento salvar, aun estando validado y fallar al almacenar en la bd, y se puede cachaer todos esos errors. 
+
+Hablando de Bd por que es una aplicacion con ActiveRecord, pero puede ser una aplicación en u archivo de texto, el modelo puede salvar en diferentes entidades en fdiferentes formas.
+
+Con esta estructura, tenemos una action, que puede crear un usurio, falta poco el manejo de errores y mantener el vaidate.
+
+
+con 15 linea lo hacen absolutamente todo, vamos a manejar los errors cuando no funcionan las cosas, y entender el flujo en caso de algun error.
+
+
+Si el usuario no se puede salvar, significa que ya valido el primer else.
+
+Tirando un error.
+
+Se puede hacer dos cosas, tirar un exeption
+
+El throw corta exeption, corta la ejecucion en donde esta, no es necesario eun return pero podria tener un return.
+
+Podemo usar.
+
+ throw new \Exception("Error al salvar el usuario");
+
+ o usar:
+
+ use Exception;
+
+class BookController extends controller {
+
+    public function actionNew(){
+        $user = new User;
+
+        if($user->load(Yii::$app->request->post())){
+            //Hay algo en POST que es para mi.
+            if($user->validate()){
+                //Lo que cargue valido bien
+                if($user->save()){
+                    //Lo que vlide se salvo en la BD
+
+                }else{
+                    throw new Exception("Error al salvar el usuario");
+                    return;
+                }
+            }
+
+        }
+
+        return $this->render('new.tpl', ['user' => $user]);
+    }
+
+
+Vamos a considerar que se cayo la bd hay algun error en sql en las validaciones y no se puede salvar y vamos a tirar una exeption, aca tenemos una gran ventaja, si el validate no funciona, no se va a savar, por lo tanto no habra un retr y regresa a renderear, el template del formulario con el usuario cargado.
+
+return $this->render('new.tpl', ['user' => $user]);
+
+
+Y entonces auntomaticamente ve  a mostrar el formulario. Ya no con los datos validados, y en cada campo va a mostrar que error le hace falta.
+
+Mientras aca necesitamos que ya cargo, ya gardo y ya valido.
+
+Debemos cortar la ejecución,para no volver a cargarlo y decir hay algun error.
+
+Utilizamos una fucnion 
+Yii::$app->session->setFlash("success", 'usuasrio guardado correctamente');
+
+Dspues hacemos un rediret y lo mandaremos al login,por que estamoscreando un usuario que es el nuestro.
+
+//Lo que vlide se salvo en la BD
+                    Yii::$app->session->setFlash("success", 'usuasrio guardado correctamente');
+                    return $this->redirect(['site/login']);
+
+Lo que acabamos de ver es, el primer paso para recibir input que es la accion en el controlador, en la siguiente sesion veremos como fucniona en elform.
+
+y por ultimo veremos omo valida el modelo para tener elgo completamente fncional.
+
+
