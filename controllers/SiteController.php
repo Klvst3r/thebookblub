@@ -10,6 +10,8 @@ use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
 
+use app\models\Book;
+
 class SiteController extends Controller
 {
     /**
@@ -59,9 +61,23 @@ class SiteController extends Controller
      *
      * @return string
      */
+    // public function actionIndex()
+    // {
+    //     return $this->render('index.tpl');
+    // }
     public function actionIndex()
     {
-        return $this->render('index');
+        $isGuest = Yii::$app->user->isGuest;
+        $username = $isGuest ? null : Yii::$app->user->identity->username;
+        $loginLink = \yii\helpers\Html::a('Login', ['site/login']);
+        $bookCount = Book::find()->count(); // <<-- Aquí obtenemos el conteo
+
+        return $this->render('index.tpl', [
+            'isGuest' => $isGuest,
+            'username' => $username,
+            'loginLink' => $loginLink,
+            'bookCount' => $bookCount, // <<-- Lo enviamos a la vista
+        ]);
     }
 
     /**

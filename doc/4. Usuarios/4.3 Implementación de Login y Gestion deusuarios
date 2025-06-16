@@ -61,3 +61,354 @@ Comentarios:
 Procedimiento:
 --------------
 
+Despues de modificar una manera sutil pero de manera potente toda la clase que ya viene co la instalaciń de yii, ahora vamos a ver para que funcione el login desde web.
+
+Iniciamos con el pass klvst3r / desarrollo.
+
+
+Vemos si podemos llogearnos con la modificación al modelo d eusuarios.
+
+Todo lo que se referencia desde el modelo que es ir a la bd, corroborar el pass tener un tercer sistema de login de terceros, todo va a ir  caer a modelo y mo esta modificado correctamente el modelo usuario, ya tenemos un login en linea.
+
+Hay una cosa importante, la insytalación asi como trae la clase modelo usuario trae tambien el LoginForm, qu es un modelo que no es active record guarda los datos en el objeto, en el sobre de información, tiene:
+
+    public $username;
+    public $password;
+    public $rememberMe = true;
+
+Que si nos vamos a logout, y login in true o false, si nos quedamos logueados, 
+
+con este modelo, lo que hace es traer toda la logica de traer información, de la vista al controlador de site login, 
+
+abrimos el SiteController
+
+public function actionLogin()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $model = new LoginForm();
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goBack();
+        }
+
+        $model->password = '';
+        return $this->render('login', [
+            'model' => $model,
+        ]);
+    }
+
+tiene su prpia accion que crea un login form el modelo trae lo que necesite del usuario.
+
+En el modelo loginForm esta la lgica de negocios con 
+
+public function validatePassword($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $user = $this->getUser();
+
+            if (!$user || !$user->validatePassword($this->password)) {
+                $this->addError($attribute, 'Incorrect username or password.');
+            }
+        }
+    }
+
+Que es parte del modelo del loginform, trae el usuario, si el usuario no valida el password, manda el error, 
+
+podremos configurar el error de la soguiente manera:
+
+public function validatePassword($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $user = $this->getUser();
+
+            if (!$user || !$user->validatePassword($this->password)) {
+                Yii::$app->session->setFlash("error", 'Incorrecto');
+                $this->addError($attribute, 'Incorrect username or password.');
+            }
+        }
+    }
+
+Con esto lo que vemos es que con el usuario que ya esta loguead, viaja a traves del sistema y esta en la app, es decir lo vamos a ver con un ejemplo.
+
+
+Abrimos la vista index.php
+
+Vamosa crear un archivo nuevo llamado index.tpl
+
+
+<h1>Indice de sitio</h1>
+
+
+Ahora vamos a indicar que el controlador no invoque a index.php sino a index.tpl
+
+Abrimos e controlador SitoController
+
+ public function actionIndex()
+    {
+        return $this->render('index.tpl');
+    }
+
+
+Ahora vamos a pulsar el boton de goHome
+
+Con esto tenemos algo diferente con el cambio simplemente de la referencia
+
+podemos mandar una variable.
+
+En Index tpl Utlizaremos Smarty, con el usuario
+
+
+Donde user es un usuario que no es mi modelo, es la referencia que se hace desde yii, si yo quiero ver un objeto instancia de mi modelo, tenemos que traer identity, este ya es mi usuario.
+
+<h1>Indice de sitio</h1>
+
+{ if Yii::$app->user->identity}
+
+
+
+user de yii tiene muchas cosas utiles por ejemplo isGuest
+
+<h1>Indice de sitio</h1>
+
+{ if Yii::$app->user->isGuest}
+hola invitado 
+{else}
+hola {Yii::$app->user->identity->username} 
+{/if}
+
+
+Lo que va a pasar es que si el usuario esta logueado dira hola username y si no dira holka invitado.
+
+El error ocurre porque Smarty no entiende directamente la sintaxis de PHP como Yii::$app->user->isGuest o Html::a(...) dentro de las llaves {}. Smarty tiene su propio sistema de sintaxis que no interpreta expresiones complejas de PHP dentro de sus etiquetas por defecto.
+
+
+ Problemas detectados:
+
+
+    Líneas {use class="Yii} y {use class="yii\helpers\html} no son válidas para Smarty. No son sintaxis reconocida a menos que hayas configurado un plugin personalizado.
+
+    Estás intentando ejecutar código PHP (como Html::a(...)) dentro de {}, pero Smarty no lo permite sin ayuda explícita.
+
+    El uso de comillas también está incorrecto: te falta cerrar algunas (['site/login]) → ['site/login']).
+
+ 
+ 
+ Solución propuesta:
+
+Puedes pasar las variables necesarias desde el controlador y evitar usar código PHP directamente en el .tpl.
+1. Controlador (SiteController.php):
+
+public function actionIndex()
+{
+    return $this->render('index.tpl', [
+        'isGuest' => Yii::$app->user->isGuest,
+        'username' => !Yii::$app->user->isGuest ? Yii::$app->user->identity->username : null,
+        'loginUrl' => Yii::$app->urlManager->createUrl(['site/login']),
+    ]);
+}
+
+2. Vista index.tpl corregida:
+
+<h1>Indice de sitio</h1>
+
+{if $isGuest}
+  Hola invitado, <a href="{$loginUrl}">Login</a>
+{else}
+  Hola {$username}
+{/if}
+
+ ¿Y si quieres seguir usando clases PHP dentro del .tpl?
+
+Entonces necesitarás registrar plugins personalizados de Smarty o hacer asignaciones más avanzadas desde el renderizador. Pero lo más limpio y seguro es:
+
+    Pasar todos los datos desde el controlador.
+
+    Usar HTML y lógica de control (if, foreach, etc.) dentro del .tpl, sin llamar funciones PHP directamente.
+
+ Bonus: Evitar {use class=...}
+
+Esa sintaxis no es válida en Smarty 3.x ni 4.x, salvo que tú mismo hayas creado una extensión personalizada para permitirlo. Usa siempre el patrón: Smarty sólo para lógica de vista y HTML, y Yii para lógica de negocio y rutas.
+
+
+Lo que nos funciono es pasar la logica al controlador
+En SiteController con la accion:
+
+En el controlador SiteController.php:
+
+public function actionIndex()
+{
+    $isGuest = Yii::$app->user->isGuest;
+    $username = $isGuest ? null : Yii::$app->user->identity->username;
+    $loginLink = \yii\helpers\Html::a('Login', ['site/login']);
+
+    return $this->render('index.tpl', [
+        'isGuest' => $isGuest,
+        'username' => $username,
+        'loginLink' => $loginLink,
+    ]);
+}
+
+En tu archivo index.tpl:
+
+<h1>Indice de sitio</h1>
+
+{if $isGuest}
+  Hola invitado, {$loginLink|raw}
+{else}
+  Hola {$username}
+{/if}
+
+     |raw le dice a Smarty que no escape el HTML generado por Html::a().
+
+
+Opcio correcta:
+-------------
+
+El error:
+
+    unknown modifier 'raw'
+
+significa que el modificador raw no está registrado en tu instalación de Smarty.
+
+Este modificador sí existe en Twig (el motor de plantillas alternativo de Yii), pero no es nativo de Smarty, y por eso falla.
+ Solución recomendada
+En Smarty, para evitar que el HTML sea escapado:
+
+Utiliza el modificador noescape si existe, o simplemente desactiva el escape automático con autoescape deshabilitado, o mejor aún, solo imprime directamente la variable sin escape explícito, usando:
+
+{$loginLink nofilter}
+
+ Cambia esta línea en tu archivo index.tpl:
+
+Hola invitado, {$loginLink|raw}   ← ❌ Incorrecta
+
+por:
+
+Hola invitado, {$loginLink nofilter}   ← ✅ Correcta
+
+    nofilter es un modificador integrado en Smarty que indica que no se debe escapar la variable (es decir, permite insertar HTML sin codificación).
+
+
+ Resultado Final
+SiteController.php (ya está bien):
+
+public function actionIndex()
+{
+    $isGuest = Yii::$app->user->isGuest;
+    $username = $isGuest ? null : Yii::$app->user->identity->username;
+    $loginLink = \yii\helpers\Html::a('Login', ['site/login']);
+
+    return $this->render('index.tpl', [
+        'isGuest' => $isGuest,
+        'username' => $username,
+        'loginLink' => $loginLink,
+    ]);
+}
+
+index.tpl corregido:
+
+<h1>Indice de sitio</h1>
+
+{if $isGuest}
+  Hola invitado, {$loginLink nofilter}
+{else}
+  Hola {$username}
+{/if}
+
+El login nos redirige registrarnos, lo hacemos y nuestra vista es ahora correcta
+Indice de sitio
+Hola klvst3r 
+
+
+Estamos en login y ya podemos identificar a los usuarios logueados, vmoa a hacer algo adicional que no tiene sentido pero que pude hacerce.
+
+
+Podremos explicar como hacer referencia a cualquier modelo de nuestro aplicación 
+
+De la misma manera cmo lo hicimos anteriormente ahora con el modelo de libros
+Gracias por compartir tanto tu plantilla .tpl como tu acción en el SiteController. Te confirmo: no puedes ejecutar directamente código PHP como Book::find()->count() dentro de una plantilla Smarty, aunque lo "uses" con {use class="..."}.
+¿Cómo hacerlo correctamente?
+
+Tienes que pasar el valor desde el controlador a la vista.
+ Paso a paso
+1. Modifica tu controlador (SiteController.php):
+
+use app\models\Book;
+
+public function actionIndex()
+{
+    $isGuest = Yii::$app->user->isGuest;
+    $username = $isGuest ? null : Yii::$app->user->identity->username;
+    $loginLink = \yii\helpers\Html::a('Login', ['site/login']);
+    $bookCount = Book::find()->count(); // <<-- Aquí obtenemos el conteo
+
+    return $this->render('index.tpl', [
+        'isGuest' => $isGuest,
+        'username' => $username,
+        'loginLink' => $loginLink,
+        'bookCount' => $bookCount, // <<-- Lo enviamos a la vista
+    ]);
+}
+
+2. En tu archivo index.tpl:
+
+<h1>Índice de sitio</h1>
+
+{if $isGuest}
+  Hola invitado, {$loginLink nofilter}
+{else}
+  Hola {$username}
+{/if}
+
+<p>Total de libros registrados: {$bookCount}</p>
+
+
+
+Resultado
+
+Tu plantilla mostrará correctamente el conteo total de libros desde el modelo Book, sin necesidad de ejecutar PHP dentro del .tpl.
+
+
+
+Índice de sitio
+Hola klvst3r
+
+Total de libros registrados: 215
+
+
+Es decir que con esta linea <p>Total de libros registrados: {$bookCount}</p>, va a contar cuantos libros hay.
+
+Estamos involucrando todo dentro de una vista, 
+
+En teoria desde el controlador de Sitecontroller hacemos
+ puedes tener una acción actionIndex así de simple en tu SiteController. Ese código es válido y funcional siempre que solo necesites pasar el conteo de libros (bookCount) a la vista.
+
+Ejemplo válido:
+
+use app\models\Book;
+
+public function actionIndex()
+{
+    $bookCount = Book::find()->count(); 
+
+    return $this->render('index.tpl', [
+        'bookCount' => $bookCount
+    ]);
+}
+
+
+Hay 215 delsistema y ahora o invocamos desde la vista sino toda la logica ocurre en el controlador el query en el find()
+
+El modelo ejecuta todo pero el controlador invoca toda la busqueda.
+
+La vista no tiene nada que hacer en las llamadas.
+
+Smarty es tan estricto que no deja usar funciones que no estan dadas de alta, ya que or ejemplo si le mando a la vista un arreglo, no puedo buscar el count por que es el controlador o el modelo defeinir cuantos elementos tiene ese arreglo.}
+
+La vista solo debe desplegar o traer informacion recopilada.
+
+Login conteo de libros, alguna condicional y la lectura de todo el sistema.
+
+Vemos de una forma muy sencilla la potencia que usarmos con yii2 de una forma realmente rapida.
