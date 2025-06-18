@@ -1,0 +1,15 @@
+1. ¿Qué hace Yii2 cuando un usuario escribe información en un campo que NO está en las reglas (Model->rules())?
+
+    Omite o descarta ese input a la aplicación.
+2. ¿Cuál es una de las mejoras sugeridas para la seguridad del sistema al crear un usuario?
+    Hacer un hash con el password y un salt del sistema.
+
+3. ¿Qué se debe hacer una vez que se determina que el usuario y password corresponden a un usuario legítimo para poder operar el sistema?
+    Hacer nada, Yii2 se encarga automáticamente de gestionar la autenticación y la sesión del usuario.
+
+4. ¿Cuál es el orden de ejecución de las reglas rules()usando los CoreValidators?
+    
+    En orden de aparición en el arreglo de reglas, de arriba hacia abajo.
+
+5.  ¿Cuál es la principal responsabilidad de la clase LoginForm (que es un Model y no un ActiveRecord)?
+    Transportar la información entre la vista y el controlador y llevar la lógica de negocios del login.
