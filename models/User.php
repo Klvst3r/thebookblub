@@ -11,6 +11,8 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
 
     public $password_repeat;
+    public $email;
+     
     //public $bio;
 
     /*
@@ -188,9 +190,17 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     {
         return [
             [['username', 'password', 'password_repeat'], 'required'],
+            [['username'], 'filter', 'filter' => function($v){
+                $v = ltrim(rtrim($v));
+                $v = strtolower($v);
+                return $v;
+            }],
+            [['username'], 'unique'],
+            [['username'], 'string', 'length' => [4-100] ],
             ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
             [['bio'], 'default'],
-            [['username '], 'string', 'length' => [4-100] ],
+            [['email'], 'email'],
+            
             // Se puede añadir otras reglas que ya se tengan
         ];
     }

@@ -1,0 +1,70 @@
+Validaciones y Filtros en PHP para Gestión de Usuarios
+
+Resumen
+-------
+
+
+¿Cómo funcionan 'rules' y los 'core validators'?
+
+La función 'rules' y los 'core validators' en G son armas poderosas que pueden ahorrarnos horas de trabajo al manejar validaciones complejas. Especialmente en el desarrollo de bases de datos y aplicaciones web, donde la validación es clave para asegurar la integridad de los datos. Al utilizar estas herramientas, podemos automatizar la verificación de datos, lo que permite un flujo de trabajo más eficiente y seguro.
+¿Cómo manejar las entradas únicas en la base de datos?
+
+Cuando desarrollamos aplicaciones que manejan usuarios, es crucial asegurarse de que las entradas en ciertas columnas sean únicas. Por ejemplo, los nombres de usuario no pueden repetirse. Jou puede especificar directamente en rules que ciertos atributos sean únicos, como se muestra a continuación:
+
+// En el controlador
+public function rules()
+{
+    return [
+        ['username', 'unique'],
+        // otras reglas
+    ];
+}
+
+Esto evita conflictos de integridad y errores en la base de datos, como el "Integrity constraint violation: duplicate entry".
+¿Qué es y cómo usar 'Filter' en PHP?
+
+'Filter' es un aspecto único de los core validators que no realiza una validación estricta, sino que modifica el valor de entrada. Esto es ideal para estandarizar datos antes de guardarlos. Por ejemplo, convertir el texto a minúsculas y eliminar espacios en blanco:
+
+// Aplicando un filtro a username
+public function rules()
+{
+    return [
+        ['username', 'filter', 'filter' => function($value) {
+            return strtolower(trim($value));
+        }],
+        // otras reglas
+    ];
+}
+
+Estos filtros aseguran que los nombres de usuario sean coherentes al transformarlos a un formato estándar antes de almecenarlos en la base de datos.
+¿Cómo validar correos electrónicos?
+
+La validación de correos electrónicos es fundamental para aplicaciones que manejan registros de usuarios. G permite hacerlo fácilmente mediante los core validators.
+
+// Validación de email
+public function rules()
+{
+    return [
+        ['email', 'email'],
+        // otras reglas
+    ];
+}
+
+Esto verifica que la entrada sea un correo electrónico válido antes de intentar almacenarlo, previniendo errores y entradas incorrectas.
+Beneficios de los core validators
+
+Los core validators y la función rules no solo facilitan la vida del desarrollador al reducir el código necesario para validaciones, sino que también aseguran que las aplicaciones sean robustas y seguras. La capacidad de manejar validaciones complejas de modo simple y directo es una de las razones por las cuales G se destaca en el ámbito de desarrollo ágil.
+
+Continuar aprendiendo y profundizando en estas herramientas no solo te hará más eficiente, sino que también potenciará tus capacidades para entregar productos de alta calidad en menor tiempo
+
+
+Referencias:
+------------
+https://www.yiiframework.com/doc/guide/2.0/es/tutorial-core-validators/
+
+
+Proceso:
+---------
+
+
+

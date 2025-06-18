@@ -298,3 +298,146 @@ nosotro sdejaremos la ligica propia tal cual estamos manejando.
 
 ahora podremos traer infomaación del usuario, al sistema del sistema ya sabemos como manejarlo, entonces ya teemso e camino completo,
 
+al tener ya regisrrado el suauro el navegador nos envia el siguiente tipo de error:
+
+
+Integrity constraint violation – yii\db\IntegrityException
+SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'test' for key 'username'
+The SQL being executed was: INSERT INTO `users` (`username`, `password`, `bio`) VALUES ('test', 'a1f21e670a117ebe6f2186b8f3a8ba66', 'test')
+
+Error Info: Array
+(
+    [0] => 23000
+    [1] => 1062
+    [2] => Duplicate entry 'test' for key 'username'
+)
+
+↵
+Caused by: PDOException
+SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'test' for key 'username'
+
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/Command.php at line 1320
+
+
+lo que significa que ya existe el usuario en la base de datos.
+
+
+El error se manda desde el intento de guardar, por que ya valido el string, pero alviar a la bd, regresa el error, de 
+
+Integrity constraint violation: 1062 Duplicate entry 'test' for key 'username'
+
+el error lo da la base de datos desde el save por un false.
+
+Para esto tenemos un avemntaja, podemos decir en la reglas.
+
+[['username'], 'unique'],
+
+
+
+la respuesta a nivel de vista sera:
+
+Usuario "test" has already been taken.
+
+Este unique nos ahorran mucho trabajo de ir a reviar si ya existe o no existe, y volver a escribirlo
+
+
+Las reglas se exietuta de ariibna hacia abajo, por orden y es necesario acomodarlos en caso necesario
+
+Hay otra regla que usaremos llamada filter
+
+es una fiuncion directa de php-
+
+ public function rules()
+    {
+        return [
+            [['username', 'password', 'password_repeat'], 'required'],
+            [['username'], 'filter', 'filter' => function($v){
+                return $v;
+            }],
+            [['username'], 'unique'],
+            [['username'], 'string', 'length' => [4-100] ],
+            ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
+            [['bio'], 'default'],
+            
+            // Se puede añadir otras reglas que ya se tengan
+        ];
+    }
+
+
+Es decir  el valo que entra es el valo que regresa, pero que pasa si 
+
+ podemos 
+
+ quitar espacios y caracteres raros a la derecha, ademas de hacer minusculas ese valor insertado
+
+
+  [['username'], 'filter', 'filter' => function($v){
+                $v = ltrim(rtrim($v));
+                $v = strtolower($v);
+                return $v;
+            }],
+
+
+Si desde nuestra aplicación vamos usar algo como
+tEst
+
+
+como usuario
+
+regresara la validación como si lo hubieramos escrito como
+
+test
+
+y al ya existir ese usuario en la base de ddatos entra la regla de validación anterior-
+
+y enviara el hint siguiente:
+
+Usuario "test" has already been taken.
+
+Es importante que cuando se fultra el valor de esta variable, de username se guardara asi en la bd, algo que es muy util es guardar todo en minusculas.
+
+Si queremos utilizar el email agregamos
+
+no se va a guardar-
+public $email;
+
+
+queremos guardar el email pero queremos validar correctamente el email.
+
+[['email'], 'email'],
+
+
+en el controlador colocamos el nuevo input
+
+echo $form->field($user, 'username');
+        echo $form->field($user, 'email');
+
+
+asi de facil se agrega un nuevo comparaciones
+sinque for<osamente deba guardarse en la bd
+
+
+
+Desde la vista tendemos la validación para el campo email.-
+
+
+Email is not a valid email address.
+
+
+Prevalida el email, al intentar guardar la bd, a traves del modelo.
+
+
+para poder tener la validación del correo, algo a considerar es que ene el controlador
+
+ahora podremos pedirle al usaio que mande a la bd datos ya validados, operarlos para guardarlos.
+
+Algo a considerar en las reglas rules y por ende en los core validators.
+
+son realmente podtentes y los filtros.
+
+en la referencias
+la potencia se traduce en horas ahorradas.
+
+
+Con esot tenemos una validación mas efectiva para nuestros formularios.
+

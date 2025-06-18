@@ -37,6 +37,7 @@ class UserController extends controller {
         $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
 
         echo $form->field($user, 'username');
+        echo $form->field($user, 'email');
         echo $form->field($user, 'password')->passwordInput(); // Campo de contraseña
         echo $form->field($user, 'password_repeat')->passwordInput()->label('hola'); // Campo agregado
         echo $form->field($user, 'bio')->textArea(); // Campo de arad e teto para escribir la biografia dl usuario
@@ -49,6 +50,10 @@ class UserController extends controller {
             //return $this->render('new.tpl', ['user' => $user]);
             //return $this->render('new.tpl');
             //return $this->render('new', ['user' => $user]);
+
+        //consideraciones de validación;
+        $user->password='';
+        $user->password_repeat = '';
 
         return $this->render('new.tpl', [
             'formHtml' => $formHtml
