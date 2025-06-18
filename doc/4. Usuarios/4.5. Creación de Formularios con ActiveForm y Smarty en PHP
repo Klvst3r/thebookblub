@@ -641,12 +641,181 @@ class SmartyRenderer extends ViewRenderer
     }
 }
 
-✅ 4. Enlace en navegador
+4. Enlace en navegador
 
-Accede en el navegador:
+Accedemos en el navegador:
 
 http://localhost:7000/user/new
 
 Y se debería renderizar tu formulario correctamente.
 
+
+
+ahora vamos a dar un tercer campo password repeat, el password repeat no es parte de la base de datos, entonces se tendra que crear en el modelo, como un atributo del modelo logico, no se va a guardar y ahi se va a quedar, que sirve para corroborar sea igual al otro y servira para validación 
+
+
+1. Para ello en mi modelos agregamos el atributo
+
+password_repeat al modelo User
+En models/User.php:
+
+public $password_repeat;
+
+Esto crea un atributo lógico que no se guarda en la base de datos, pero que puedes usar para validación.
+
+
+2. Añadir la regla de validación
+
+Agrega una regla para validar que coincida con password:
+
+public function rules()
+{
+    return [
+        [['username', 'password', 'password_repeat'], 'required'],
+        ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
+        // Puedes añadir otras reglas que ya tengas
+    ];
+}
+
+
+3. Modificar el UserController para mostrar el campo password_repeat
+En UserController.php, en tu actionNew():
+
+ob_start();
+$form = ActiveForm::begin(['id' => 'new-user']);
+
+echo $form->field($user, 'username');
+echo $form->field($user, 'password')->passwordInput();
+echo $form->field($user, 'password_repeat')->passwordInput(); // 👈 Campo agregado
+
+echo Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+ActiveForm::end();
+$formHtml = ob_get_clean();
+
+
+4. La plantilla new.tpl sigue igual:
+
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo usuario</h1>
+
+{$formHtml nofilter}
+
+
+
+
+5. Opcional: Quitar password_repeat antes de guardar
+
+No es obligatorio, pero si queremos evitar cualquier intento de guardarlo, podemos hacer esto en nuestro modelo o antes de guardar:
+
+unset($this->password_repeat);
+
+Pero en general, Yii ignora los atributos no declarados como columnas si usas save() sobre una instancia de ActiveRecord.
+
+
+
+Aun no hay ninguna logica de negocios para el password y el password repeat
+
+
+Para dar un poco de usabilidad,  el password sera un password
+
+En el controlador indicamos que el atributo, 
+
+echo $form->field($user, 'password')->passwordInput();
+
+passwordInput, nos genera un campode tipo password
+
+
+Al usuario le vamos a gregar un nuevo campo que es public, esto lo hacemos en el modelo.
+
+public $bio;
+
+Esto es para poder escribir la biografia del usuario, 
+
+Asi podriamos tener todos los campos del formulario, incluyendo los radio buttons, los checkbuttons, select a modo de dropdown, 
+
+Probeamos nuestro form
+
+
+Nos indica que el usuario se ha guardado correctamente verificamos en la BD
+
+
+Con ello confirmamos que se ejecuto el controlador, valido aunque no hay nada que validar, no hay regas.
+
+Guardo y en la bd tenemos nuestro usuario.
+
+Ahora vamos a hacer un ejemplo con validación.
+
+Otro ejemplo 
+
+bobo
+patito123
+patito-passdiferente
+chido
+
+guardar.
+
+login.
+
+funciona.
+
+en la bd veremos
+
+no guardo el nombre por que no le hemos dado el permiso d e guardar, datos. se vera en el modelo.Ya que no hay ningun dato del usuario, que yo explicitamente pueda guardar.
+
+El tema de password, es exacto, eso siginifica que ni el usuario esta tamndo, el user name, solo esta encriptando, son el salt, con el username y el password.
+
+Esta nos permite crear y traer datos del usuario, ya tenemos el formulario hecho y es muy facil estetico, con la logicad del poder usar input type y usando el active form.
+
+Corrigiendo si el usuario esta logieado, no va a poder crear el usuario se va a poder crear solo sino esta logieado.
+
+Utilizamosuna logica similar en el index.
+
+
+Probamos con una modificacion en el controlador para que no permita registrar usuarios si estamos logueados
+
+ public function actionNew()
+    {
+        if(!Yii::$app->user->isGuest){
+            Yii::$app->session->setFlash('warinig', 'No puedes crear usuario estandoo logueado');
+
+            return $this->goHome(); //Genera un response que redirige a home
+        }
+        $user = new User();
+
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+            Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+            return $this->redirect(['site/login']);
+        }
+
+        ob_start();
+        $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+
+        echo $form->field($user, 'username');
+        echo $form->field($user, 'password')->passwordInput(); // Campo de contraseña
+        echo $form->field($user, 'password_repeat')->passwordInput(); // Campo agregado
+        echo $form->field($user, 'bio')->textArea(); // Campo de arad e teto para escribir la biografia dl usuario
+
+        echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
+        \yii\widgets\ActiveForm::end();
+
+        $formHtml = ob_get_clean();
+
+            //return $this->render('new.tpl', ['user' => $user]);
+            //return $this->render('new.tpl');
+            //return $this->render('new', ['user' => $user]);
+
+        return $this->render('new.tpl', [
+            'formHtml' => $formHtml
+        ]);
+    }
+
+Probamos
+http://localhost:7000/user/new
+
+Estamos sumando primero e controlador, ahora la vista, con un formulario sencillo. algo de logica de operacion en el modelo.
+
+Ahora vamos aoperar el modelo.
+
+las validaciones, las regls de negocio, que rel usurio no este en la bd, y tener la cadena completa pra que el usaurio pueda mandar información, notoros puedamos procesarla guadarla y utilizarla.
 

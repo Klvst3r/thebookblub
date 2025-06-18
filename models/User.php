@@ -9,6 +9,10 @@ use Exception;
 //class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
 class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
+
+    public $password_repeat;
+    public $bio;
+
     /*
     public $id;
     public $username;
@@ -155,6 +159,15 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
             $this->password = $this->ofuscatePassword($this->password);
         }
          return parent::beforeSave($insert);
+    }
+
+    public function rules()
+    {
+        return [
+            [['username', 'password', 'password_repeat'], 'required'],
+            ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
+            // Se puede añadir otras reglas que ya se tengan
+        ];
     }
 
 
