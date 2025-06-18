@@ -11,7 +11,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
 
     public $password_repeat;
-    public $bio;
+    //public $bio;
 
     /*
     public $id;
@@ -43,6 +43,29 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     {
         return 'users'; // Aquí especificas el nombre correcto de la tabla
     }
+
+
+    public function attributeLabels()
+    {
+        return [
+            'username' => 'Usuario',
+            'password' => 'Password',
+            'password_repeat' => 'Repetir password',
+            'bio' => 'Biografía',
+        ];
+    }
+
+
+    public function attributeHints()
+    {
+        return [
+            'username' => 'debera ser unico en el sistema',
+            'password' => 'Clave con 8 caracterirs como minimo',
+            'password_repeat' => 'Tiene que ser igual al anterior',
+            'bio' => 'Breve resera bibliografica',
+        ];
+    }
+
 
     /**
      * {@inheritdoc}
@@ -166,6 +189,8 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
         return [
             [['username', 'password', 'password_repeat'], 'required'],
             ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
+            [['bio'], 'default'],
+            [['username '], 'string', 'length' => [4-100] ],
             // Se puede añadir otras reglas que ya se tengan
         ];
     }

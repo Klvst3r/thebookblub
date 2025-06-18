@@ -1,0 +1,300 @@
+Validación de Datos en Modelos y Formularios con Yii2
+
+Resumen
+-------
+
+
+¿Cómo gestionar las validaciones en un modelo usando Yii?
+
+El manejo de validaciones en aplicaciones web es crucial para asegurar la integridad de los datos que maneja el sistema. En Yii, este proceso se optimiza a través de las funciones disponibles en los modelos, permitiendo ahorrar tiempo y evitar errores comunes. Aquí exploraremos cómo implementar estas validaciones.
+¿Cómo se estructuran las validaciones en Yii?
+
+Yii ofrece funciones como attributeLabels(), attributeHints() y rules() para gestionar las validaciones de los datos:
+
+    attributeLabels(): Retorna un arreglo con etiquetas personalizadas para cada atributo, permitiendo modificar cómo se despliega la información dentro de una vista.
+
+    public function attributeLabels() {
+        return [
+            'username' => 'Usuario',
+        ];
+    }
+
+    attributeHints(): Proporciona consejos o indicaciones adicionales para cada campo, lo que le permite a los usuarios llenar los formularios de manera más informada.
+
+    public function attributeHints() {
+        return [
+            'username' => 'Deberá ser único en el sistema',
+        ];
+    }
+
+¿Cómo implementar reglas de validación en Yii?
+
+Las reglas de validación se definen en la función rules(), retornando un arreglo de arreglos que especifica las condiciones que cada atributo debe cumplir.
+
+    Requerido (required): Se asegura que el campo no esté vacío.
+
+    public function rules() {
+        return [
+            [['username', 'password'], 'required'],
+        ];
+    }
+
+    Por defecto (default): Permite aceptar cualquier valor de entrada sin validaciones estrictas.
+
+    ['bio', 'default'],
+
+    String y longitud (string): Restrictivo para limitar el largo de texto que el campo puede contener.
+
+    ['username', 'string', 'length' => [3, 100]],
+
+¿Cómo usar validadores predeterminados de Yii?
+
+Yii facilita una serie de validadores predeterminados que cubren diferentes necesidades, desde validación de tipo de dato hasta comparaciones entre campos:
+
+    Valida tipo entero (integer): Sólo permite números enteros.
+
+    Comparar (compare): Compara un campo con otro dentro del mismo modelo, esencial para confirmaciones como las de la contraseña.
+
+    ['password', 'compare', 'compareAttribute' => 'password_repeat'],
+
+Estos validadores pueden combinarse y personalizarse para cumplir con políticas más detalladas de validación, como garantizar que un campo sea único o restringir la entrada a valores predeterminados.
+¿Qué hacer en caso de error en datos de usuario?
+
+Cuando los datos de un usuario no pasan las validaciones, es fundamental manejar los errores de manera clara para evitar confusiones y mejorar la experiencia de usuario.
+
+if (!$model->validate()) {
+    // Restablecer campos sensibles como contraseñas
+    $model->password = '';
+}
+
+Implementar estrategias para manejar errores no solo refuerza la seguridad, sino que también impulsa una mejor interacción con el usuario.
+Herramientas adicionales y referencias
+
+Para quienes deseen expandir sus conocimientos sobre validadores en Yii, es recomendable revisar la lista de Core Validators de Yii, donde se detallan opciones adicionales y ejemplos prácticos.
+
+Con prácticas robustas de validación, el desarrollo web no solo alcanza mayores niveles de seguridad, sino que también ofrece una experiencia de usuario más amigable y eficaz.
+
+
+
+
+Referencias:
+--------------
+https://www.yiiframework.com/doc/guide/2.0/es/tutorial-core-validators
+
+Comentarios:
+------------
+Me llamo mucho la atencion la forma de validacion despues de perder el foco (Ahi hay un javascript haciendo la magia).
+
+Y lo segundo como desde el contralador se envio esta linea y eso se refleja en el formulario, interesante.
+
+$user->password = '';
+```![](https://static.platzi.com/media/user_upload/aplicando%20estilos-6964fc6d-37aa-4079-9c34-34283dfa38c6.jpg)
+
+
+
+También es posible personalizar los mensajes de error
+
+Ejemplo:
+
+public function rules()
+    {
+        return [
+            // Validador de email con mensaje en español
+            ['email', 'email', 'message' => 'El formato del correo electrónico no es válido.'],
+            
+            // Validador de longitud con mensaje personalizado
+            ['username', 'string', 'min' => 3, 'max' => 12, 'tooShort' => 'El nombre de usuario debe tener al menos 3 caracteres.', 'tooLong' => 'El nombre de usuario no puede tener más de 12 caracteres.'],
+            
+            // Validador de número con mensaje personalizado
+            ['age', 'integer', 'message' => 'La edad debe ser un número entero.'],
+
+            // Validación de valor requerido
+            [['username', 'email'], 'required', 'message' => 'Este campo es obligatorio.'],
+        ];
+    }
+```public function rules() { return \[ // Validador de email con mensaje en español \['email', 'email', 'message' => 'El formato del correo electrónico no es válido.'], // Validador de longitud con mensaje personalizado \['username', 'string', 'min' => 3, 'max' => 12, 'tooShort' => 'El nombre de usuario debe tener al menos 3 caracteres.', 'tooLong' => 'El nombre de usuario no puede tener más de 12 caracteres.'], // Validador de número con mensaje personalizado \['age', 'integer', 'message' => 'La edad debe ser un número entero.'], // Validación de valor requerido \[\['username', 'email'], 'required', 'message' => 'Este campo es obligatorio.'], ]; }
+
+
+
+Proceso:
+---------
+
+
+ya tenemos ahorita desde el controlador, manejando el request por completo, ya tenemos por otro lado que el controlador manda e imprime una vista, la vista ya esta hecha con el formulario.
+
+A la hora de slavar manda algunos vacios, por lo que es critico, la validación que vienen desde el usuario.
+
+
+Ahora vamos a trabajar en el modelo con cambios en la bd.
+
+La biol la vamos a tener en la bd
+en el squema 
+
+Creamos un archivo sql en
+schema/alter.sql
+
+    alter table users add column bio text after password;
+
+
+Copiamos en terminal de la bd y ejecutamos
+
+
+Ahora en el modelo, con una funcion que regresa un arreglo con las etiquetas que le vamos a poner la vista a cada atributo, 
+
+
+
+public static function attributeLabels(){
+        return [
+            'username' => 'usuario',
+        ];
+    }
+
+
+Accedemos a nuestro url para la generación del usuario
+
+http://localhost:7000/user/new
+
+
+
+Los nombres de las etiquetas en el modelo pueden persoanlizarse de la siguiente manera:
+
+public function attributeLabels()
+{
+    return [
+        'username' => 'Usuario',
+        'password' => 'Clave',
+        'password_repeat' => 'Repetir clave',
+        'bio' => 'Biografía',
+    ];
+}
+
+
+
+
+Podemos crear otro 
+
+
+    public function attributeHints()
+    {
+        return [
+            'username' => 'debera ser unico en el sistema',
+            'password' => 'Clave con 8 caracterirs como minimo',
+            'password_repeat' => 'Repetir clave para verificar',
+            'bio' => 'Breve resera bibliografica',
+        ];
+    }
+
+
+Yii con la maqinaria de formularios, y las vistas se encargan de todo lo demas, podriamos sobreescribimos en el modelo, en la vista
+
+echo $form->field($user, 'password_repeat')->passwordInput()->label('hola');
+
+
+No tiene sentido soloera para mostrar.
+
+
+validaciones
+
+
+Las validaciones vienen con unafcuncion muy sencilla, potente en el fondo pero sencilla de escribir.:
+
+Con un arreglo de arreglos
+
+
+ public function rules()
+    {
+        return [
+            [['username', 'password', 'password_repeat'], 'required'],
+            ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
+            // Se puede añadir otras reglas que ya se tengan
+        ];
+    }
+
+Por cada campo puedo poner, el nombre del campo areglos de dos elementos, los campos y despues la caracteriticas exigidas
+
+con esto el formualrio validara los campos poniendo
+
+Usuario cannot be blank.
+
+si esta vacio.
+
+Se entiende que esta validación puede ser sumanente compleja 
+
+Todo el il input que venga del usuario tiene que estar, declarado en el modelo, si no esta declarado, no lo considera y no lo guarda, por cuestiones de seguridad.
+
+La bio, la quiero pero no es importante, no tiene que ser obligatoria por eso podemos dejarla como
+
+[['bio'], 'default'],
+
+con esto me permitira guardar.
+
+Hemos usado mas validator.
+
+Google:
+yii2 core Validators
+
+Para cualquier input que venga podremos usar estos validadores, si si es o no valido este campo.
+
+
+Ahora estamos utilizando el string.
+
+[['username '], 'string', 'length' => [4-100] ],
+
+
+hemos puesto el validador compare
+
+
+['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Las contraseñas no coinciden.'],
+
+Podemos usarlo como:
+
+['password', 'compare', 'compareAttribute' => 'password_repeat', 'message' => 'Las contraseñas no coinciden.'],
+
+
+Cuando recargamos los datos del formulario son los introducidos anteriormente por ello, podemos hacer lo siguiente.
+
+Ennuestro controlador tenemos la siguienyte condición
+
+ if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+            Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+            return $this->redirect(['site/login']);
+        }
+
+si el usuario no ha enviado información y no ha sido validada o guardada, sera redirigida al login, y se acabo no hay mao terminal
+
+Pero si el usuario esta validado y hay información proveniente del formulario y pasan las rreglas la información sera persistida en le bd.
+
+
+
+Lo que podemos hcaer es algo como que si el usuario no validacion
+
+
+
+        if ($user->load(Yii::$app->request->post()){        
+        
+            if($user->validate()){
+            
+                if($user->save()) {
+                    Yii::$app->session->setFlash("success", 'Usuario guardado correctamente');
+                    return $this->redirect(['site/login']);
+                    }
+                }else{
+                    throw new Exception("Error al salvar el usuario");
+                }
+            }
+            $user->password = '';
+        }
+
+podemos decir que el usaurio esta vacio para que no lo mande al formulario y no sepamos que dice exacatamente.
+
+Pero hay que poner la reglas
+
+[['password_repeats'], 'default'],
+
+No importa lo que venga del repeat, lo que le estamos inidcando es que lo acepte, si no lo envia a null,
+
+nosotro sdejaremos la ligica propia tal cual estamos manejando.
+
+
+ahora podremos traer infomaación del usuario, al sistema del sistema ya sabemos como manejarlo, entonces ya teemso e camino completo,
+

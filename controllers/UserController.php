@@ -24,7 +24,7 @@ class UserController extends controller {
         if(!Yii::$app->user->isGuest){
             Yii::$app->session->setFlash('warinig', 'No puedes crear usuario estandoo logueado');
 
-            return $this->goHome();
+            return $this->goHome(); //Genera un response que redirige a home
         }
         $user = new User();
 
@@ -38,7 +38,7 @@ class UserController extends controller {
 
         echo $form->field($user, 'username');
         echo $form->field($user, 'password')->passwordInput(); // Campo de contraseña
-        echo $form->field($user, 'password_repeat')->passwordInput(); // Campo agregado
+        echo $form->field($user, 'password_repeat')->passwordInput()->label('hola'); // Campo agregado
         echo $form->field($user, 'bio')->textArea(); // Campo de arad e teto para escribir la biografia dl usuario
 
         echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-primary']);
