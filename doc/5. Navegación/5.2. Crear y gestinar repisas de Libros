@@ -1,0 +1,322 @@
+Crear y Gestionar Repisas de Libros en PHP
+
+
+Resumen
+-------
+¿Cómo crear una nueva tabla y lógica de negocio en una aplicación?
+
+Crear una nueva funcionalidad en una aplicación existente no tiene por qué ser complicado. En este contenido, nos enfocaremos en cómo añadir una nueva funcionalidad que permite al usuario almacenar qué libros posee. Desde la creación de una tabla hasta la implementación de la lógica de negocios, te mostraremos cómo construir y expandir un sistema de gestión de libros. Acompáñanos en este sencillo pero poderoso viaje de desarrollo.
+¿Cómo crear la tabla para almacenar los libros del usuario?
+
+Una tabla en una base de datos es esencial para guardar información relevante de los usuarios. Para empezar, definimos una nueva tabla llamada UserBooks que almacena datos sobre los libros que tiene cada usuario. La creación es bastante directa:
+
+CREATE TABLE IF NOT EXISTS UserBooks (
+  UserBookID INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  UserID INTEGER NOT NULL,
+  BookID INTEGER NOT NULL,
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+Esta tabla simple utiliza un UserBookID como clave primaria y enlaza los UserID y BookID.
+¿Cómo integrar la tabla con la lógica de negocios?
+
+Una vez creada la tabla, el siguiente paso es integrar esta nueva funcionalidad en la lógica de nuestra aplicación, comenzando desde la vista hacia el backend.
+
+    Añadir un enlace en la vista del libro: Para empezar, en la vista detallada de cada libro, añadimos un enlace de HTML que permite al usuario indicar que posee dicho libro.
+
+    <a href="controller.php?action=IownThisBook&book_id=<?= $book->id ?>">Tengo este libro</a>
+
+    Manejando la acción en el controlador: Es fundamental tener un controlador que procese esta información. Añadimos una función al controlador de libros para manejar la acción de "Yo tengo este libro".
+
+    public function actionIownThisBook($bookId) {
+      if (Yii::$app->user->isGuest) {
+        return $this->goHome();
+      }
+
+      $userBook = new UserBook();
+      $userBook->userID = Yii::$app->user->identity->id;
+      $userBook->bookID = $bookId;
+      if ($userBook->save()) {
+        Yii::$app->session->setFlash('success', 'Chido');
+      }
+
+      return $this->redirect(['book/detail', 'id' => $bookId]);
+    }
+
+¿Cómo crear un modelo para la nueva tabla?
+
+Los modelos son piezas clave que conectan la base de datos con la lógica de programación. Creamos un modelo para UserBook:
+
+class UserBook extends \yii\db\ActiveRecord {
+   public static function tableName() {
+     return 'UserBooks';
+   }
+}
+
+Este modelo es necesario para manejar la lógica de almacenamiento de la información de los libros que poseen los usuarios.
+¿Qué consideraciones de seguridad y validación debo tener?
+
+    Validaciones de Usuario: Asegúrate de validar que el usuario está autenticado antes de permitir el acceso a la funcionalidad de tener libros.
+
+    Validación de Existencia de Datos: Antes de guardar, podrías verificar que el libro realmente existe y que el usuario no está intentando modificar datos no permitidos.
+
+    Uso de HTTP GET y POST: Esta implementación utiliza una consulta GET para señalar la propiedad de un libro; sin embargo, para acciones más críticas, como calificar un libro, es preferible utilizar peticiones POST.
+
+Con estos pasos, ampliamos una aplicación de libros, potenciando ligeramente su funcionalidad de manera eficaz. Aprende a aprovechar al máximo la estructura de tu aplicación para desarrollar nuevas características que tus usuarios apreciarán.
+
+
+Comentarios:
+------------
+
+
+porque no utiliza migrations? estaría padre que explicara esa parte y asi cada vez que hace cambios en la estructura de la tabla se tendría un proceso que ejecutar
+
+El profesor dijo que queria tener mas control sobre la creacion de las tablas usando los querys.
+
+Supongo que de esa forma nos anima a investigar otra forma de hacer las cosas.
+
+Y si, con las migraciones en pie, es tan facil como:
+
+yii migrate/down 7
+
+(realizar modificaciones o crear nuevas)
+
+yii migrate
+
+yii user/new admin admin
+
+yii platzi/books local/books3.csv
+
+listo, sistema andando de nuevo
+
+
+
+Procedimiento:
+--------------
+
+Ahora con una historia completamente nueva, no esta ni la tabla ni la logica, pero es muy sencilla, del listado d elibros yo voy a poder darle click al detalle, y en el detalle podemos decir yo tengo este libro y es crear mi propia reiza, de los qwue tengo yo.
+
+
+Desde la tabla, creamos.
+
+En el archivo schema.sql
+
+
+
+create table if not exists user_books (
+  user_books_id integer unsigned primary key auto_increment,
+  user_id integer not null,
+  book_id integer not null,
+  created_at timestamp not null default current_timestamp,
+	modified_at timestamp not null default current_timestamp on update current_timestamp,
+	unique key no_rep(user_id, book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+
+desc user_books;
++---------------+------------------+------+-----+---------------------+-------------------------------+
+| Field         | Type             | Null | Key | Default             | Extra                         |
++---------------+------------------+------+-----+---------------------+-------------------------------+
+| user_books_id | int(10) unsigned | NO   | PRI | NULL                | auto_increment                |
+| user_id       | int(11)          | NO   | MUL | NULL                |                               |
+| book_id       | int(11)          | NO   |     | NULL                |                               |
+| created_at    | timestamp        | NO   |     | current_timestamp() |                               |
+| modified_at   | timestamp        | NO   |     | current_timestamp() | on update current_timestamp() |
++---------------+------------------+------+-----+---------------------+-------------------------------+
+
+Tenemos una nueva tabla que se llama user_books;
+
+
+ahora atacaremos este problema ddesde a vista hacia el backend y despues, como leemos esta información, este caso es muy interesante.
+
+
+En la vista
+
+views/book/detail.tpl
+
+
+{use class="yii\helpers\Html"}
+
+{assign var="this->title" value=$book->title}
+
+<h1>{$book->title|escape}</h1>
+
+<p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
+
+<p>{Html::a('tengo este libro',['book/i-own-this-book', 'book_id' => id])}
+
+<p>{Html::a('Regresar a la lista', ['book/all'], ['class' => 'btn btn-primary']) nofilter}</p>
+
+
+Vamos al controlador
+
+BookController
+
+
+
+ public function actionIOwnThisBook($book_id){
+        return 'chido';
+    }
+
+
+
+http://localhost:7000/book/i-own-this-book?book_id=2
+Devuelve
+chido
+
+Ya tenemos la ruta creada, ahor vamos a darle la logica de negocios para almacenar eto, y necesitamos al macenar información en una tabla nueva
+
+Para ello, vamos a crear un modelo epecifico para esto.
+
+Creamos el modelos UserBook.php
+
+Copiamos de book lo basico 
+
+<?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class UserBook extends ActiveRecord
+{
+
+    
+
+
+
+    public static function tableName(){
+        return 'user_books';
+    }
+
+    public function getId(){
+        return $this->user_book_id;
+    }
+
+    public function rules()
+    {
+        return [
+            [['user_id', 'book_id'], 'required'],
+            [['user_id', 'book_id'], 'integer'],
+            [['user_id', 'book_id'], 'unique', 'targetAttribute' => ['user_id', 'book_id'], 'message' => 'Ya registraste este libro.'],
+        ];
+    }
+
+
+}
+
+En el controlador agregamos las acciones
+
+
+use app\models\UserBook;
+
+
+
+
+ public function actionDetail($id){
+        $book = Book::findOne($id);
+
+        if(empty($book)){
+            //TODO: Error
+            //return "Libro no encontrado";
+            //return $this->redirect(['site/index']);
+
+            Yii::$app->session->setFlash('error', 'ese libro no existe');
+
+            // Podemos sustituir con el siguiente shortcut
+            return $this->goHome();
+
+        }
+        // return $book->title;
+        //return $book->toString();
+         $flash = null;
+        if (Yii::$app->session->hasFlash('success')) {
+            $flash = Yii::$app->session->getFlash('success');
+        } elseif (Yii::$app->session->hasFlash('error')) {
+            $flash = Yii::$app->session->getFlash('error');
+        }
+
+        return $this->render('detail.tpl', [
+            'book' => $book,
+            'flash' => $flash,
+        ]);
+    }
+
+
+    ...
+
+    public function actionIOwnThisBook($book_id){
+        //return 'chido';  //Solo loutilizamos para verificar la ruta
+        //Validamos por que estamos utilizando identity
+        if(Yii::$app->user->isGuest){
+            return $this->goHome();
+        }
+
+        $ub =  new UserBook;
+
+        $ub->user_id = Yii::$app->user->identity->id;
+        $ub->book_id = $book_id;
+        // $ub->save();
+        // Yii::$app->session->setFlash('success', 'chido!');
+        if ($ub->save()) {
+            Yii::$app->session->setFlash('success', '¡Libro agregado a tu colección!');
+        } else {
+            Yii::$app->session->setFlash('error', 'No se pudo registrar el libro.');
+        }
+
+
+        return $this->redirect(['book/detail', 'id' => $book_id]);
+
+    }
+
+
+Vista detail.tpl actualizada con mensajes flash
+
+Agrega esta parte antes del título:
+
+{use class="yii\helpers\Html"}
+
+{if $flash}
+    <div class="alert alert-success">
+        {$flash}
+    </div>
+{/if}
+
+<h1>{$book->title|escape}</h1>
+
+<p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
+
+<p>{Html::a('Tengo este libro', ['book/i-own-this-book', 'book_id' => $book->id]) nofilter}</p>
+
+<p>{Html::a('Regresar a la lista', ['book/all'], ['class' => 'btn btn-primary
+
+
+Resultado esperado
+
+    Cuando hacemos clic en “Tengo este libro”, se llama a actionIOwnThisBook.
+
+    Se guarda el libro en UserBook y se crea un mensaje flash.
+
+    Luego, redirecciona a book/detail.
+
+    actionDetail() recupera ese mensaje flash y lo muestra arriba del título.
+
+¿Qué pasa si el usuario no está autenticado?
+
+Actualmente tenemos esta verificación en actionIOwnThisBook():
+
+if (Yii::$app->user->isGuest) {
+    return $this->goHome();
+}    
+
+Esto evita correctamente el acceso. 
+
+Con esto tenemoscreada unatabla nueva, un modelo nuevo, un logica de negocio nueva dentro una accion completamente nueva, darle una nueva funcionalidad completamente nueva a nuestro sistema.
+
+Es un ejenplo practico,
+
+Nos aseguramos que el lilbro exista, darle mas seguridad, el usuario tenga algunas reglas que el usuario deba cumplirlas, admeas como los datos del modelo fueron ingresados a traves de codigo y no del usuario no fue necesario crear rules para userbook, por que estan asignadas en codigo por logica de negocios no por el usuario, estamos viendo un crecimiento de la aplicación rapida facil, y realmente potente.
+
+Vamos a continuación con otro ejemplo para mandar la información vie get boo_id a traves de la url y en el siguiente caso vamos a calificar un libro, mandando la información via post.
+

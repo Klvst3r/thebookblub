@@ -16,6 +16,8 @@ use yii\helpers\Html;
 
 use app\models\Author;
 
+use app\models\UserBook;
+
 
 class BookController extends controller {
     public function actionAll(){
@@ -36,9 +38,21 @@ class BookController extends controller {
 
             // Podemos sustituir con el siguiente shortcut
             return $this->goHome();
+
         }
         // return $book->title;
-        return $book->toString();
+        //return $book->toString();
+        $flash = null;
+if (Yii::$app->session->hasFlash('success')) {
+    $flash = Yii::$app->session->getFlash('success');
+}
+
+var_dump($flash); exit;
+
+        return $this->render('detail.tpl', [
+            'book' => $book,
+            'flash' => $flash,
+        ]);
     }
 
   public function actionNew()
@@ -77,5 +91,31 @@ class BookController extends controller {
             'book' => $book,
             'flash' => $flash,
         ]);
+    }
+
+
+
+    public function actionIOwnThisBook($book_id){
+        //return 'chido';  //Solo loutilizamos para verificar la ruta
+        //Validamos por que estamos utilizando identity
+        if(Yii::$app->user->isGuest){
+            return $this->goHome();
+        }
+
+        $ub =  new UserBook;
+
+        $ub->user_id = Yii::$app->user->identity->id;
+        $ub->book_id = $book_id;
+        // $ub->save();
+        // Yii::$app->session->setFlash('success', 'chido!');
+        if ($ub->save()) {
+            Yii::$app->session->setFlash('success', '¡Libro agregado a tu colección!');
+        } else {
+            Yii::$app->session->setFlash('error', 'No se pudo registrar el libro.');
+        }
+
+
+        return $this->redirect(['book/detail', 'id' => $book_id]);
+
     }
 }
