@@ -1,0 +1,443 @@
+Creación y Gestión de Libros en Aplicaciones Web
+
+Resumen
+--------
+¿Cómo crear un controlador y acción en una aplicación web?
+
+Crear un controlador y una acción es fundamental en el desarrollo de aplicaciones web, especialmente para implementar la lógica de negocio requerida. Primero, se inicia definiendo el controlador donde se declarará una nueva función pública, como actionNew. Dentro de esta acción se utilizará la lógica de negocio para la creación de un libro.
+Código de ejemplo
+
+public function actionNew() {
+    $book = new Book();
+    if ($book->load(\G\App::request()->post()) && $book->validate()) {
+        if ($book->save()) {
+            \G\App::session()->setFlash('success', 'Libro creado');
+            return $this->redirect(['books']);
+        }
+    }
+    return $this->render('form', ['book' => $book]);
+}
+
+En este proceso:
+
+    Carga de datos: Se obtienen los datos a través de una petición POST.
+    Validación: Se verifica que los datos cumplan con los requisitos definidos.
+    Guardado: Si todo es correcto, los datos se guardan en la base de datos.
+    Redirección: Después, se redirige al usuario a la lista de libros, mostrando un mensaje de éxito.
+
+¿Por qué usar una plantilla de formulario (form.tpl)?
+
+Usar una plantilla de formulario, como form.tpl, es una práctica recomendada porque permite reutilizar el mismo formulario tanto para crear como para editar registros. Esto ayuda a mantener un código más limpio y estructurado.
+Implementación del formulario
+
+use \SGWidgets\ActiveForm;
+
+$form = ActiveForm::begin(['id' => 'book-form']);
+echo $form->field($book, 'title')->textInput();
+ActiveForm::end();
+
+En esta sección, se utiliza una clase de formulario activa que permite generar campos y gestionar la entrada del usuario de manera sencilla y eficiente.
+¿Cómo gestionar el acceso solo para usuarios registrados?
+
+Es crucial establecer restricciones de acceso para ciertas acciones, como la creación de un libro, evitando que usuarios no autenticados accedan a esta funcionalidad.
+Código de ejemplo
+
+if (\G\App::user()->isGuest()) {
+    return $this->redirect(['site/login']);
+}
+
+El código anterior redirige a los usuarios a la página de inicio de sesión si intentan acceder al formulario sin estar autenticados.
+Navegación y autenticación
+
+El sistema contempla una opción en la página de inicio donde los usuarios pueden comenzar a crear un libro, pero requerirá autenticación previa para acceder al formulario.
+¿Cómo se configuran las etiquetas y validaciones del modelo?
+
+Configurar etiquetas y reglas de validación ayuda a que los datos sean coherentes y estén preparados para su almacenamiento.
+Ejemplo de etiquetas y reglas de validación
+
+public function attributeLabels() {
+    return [
+        'title' => 'Título',
+    ];
+}
+
+public function rules() {
+    return [
+        [['title', 'author_id'], 'required'],
+        ['author_id', 'integer'],
+    ];
+}
+
+Las etiquetas permiten presentar los nombres de los campos de manera amigable para los usuarios, mientras que las reglas de validación aseguran que los datos introducidos cumplen con los criterios establecidos, como requerimientos de tipo de dato.
+¿Cómo crear un drop-down list de autores?
+
+Un drop-down list facilita la selección de un autor ya existente al crear un libro, mejorando la usabilidad del formulario.
+Generar una lista de autores
+
+Primero, se define una función estática en el modelo Author para obtener los autores en el formato deseado para el drop-down list.
+
+public static function getAuthorList() {
+    $authors = self::find()->orderBy('name')->all();
+    return ArrayHelper::map($authors, 'id', 'name');
+}
+
+Luego, se utiliza esta función para poblar la lista desplegable en el formulario de creación de libros.
+Código de uso en formularios
+
+echo $form->field($book, 'author_id')->dropDownList(Author::getAuthorList());
+
+Este fragmento de código asegura que el drop-down list esté poblado con autores existentes y ordenados alfabéticamente.
+
+Siempre es importante recordar que los usuarios deben tener una experiencia intuitiva y segura al manejar el sistema. Estos ejemplos fomentan la creación de aplicaciones eficientes y de fácil manejo
+
+
+
+Comentarios:
+En el minuto 3:50 debemos ingresar a books/new pero en la edición supongo que se equivocaron y pusieron user/new
+
+
+Para que funcionara book/new, tuve que configurar las rutas en web.php.
+
+            'rules' => [
+                'books' => 'book/all',
+                'book/new' => 'book/new',  // Agrega esta línea
+                'book/<id>' => 'book/detail',
+                'authors' => 'author/all',
+                'authors/new' => 'authors/new',
+                'author/search/<search:\w+>' => 'author/all',
+                'author/<id:\d+>' => 'author/detail'           
+            ],
+
+
+Buenas tardes compan;ero, debe haber un error en como estas llamando a las rutas.
+
+El objetivo del urlManager es mapear un nombre hacia la ruta real:
+
+'books' => 'book/all'
+
+Pero estas lineas no son necesarias, el alias es igual:
+
+'book/new' => 'book/new',
+
+'authors/new' => 'authors/new'
+
+Es por eso que pienso hay algun problema cuando haces el llamado de las rutas. para el caso de crear el libro es asi:
+
+{Html::a('Crear libro', ['book/new'])}
+
+Si el método save ejecuta por defecto un validate, no estaríamos ejecutando dos veces el validate??
+Sí, tienes razón. Si quisieras optimizar ejecución podrías mandarlo sin validación (con $model->save(false); pero es tan rápida que casi nunca lo hago.
+
+
+Procedimiento:
+--------------
+
+Veremos user store, 
+
+
+Empezamos creando un lirbo dando lo de alta. Comenzando por el controlador y la acción.
+
+Vamos a iniciar la logica de nogico con una nueva accion en BookController
+
+public function actionNew(){
+        $book = new Book;
+        
+        return $this->render('new.tpl', ['book'=>$book]);
+    }
+
+Este es el caso de exito;
+
+public function actionNew(){
+        $book = new Book;
+
+        if($book->load(Yii::$app->request->post())){
+            if($book->save()){
+                Yii::$app->session->setFlash('success','libro creado');
+                return $this->redirect(['book/all']);
+            }
+        }
+
+        return $this->render('new.tpl', ['book'=>$book]);
+    }
+
+Primero intenta cargar cuando llega a la acción, el book, si logra cargar, valida, si logra validar, salva, si logra ssalvar me redireccióna a todos los libros con un mensaje de libro creado.
+
+Ahora vamos a crear el new.tpl. en lugar de llamarlo new lo llamaremos form
+
+Es el formulario, de creación, por que este mismo formulario lo vamos a poder utilizar para editar.
+
+
+ahora en views.
+
+view s/book/form.tpl
+
+{use class="yii\widgets\ActiveForm" typy="block"}
+
+{title} Crear libro
+<h1>{$this->title}</h1>
+
+
+Vamos a modificar la logica en el controlador por que smarty y yii 2 ya no utilizan actualmente esta forma, ya que en la vista estamos accediento directamente a Yii::$app, lo cual Smarty ya no recomienda. La solución es mover esa lógica (como los flashes) al controlador, y solo pasar los datos necesarios a la vista.
+
+Vamos a modificar la logica del flashes al controlador.
+
+public function actionNew()
+{
+    $book = new Book();
+    $flash = null;
+
+    if ($book->load(Yii::$app->request->post()) && $book->save()) {
+        Yii::$app->session->setFlash('success', 'Libro creado correctamente');
+        return $this->redirect(['book/all']);
+    }
+
+    // Captura el flash (si existe) para pasarlo a la vista
+    if (Yii::$app->session->hasFlash('success')) {
+        $flash = Yii::$app->session->getFlash('success');
+    }
+
+    ob_start();
+    $form = \yii\widgets\ActiveForm::begin();
+
+    echo $form->field($book, 'title');
+    echo $form->field($book, 'author');
+    echo $form->field($book, 'published_date')->input('date');
+    echo $form->field($book, 'isbn');
+    echo \yii\helpers\Html::submitButton('Guardar', ['class' => 'btn btn-success']);
+
+    \yii\widgets\ActiveForm::end();
+    $formHtml = ob_get_clean();
+
+    return $this->render('form.tpl', [
+        'formHtml' => $formHtml,
+        'book' => $book,
+        'flash' => $flash,
+    ]);
+}
+
+
+
+Ahora modifica la vista form.tpl
+
+Removemos el acceso directo a Yii::$app y usamos la variable flash:
+
+{use class="yii\helpers\Html"}
+
+<h1>Registrar nuevo libro</h1>
+
+{if $flash}
+    <div class="alert alert-success">
+        {$flash}
+    </div>
+{/if}
+
+{$formHtml nofilter}
+
+
+Con eso, ya no usamos directamente Yii::$app en la vista y evitamos el warning deprecado. Al ingresar accedan
+http://localhost:7000/book/new
+
+tendremos nuestro formulario funcional.
+
+enla acción 
+
+ if(Yii::$app->user->isGuest){
+            return $this->goHome();
+        }
+
+agregamos  una condición que buena práctica para proteger la acción de creación solo para usuarios autenticados.      
+
+Por ello para poder agregar necesitamos autenticarnos, y en la vista del sitio en index.tpl
+
+
+agregamos
+{use class="yii\helpers\Html"}
+
+
+Ya que no podemos usar directamente clases estáticas como Html::a() a menos que se registren primero con la linea anterior.
+
+Ahora ya podremos utilizar el enlace de la situiente manera:
+
+<p>{Html::a('Crear libro', ['book/new'])}</p>
+
+
+
+ahor aya podemos crear el libro y dar paso al formulario.
+
+
+continuando el tema del formulario, ahora en el modelo agregamos:
+
+
+  Para las etiquetas podremos hacer uso de
+
+      public function attributeLabels(){
+        return [
+            'title' => 'Titulo',
+        ];
+    }
+
+
+
+y sugerencia de algunas reglas de validación:
+
+
+ public function rules()
+    {
+        return [
+            [['title', 'author', 'published_date', 'isbn'], 'required'],
+            ['isbn', 'string', 'max' => 13],
+        ];
+    } 
+
+
+
+Teniendo en consideración la estructura de nuestra tabla books
+
+desc books;
++-----------+------------------+------+-----+---------+----------------+
+| Field     | Type             | Null | Key | Default | Extra          |
++-----------+------------------+------+-----+---------+----------------+
+| book_id   | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| title     | varchar(500)     | YES  |     | NULL    |                |
+| author_id | int(10) unsigned | NO   |     | NULL    |                |
++-----------+------------------+------+-----+---------+----------------+
+
+Entonces
+
+las reglas sera:
+
+public function rules()
+    {
+        return [
+            [['title', 'author_id'], 'required'], // usa el validador 'required'
+            ['author_id', 'integer'],             // validador correcto
+        ];
+    }
+
+
+En elformulario
+
+Dandole mas intelegiencia a nuestroejercicio, ya ue vamos a utilizar un dropdownlist
+
+
+endriamos que tener como paremetro por lo menos un valor del arreglo al valor 1 que es el inicial.
+
+
+echo $form->field($book, 'author_id')->dropDownList([1 => 'Fulano']);
+
+Pero como queremos meter los autores que tenemos registrados en el sistema, vamos a crear una funcion estatica en ahotr que me traiga todo los autores en el formato que yo quiero.
+
+
+
+Agregamos a nuestro contolador el use class
+
+
+use app\models\Author;
+
+de autor
+En nuestro controlador de la accion de new tenemos:
+
+echo $form->field($book, 'author_id')->dropDownList(Author::getAuthorList());
+
+pero estoindicara que falta el metodo getAuthorList
+
+Por ello en el modelo de Author
+
+
+public static function getAuthorList(){
+      // Nos traemos a todos los autores
+      $authors = self::
+
+     }
+
+
+El objeto author que a su vez es un active model, en active record. 
+
+
+ublic static function getAuthorList(){
+      // Nos traemos a todos los autores
+      $authors = self::find()->all();
+      $reet = [];
+      foreach($authors as $author){
+         $ret[$author->id] = $author->name;
+      }
+    return $ret;
+     }
+
+necesitamos un return o ret que es un arreglo vacio, la llave tiene que ser el id que a su vez sera el id = author-name
+
+Ahora vamos a ver en el dropdown list de la vista
+
+Tenemos a todos los autores, 
+
+podemos registrar el libro
+
+No te lo crear del autor Jordi Cruz
+
+Otro ejercicio
+
+Algo de numeros del autor Eli Maor 
+
+Hay dos errores marcados porlo que en el modelo Author modificamos la funcion
+
+ public static function getAuthorList(){
+      // Nos traemos a todos los autores
+      $authors = self::find()->all();
+       $ret = [];
+         foreach (self::find()->all() as $author) {
+            $ret[$author->id] = $author->name;
+         }
+         return $ret;
+      }
+
+Y en el tenmplate donde visualizamos todos los autores, es decir en  book/all.tpl
+
+{use class="yii\helpers\Html"}
+<h1>Todos los libros {$titulo} 
+{if $titulo > 2}muchos{else}pocos{/if}
+
+</h1>
+
+<ol>
+{foreach from=$books item=book}
+    <li>{Html::a($book->toString(), ['book/detail', 'id' => $book->id])}</li>
+{/foreach}
+</ol>
+
+Agregamos
+
+Error de uso de Html::a(...) en una plantilla Smarty
+
+El error:
+
+Using unregistered static method "Html::a(...)" in a template is deprecated...
+
+Como ya hicimos antes, necesitamos registrar la clase Html en la vista Smarty donde estemos generando ese enlace.
+
+Por ejemplo, en la vista donde haces algo como:
+
+<p>{Html::a($book->title, ['book/detail', 'id'=>$book->id])}</p>
+
+Necesitamos asegurar que al inicio del archivo tengamos:
+
+{use class="yii\helpers\Html"}
+
+Así ya no veremos el warning y el link funcionará correctamente.
+
+Recomendación adicional: mejor sintaxis para enlaces
+
+En Smarty, si estás pasando una variable, como en:
+
+{Html::a($book->title, ['book/detail', 'id'=>$book->id])}
+
+puede ser más seguro hacer:
+
+{Html::a($book->title, ['book/detail', 'id' => $book->id]) nofilter}
+
+Agregando nofilter para evitar que Smarty lo escape si contiene HTML.
+
+
+$authors = self::find()->orderBy('name')->all();
+
+Esto nos dara el listado en orden alfabetico
+

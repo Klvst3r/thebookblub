@@ -24,6 +24,14 @@ class Author extends ActiveRecord {
          ->all();
      }
 
-
+     public static function getAuthorList(){
+      // Nos traemos a todos los autores
+      $authors = self::find()->orderBy('name')->all();
+       $ret = [];
+         foreach (self::find()->all() as $author) {
+            $ret[$author->id] = $author->name;
+         }
+         return $ret;
+      }
    
 }

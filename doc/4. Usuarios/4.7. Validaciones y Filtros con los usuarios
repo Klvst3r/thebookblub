@@ -66,5 +66,29 @@ https://www.yiiframework.com/doc/guide/2.0/es/tutorial-core-validators/
 Proceso:
 ---------
 
+Para ver la potencia del modelo y ene especifico del metodo rules y por ende los core validatos, tendremos que adentrarnos en un par de cosas, que son siempre utiles.
+
+Por ejemplo, 
+
+al crear la bd, el user name
+
+esc users;
++--------------+------------------+------+-----+---------------------+-------------------------------+
+| Field        | Type             | Null | Key | Default             | Extra                         |
++--------------+------------------+------+-----+---------------------+-------------------------------+
+| user_id      | int(10) unsigned | NO   | PRI | NULL                | auto_increment                |
+| username     | varchar(100)     | YES  | UNI | NULL                |                               |
+| password     | varchar(500)     | YES  |     | NULL                |                               |
+| bio          | text             | YES  |     | NULL                |                               |
+| auth_key     | varchar(200)     | YES  |     | NULL                |                               |
+| access_token | varchar(200)     | YES  |     | NULL                |                               |
+| created_at   | timestamp        | NO   |     | current_timestamp() |                               |
+| modified_at  | timestamp        | NO   |     | current_timestamp() | on update current_timestamp() |
++--------------+------------------+------+-----+---------------------+---------
 
 
+El username esta como unique, y cuando mandamos, esto significa que si queremos crear un uauario que ya existe, por ejemplo beco,
+
+Por que en la vaidación, en el controlador, al salvar habra un error, 
+
+http://localhost:7000/user/new
