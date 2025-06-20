@@ -1,0 +1,382 @@
+Calificación de Libros con Validación en PHP y Yii Framework
+
+Resumen
+-------
+
+
+
+¿Cómo calificar libros en una aplicación web?
+
+Calificar libros en una aplicación puede ser una tarea sencilla si se sigue un proceso bien estructurado. La implementación de esta funcionalidad requiere la creación de tablas, modelos, formularios y controladores. A continuación, se describen los pasos básicos para calificar libros y se explica cómo integrar la calificación en una aplicación web.
+¿Cómo crear el modelo y la tabla para calificaciones?
+
+Para comenzar, se necesita una nueva tabla que almacene las calificaciones de los libros. Esta tabla incluirá el User ID, el Book ID, y una calificación de 1 a 5, además de una llave de no repetición para que User ID y Book ID no se repitan juntos.
+
+Primero se crea un modelo llamado BookScore. A continuación, se define la función de reglas para validar las calificaciones:
+
+public function rules()
+{
+    return [
+        [['score'], 'required'],
+        [['score'], 'integer', 'min' => 1, 'max' => 5],
+    ];
+}
+
+¿Cómo implementar la lógica para guardar las calificaciones?
+
+Una vez que el modelo y la tabla están definidos, pasamos a la lógica de la aplicación que se encargará de recibir y procesar las calificaciones enviadas por el usuario. Se debe acceder al controlador y crear las acciones necesarias.
+
+Se inicia creando un nuevo objeto BookScore como un "placeholder":
+
+$bookScore = new BookScore();
+
+Para gestionar la lógica del almacenamiento, se crea una función actionScore, que recibirá todos los datos via POST:
+
+public function actionScore()
+{
+    $bookScore = new BookScore();
+    if ($bookScore->load(Yii::$app->request->post()) && $bookScore->validate()) {
+        $bookScore->user_id = Yii::$app->user->identity->id;
+        if ($bookScore->save()) {
+            Yii::$app->session->setFlash('success', 'Gracias por tu calificación.');
+            return $this->redirect(['book/detail', 'id' => $bookScore->book_id]);
+        }
+    }
+}
+
+¿Cómo se crea el formulario para calificar?
+
+Para pintar y manejar el formulario de calificación, se necesita modificar la vista book_detail. Aquí se crea un formulario que apunta a la nueva acción actionScore:
+
+<?php $form = ActiveForm::begin(['action' => ['book/score'], 'method' => 'post']); ?>
+    <?= $form->field($bookScore, 'score')->dropDownList(
+        [
+            1 => '⭐',
+            2 => '⭐⭐',
+            3 => '⭐⭐⭐',
+            4 => '⭐⭐⭐⭐',
+            5 => '⭐⭐⭐⭐⭐'
+        ]
+    ) ?>
+    <?= Html::submitButton('Calificar', ['class' => 'btn btn-primary']) ?>
+<?php ActiveForm::end(); ?>
+
+Adicionalmente, se debe incluir un campo oculto para el Book ID:
+
+<?= $form->field($bookScore, 'book_id')->hiddenInput()->label(false) ?>
+
+¿Cuál es la importancia de validar y gestionar errores?
+
+Es crucial verificar que todas las validaciones estén implementadas correctamente y que cualquier problema potencial se maneje de manera adecuada. Si se omiten validaciones esenciales, como asegurar que User ID se capture apropiadamente, se podrían producir errores en la lógica de la aplicación.
+¿Qué mejoras se pueden implementar para la experiencia del usuario?
+
+    Cambiar el dropDownList a radio buttons: Esto puede proporcionar una experiencia de usuario más interactiva y visualmente atractiva.
+    Submit automático al cambiar la selección: Implementar un onChange en el campo para enviar automáticamente el formulario podría agilizar la interacción del usuario.
+
+Al seguir estos pasos y consejos, puedes implementar un sistema de calificación de libros robusto y eficiente en tu aplicación web. También es importante recordar la validación de los datos y ofrecer una experiencia de usuario positiva, asegurando que el sistema sea intuitivo y eficaz. 
+
+
+
+Comentarios:
+-----------
+
+Añadan ->label('Puntuación') para cambiar la etiqueta de Score a ...
+
+->radioList()->label()
+
+
+Procedimiento:
+-------------
+
+
+Vamos ahora a modificar para calificar libros, para ello,
+
+vamos a necesitar una tabla nueva
+
+Creamos nuestra nueva tabla
+
+create table if not exists book_scores (
+	book_score_id integer unsigned primary key auto_increment,
+	user_id integer unsigned not null,
+	book_id integer unsigned not null,
+	score tinyint unsigned,
+	created_at timestamp not null default current_timestamp,
+	modified_at timestamp not null default current_timestamp on update current_timestamp,
+	unique key no_rep(user_id, book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+Guardamos el noos_score_id el user id y una calificación del 1 al 5, eso se validara en el modelo, una llave de no repetición, que el user_id y el book_id sean o que no se repitan juntos .
+
+
+Vamos a crear el modelo
+
+copiamos de Author
+
+<?php
+
+namespace app\models;
+
+use yii\db\ActiveRecord;
+
+class BookScore extends ActiveRecord {
+     public static function tableName(){
+        return 'book_scores';
+     }
+
+
+     public function getId(){
+        return $this->book_score_id;
+     }
+
+     //Validación
+     public function rules(){
+        return[
+            
+        ];
+     }
+
+}
+
+Con esto tenemos ya la tabla, tenemos el modelo y vamos a seguir con crear la forma en un lugar que lo mande a la acción de otro lugar,  y despues crear la logica de esta acciones
+En los controladores.
+
+
+tenemos bookcontroller y dentro acitiondEtail.
+
+public function actionDetail($id)
+{
+    $book = Book::findOne($id);
+
+    if (empty($book)) {
+        Yii::$app->session->setFlash('error', 'Ese libro no existe');
+        return $this->goHome();
+    }
+
+    $userHasBook = false;
+    if (!Yii::$app->user->isGuest) {
+        $userHasBook = Yii::$app->user->identity->hasBook($book->book_id ?? $book->id);
+    }
+
+    $flash = null;
+    if (Yii::$app->session->hasFlash('success')) {
+        $flash = Yii::$app->session->getFlash('success');
+    } elseif (Yii::$app->session->hasFlash('error')) {
+        $flash = Yii::$app->session->getFlash('error');
+    }
+
+    return $this->render('detail.tpl', [
+        'book' => $book,
+        'flash' => $flash,
+        'userHasBook' => $userHasBook,
+    ]);
+}
+
+
+Tenemos partiendo de esta accion en el controlador de bookcontroller
+
+
+   public function actionDetail($id)
+    {
+        $book = Book::findOne($id);
+        
+
+        if (empty($book)) {
+            Yii::$app->session->setFlash('error', 'Ese libro no existe');
+            return $this->goHome();
+        }
+
+        $userHasBook = false;
+        if (!Yii::$app->user->isGuest) {
+            $userHasBook = Yii::$app->user->identity->hasBook($book->book_id ?? $book->id);
+        }
+
+        $flash = null;
+        if (Yii::$app->session->hasFlash('success')) {
+            $flash = Yii::$app->session->getFlash('success');
+        } elseif (Yii::$app->session->hasFlash('error')) {
+            $flash = Yii::$app->session->getFlash('error');
+        }
+
+        $bs  = new BookScore; //Esto es un placeholder es un sobre vacio
+
+        return $this->render('detail.tpl', [
+            'book' => $book,
+            'book_score' => $bs,
+            'flash' => $flash,
+            'userHasBook' => $userHasBook,
+        ]);
+    }
+
+
+
+Vamos a tener una ueva accion
+tenemos nuestra vista de la siguiente manera para establecer el score:
+
+{use class="yii\helpers\Html"}
+{use class="yii\widgets\ActiveForm" type="block"}
+{use class="Yii"}
+
+{if $flash}
+    <div class="alert alert-info">
+        {$flash}
+    </div>
+{/if}
+
+<h1>{$book->title|escape}</h1>
+<p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
+
+
+{if $userHasBook}
+    <p>Ya lo tengo</p>
+    
+    {ActiveForm id="new-score" assign="forma"}
+
+    {$forma->field($book_score, 'score')}
+    {/ActiveForm}
+
+
+    {* Aquí podrías incluir el formulario para calificar o lo que necesites *}
+     {*formulario->['book/score']*}
+     {*1 - 5*}
+    {*Ciero el formulario*}
+
+    
+{else}
+    <p>
+        {Html::a('Tengo este libro', ['book/i-own-this-book', 'book_id' => $book->book_id]) nofilter}
+    </p>
+{/if}
+
+
+
+
+
+algo a tener en cuneta es que yii no permite la coma en el ultimo elemento del arreglo
+
+{$forma->field($book_score, 'score')
+    ->dropdownList([
+        1 => '⭐',
+        2 => '⭐⭐',
+        3 => '⭐⭐⭐',
+        4 => '⭐⭐⭐⭐',
+        5 => '⭐⭐⭐⭐⭐'
+        ])}
+    {/ActiveForm}
+
+    solamente en la vista
+
+
+ahora ya tenemos como calificar a un libro, ahora vamosnos al controlador para establecer la ligicoa en
+BookControllel
+
+  public function actionScore(){
+        $bs = new BookScore();
+        //logica
+        if($bs->load(Yii::$app->request->post())){
+            if($bs->validate()){
+                if($bs->save()){
+                    Yii::$app->session->setFlash('success', 'gracias por tu calificación');
+                    return $this->redirect(['book/detail', 'id' => $bs->book_id]);
+                }
+            }
+        }
+        return $this->redirect('book/detail', );
+    }
+
+
+
+Conesto no estamos invocando al objeto, book del modelo book_score sino simplemente al valor de boook_id, podreiamos utilizar un HasOney poder ya tener el libro, pero traemos el atributo no el modelo asociado.
+
+Por ende vamos a mandar a book/all si no se puede salvar de alguna forma
+    public function actionScore(){
+        $bs = new BookScore();
+        //logica
+        if($bs->load(Yii::$app->request->post())){
+            if($bs->validate()){
+                if($bs->save()){
+                    Yii::$app->session->setFlash('success', 'gracias por tu calificación');
+                    return $this->redirect(['book/detail', 'id' => $bs->book_id]);
+                }
+            }
+        }
+        return $this->redirect(['book/all']);
+    }
+
+nos falta un detalle que es en el detail, ya que solo teemos el field y vamos a agrgar como hiden el book_id, pero antes de ello en el BookController debemos asegurarnos que a la hora de crear el bs new sea
+
+
+
+{if $userHasBook}
+    <p>Ya lo tengo</p>
+    
+    {ActiveForm id="new-score" assign="forma"}
+
+    {$forma->field($book_score, 'score')
+    ->dropdownList([
+        1 => '⭐',
+        2 => '⭐⭐',
+        3 => '⭐⭐⭐',
+        4 => '⭐⭐⭐⭐',
+        5 => '⭐⭐⭐⭐⭐'
+        ])}
+    
+    {$forma->field($book_score, 'book_id')->hiddenInput()->label(false)}
+    {/ActiveForm}
+
+
+Ahora ya tenemos una tarea, que la primera es, que en ves de un dropdownlist sea, una seria de redios, lo segundo es que si lo dejamos como dropdownlost en el onchange de yii, haga el submit, mientras,     
+
+
+
+{if $userHasBook}
+    <p>Ya lo tengo</p>
+    
+    {ActiveForm id="new-score" assign="forma"}
+
+    {$forma->field($book_score, 'score')
+    ->dropdownList([
+        1 => '⭐',
+        2 => '⭐⭐',
+        3 => '⭐⭐⭐',
+        4 => '⭐⭐⭐⭐',
+        5 => '⭐⭐⭐⭐⭐'
+        ])}
+    
+    {$forma->field($book_score, 'book_id')->hiddenInput()->label(false)}
+
+    <input type="submit" value="calificar">
+    {/ActiveForm}
+
+
+
+Ahora en la base de datos vemos que esta vacio la tabla.
+
+Las regas de validación de BookScore
+
+   public function rules(){
+        return[
+           ['score', 'required'],
+           ['score', 'integer', 'min' => 1, 'max' => 5],
+           ['book_id', 'default'],
+        ];
+     }
+
+
+
+ahora en el Bookcontroller si se valida 
+
+ if($bs->load(Yii::$app->request->post())){
+            $bs->user_id = Yii::$app->user->identity->id;
+            
+
+Para que el book_score del usuario tenga la identidad para asignar la calificación
+
+El user id que en mi caso es el 1 le pone una calificación de 4, al libro 57, juntando, desde formas que envian por post en la plantilla, otros acciones del mismo controlador o de otro contorlador enviada por una url, creamos una tabla los modelos y tenemos una regla de negocios, tal vez un poco mas compleja con las reglas de validación, del modelo de una forma muy rapida.
+
+Esto con el ejemplo del libro 57
+
+http://localhost:7000/book/57
+
+con una calificación de 4
+

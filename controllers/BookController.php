@@ -18,6 +18,8 @@ use app\models\Author;
 
 use app\models\UserBook;
 
+use app\models\BookScore;
+
 
 class BookController extends controller {
     public function actionAll(){
@@ -80,40 +82,91 @@ class BookController extends controller {
     //     ]);
     // }
 
-    public function actionDetail($id)
-{
-    // Buscar el libro con su autor relacionado
-    $book = Book::find()->with('author')->where(['book_id' => $id])->one();
+    // public function actionDetail($id)
+    // {
+    //     // Buscar el libro con su autor relacionado
+    //     $book = Book::find()->with('author')->where(['book_id' => $id])->one();
 
-    // Verificar si el libro existe
-    if (empty($book)) {
-        Yii::$app->session->setFlash('error', 'Ese libro no existe');
-        return $this->goHome();
+    //     // Verificar si el libro existe
+    //     if (empty($book)) {
+    //         Yii::$app->session->setFlash('error', 'Ese libro no existe');
+    //         return $this->goHome();
+    //     }
+
+    //     // Verificar si el usuario tiene el libro
+    //     $userHasBook = false;
+    //     if (!Yii::$app->user->isGuest) {
+    //         // 👇 OJO: usa 'book_id' en lugar de 'id'
+    //         $userHasBook = Yii::$app->user->identity->hasBook($book->book_id);
+    //     }
+
+    //     // Leer mensajes flash si existen
+    //     $flash = null;
+    //     if (Yii::$app->session->hasFlash('success')) {
+    //         $flash = Yii::$app->session->getFlash('success');
+    //     } elseif (Yii::$app->session->hasFlash('error')) {
+    //         $flash = Yii::$app->session->getFlash('error');
+    //     }
+
+    //     // Renderizar la vista con todos los datos necesarios
+    //     return $this->render('detail.tpl', [
+    //         'book' => $book,
+    //         'userHasBook' => $userHasBook,
+    //         'flash' => $flash,
+    //     ]);
+    // }
+
+
+   public function actionDetail($id)
+    {
+        $book = Book::findOne($id);
+        
+
+        if (empty($book)) {
+            Yii::$app->session->setFlash('error', 'Ese libro no existe');
+            return $this->goHome();
+        }
+
+        $userHasBook = false;
+        if (!Yii::$app->user->isGuest) {
+            $userHasBook = Yii::$app->user->identity->hasBook($book->book_id ?? $book->id);
+        }
+
+        $flash = null;
+        if (Yii::$app->session->hasFlash('success')) {
+            $flash = Yii::$app->session->getFlash('success');
+        } elseif (Yii::$app->session->hasFlash('error')) {
+            $flash = Yii::$app->session->getFlash('error');
+        }
+
+        $bs  = new BookScore; //Esto es un placeholder es un sobre vacio
+        $bs->book_id = $book->id; //Vamos a agregar para asegurarnos que el detail a la hora de crear el bs new, para mandarlo como parametro en la vista
+
+        return $this->render('detail.tpl', [
+            'book' => $book,
+            'book_score' => $bs,
+            'flash' => $flash,
+            'userHasBook' => $userHasBook,
+        ]);
     }
 
-    // Verificar si el usuario tiene el libro
-    $userHasBook = false;
-    if (!Yii::$app->user->isGuest) {
-        // 👇 OJO: usa 'book_id' en lugar de 'id'
-        $userHasBook = Yii::$app->user->identity->hasBook($book->book_id);
+
+    public function actionScore(){
+        $bs = new BookScore();
+        //logica
+        if($bs->load(Yii::$app->request->post())){
+            $bs->user_id = Yii::$app->user->identity->id;
+            
+            if($bs->validate()){
+
+                if($bs->save()){
+                    Yii::$app->session->setFlash('success', 'gracias por tu calificación');
+                    return $this->redirect(['book/detail', 'id' => $bs->book_id]);
+                }
+            }
+        }
+        return $this->redirect(['book/all']);
     }
-
-    // Leer mensajes flash si existen
-    $flash = null;
-    if (Yii::$app->session->hasFlash('success')) {
-        $flash = Yii::$app->session->getFlash('success');
-    } elseif (Yii::$app->session->hasFlash('error')) {
-        $flash = Yii::$app->session->getFlash('error');
-    }
-
-    // Renderizar la vista con todos los datos necesarios
-    return $this->render('detail.tpl', [
-        'book' => $book,
-        'userHasBook' => $userHasBook,
-        'flash' => $flash,
-    ]);
-}
-
 
   public function actionNew()
     {
