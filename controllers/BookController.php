@@ -26,34 +26,94 @@ class BookController extends controller {
         return $this->render('all.tpl', ['books' => $books, 'titulo' => 1]);
     }
 
-    public function actionDetail($id){
-        $book = Book::findOne($id);
+    // public function actionDetail($id){
 
-        if(empty($book)){
-            //TODO: Error
-            //return "Libro no encontrado";
-            //return $this->redirect(['site/index']);
+    //     // Buscar el libro con su autor relacionado
+    //     $book = Book::find()->with('author')->where(['book_id' => $id])->one();
 
-            Yii::$app->session->setFlash('error', 'ese libro no existe');
 
-            // Podemos sustituir con el siguiente shortcut
-            return $this->goHome();
 
-        }
-        // return $book->title;
-        //return $book->toString();
-        $flash = null;
-if (Yii::$app->session->hasFlash('success')) {
-    $flash = Yii::$app->session->getFlash('success');
+    //     //$book = Book::findOne($id);
+
+
+    //     // Por defecto, el usuario no tiene el libro
+    //     $userHasBook = false;
+
+
+    //     // Verificar si el libro existe
+    //     if(empty($book)){
+    //         //TODO: Error
+    //         //return "Libro no encontrado";
+    //         //return $this->redirect(['site/index']);
+
+    //         Yii::$app->session->setFlash('error', 'ese libro no existe');
+
+    //         // Podemos sustituir con el siguiente shortcut
+    //         return $this->goHome();
+
+    //     }
+
+    //     // Si el usuario está autenticado, verificar si ya tiene ese libro
+    //     if (!Yii::$app->user->isGuest) {
+    //         $userHasBook = Yii::$app->user->identity->hasBook($book->id);
+    //     }
+
+    //     // Renderizar la vista con las variables necesarias
+    //     return $this->render('detail.tpl', [
+    //         'book' => $book,
+    //         'userHasBook' => $userHasBook,
+    //     ]);
+
+
+    //     // return $book->title;
+    //     //return $book->toString();
+    //      $flash = null;
+    //     if (Yii::$app->session->hasFlash('success')) {
+    //         $flash = Yii::$app->session->getFlash('success');
+    //     } elseif (Yii::$app->session->hasFlash('error')) {
+    //         $flash = Yii::$app->session->getFlash('error');
+    //     }
+
+    //     return $this->render('detail.tpl', [
+    //         'book' => $book,
+    //         'flash' => $flash,
+    //     ]);
+    // }
+
+    public function actionDetail($id)
+{
+    // Buscar el libro con su autor relacionado
+    $book = Book::find()->with('author')->where(['book_id' => $id])->one();
+
+    // Verificar si el libro existe
+    if (empty($book)) {
+        Yii::$app->session->setFlash('error', 'Ese libro no existe');
+        return $this->goHome();
+    }
+
+    // Verificar si el usuario tiene el libro
+    $userHasBook = false;
+    if (!Yii::$app->user->isGuest) {
+        // 👇 OJO: usa 'book_id' en lugar de 'id'
+        $userHasBook = Yii::$app->user->identity->hasBook($book->book_id);
+    }
+
+    // Leer mensajes flash si existen
+    $flash = null;
+    if (Yii::$app->session->hasFlash('success')) {
+        $flash = Yii::$app->session->getFlash('success');
+    } elseif (Yii::$app->session->hasFlash('error')) {
+        $flash = Yii::$app->session->getFlash('error');
+    }
+
+    // Renderizar la vista con todos los datos necesarios
+    return $this->render('detail.tpl', [
+        'book' => $book,
+        'userHasBook' => $userHasBook,
+        'flash' => $flash,
+    ]);
 }
 
-var_dump($flash); exit;
-
-        return $this->render('detail.tpl', [
-            'book' => $book,
-            'flash' => $flash,
-        ]);
-    }
 
   public function actionNew()
     {
@@ -118,4 +178,16 @@ var_dump($flash); exit;
         return $this->redirect(['book/detail', 'id' => $book_id]);
 
     }
+
+    public function actionView($id)
+    {
+        $book = Book::findOne($id);
+        $userHasBook = Yii::$app->user->identity->hasBook($id);
+        
+        return $this->render('view.tpl', [
+            'book' => $book,
+            'userHasBook' => $userHasBook,
+        ]);
+    }
+
 }

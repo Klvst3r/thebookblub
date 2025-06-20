@@ -1,0 +1,282 @@
+Condicionales y funciones para gestionar libros en la aplicación
+
+Resumen
+¿Cómo identificamos si un usuario tiene un libro o no?
+
+En el contexto de una aplicación de gestión de libros, es fundamental poder determinar si un usuario tiene un libro específico. En el ejercicio anterior, el objetivo era modificar la vista para reflejar si un usuario ya cuenta con un libro o no. Esta información es crucial para personalizar la interacción del usuario con la plataforma, ofreciendo opciones personalizadas como calificar el libro o eliminarlo de su lista.
+
+Para implementar esta funcionalidad, partimos de la vista, donde añadiremos un condicional que muestre diferentes opciones según el estado del libro:
+
+if (G\App\User\Identity::hasBook($bookId)) {
+    // Lógica para cuando el usuario tiene el libro
+} else {
+    // Lógica para cuando el usuario no tiene el libro
+}
+
+Este fragmento de código evalúa si el usuario ha registrado el libro como suyo y, en función de ello, despliega las acciones correspondientes.
+¿Cómo implementamos la función hasBook en el modelo de usuario?
+
+La función hasBook es clave para determinar la pertenencia de un libro en el modelo de usuario. Se verifica si el libro específico está asociado al usuario mediante una consulta a la base de datos.
+
+public function hasBook($bookId) {
+    $userBooks = UserBook::where([
+        'user_id' => $this->id,
+        'book_id' => $bookId
+    ])->get();
+
+    return !empty($userBooks);
+}
+
+En este código:
+
+    Se realiza una consulta sobre la tabla UserBook buscando coincidencias de usuario y libro.
+    El método where filtra los registros que coinciden con el user_id y book_id.
+    Si el arreglo resultante no está vacío, significa que el usuario posee el libro, retornando true. Caso contrario, se retorna false.
+
+¿Qué hacemos después de identificar un libro como propio?
+
+Una vez que se confirma que el usuario posee un libro, se ofrecen dos opciones en la vista: calificar el libro o indicar que ya no lo posee. La calificación se realiza mediante un formulario que envía la nota al controlador BookScore.
+Implementación del formulario de calificación
+
+Como parte de la futura implementación, se diseñará un formulario para que los usuarios califiquen sus libros. Este formulario enviará una calificación del 1 al 5 al controlador BookScore, encargándose de recibirla y procesarla adecuadamente en el sistema.
+
+<form action="/book-score" method="post">
+    <label for="rating">Calificar este libro:</label>
+    <select id="rating" name="rating">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+    </select>
+    <button type="submit">Enviar</button>
+</form>
+
+Esta implementación no solo mejora la experiencia del usuario, permitiéndole interaccionar y dar feedback sobre sus libros, sino que también crea un sistema más dinámico que puede adaptarse a futuras funcionalidades, como la revaluación de libros o el análisis de datos de calificación.
+
+
+
+Procedimiento:
+--------------
+
+Ya podemos agregar libros a nuestra repisa, pero sigue mostrando el boton.
+
+Si ya tengo el libro no debe dar la posibilidad de agregar nuevo libro, tenemos dos opciones, y calificar entre 1 y 5 nada mas, esas seran la forma para entender conceptos como, extender mas el modelo para entender si los tengo no, verlo desde la vista, cuando la logica ya estan cargados,
+
+Empezaremos desde la vista.
+
+en detail.tpl.
+
+Agregamos 
+
+{if Yii::$app->user->identity->hasBook($book->id)}
+ya lo tengo
+{else}
+    <p>{Html::a('Tengo este libro', ['book/i-own-this-book', 'book_id' => $book->id]) nofilter}</p>
+
+    <p>{Html::a('Regresar a la lista', ['book/all'], ['class' => 'btn btn-primary']) nofilter}</p>
+{/if}
+
+Posteriormente abril¿mos la clase del modelo usuario
+
+User.php
+
+    public function hasBook($book_id):bool{
+        $ub = UserBook::find()->where([
+            'user_id' => $this->id,
+            'book_id' => $book_id
+         ])->one();
+    }
+
+uno o todos, estando en producción tendriamos que tener claro que habria un aregla de que un usuario podria tener un libro, no se tiene entonces, por meras formas de educación, deberia ser solo uno.
+
+si esta vacio $ud no es un arreglo, 
+
+public function hasBook($book_id):bool{
+        $ub = UserBook::find()->where([
+            'user_id' => $this->id,
+            'book_id' => $book_id
+         ])->all();
+         if(empty($ub)){
+            return false;
+
+         }
+         return true;
+    }
+
+Funciona exclusivamante para temas, educacionales, se puede mejorar la logica, con esto sera mas que suficiente. Lo que estamos consiguiendo con esta fucnion es saber si el usuario que tiene registrado como suyo, tal o cual libro.
+
+Para ello vamos al browser.
+
+Hicimos varios movimientos dentro de varios archivos
+
+
+Vamos a empezar por Bookcontroller.
+   public function actionDetail($id){
+
+        // Buscar el libro con su autor relacionado
+        $book = Book::find()->with('author')->where(['book_id' => $id])->one();
+
+
+
+        //$book = Book::findOne($id);
+
+
+        // Por defecto, el usuario no tiene el libro
+        $userHasBook = false;
+
+
+        // Verificar si el libro existe
+        if(empty($book)){
+            //TODO: Error
+            //return "Libro no encontrado";
+            //return $this->redirect(['site/index']);
+
+            Yii::$app->session->setFlash('error', 'ese libro no existe');
+
+            // Podemos sustituir con el siguiente shortcut
+            return $this->goHome();
+
+        }
+
+        // Si el usuario está autenticado, verificar si ya tiene ese libro
+        if (!Yii::$app->user->isGuest) {
+            $userHasBook = Yii::$app->user->identity->hasBook($book->id);
+        }
+
+        // Renderizar la vista con las variables necesarias
+        return $this->render('detail.tpl', [
+            'book' => $book,
+            'userHasBook' => $userHasBook,
+        ]);
+
+
+        // return $book->title;
+        //return $book->toString();
+         $flash = null;
+        if (Yii::$app->session->hasFlash('success')) {
+            $flash = Yii::$app->session->getFlash('success');
+        } elseif (Yii::$app->session->hasFlash('error')) {
+            $flash = Yii::$app->session->getFlash('error');
+        }
+
+        return $this->render('detail.tpl', [
+            'book' => $book,
+            'flash' => $flash,
+        ]);
+    }
+
+Nos pasamos a los modelos
+Book.php
+
+
+    public static function primaryKey()
+    {
+        return ['book_id'];
+    }
+
+
+User.php
+  public function hasBook($book_id): bool
+    {
+        return UserBook::find()
+            ->where(['user_id' => $this->id, 'book_id' => $book_id])
+            ->exists();
+    }
+
+modificamos la vista detail.
+
+{use class="yii\helpers\Html"}
+
+{use class="Yii"}
+
+<h1>{$book->title|escape}</h1>
+<p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
+
+{if $userHasBook}
+    <p>Ya lo tengo</p>
+{else}
+    <p>{Html::a('Tengo este libro', ['book/i-own-this-book', 'book_id' => $book->id]) nofilter}</p>
+    <p>{Html::a('Regresar a la lista', ['book/all'], ['class' => 'btn btn-primary']) nofilter}</p>
+{/if}
+
+
+Ahora tenemos y pdemos mencionar que ya tenemos
+para ello enel condicional de la vista.
+
+Calificamos del 1 al 5 que es la forma de como vamos a mandar post hacia otro controlador.
+
+En la siguente secion es lo que se trabajara 
+
+    //formulario->['book/score']
+    // 1 - 5
+    //Ciero el formulario
+
+enviara a controlador book*/score
+
+public function actionDetail($id)
+{
+    // Buscar el libro con su autor relacionado
+    $book = Book::find()->with('author')->where(['book_id' => $id])->one();
+
+    // Verificar si el libro existe
+    if (empty($book)) {
+        Yii::$app->session->setFlash('error', 'Ese libro no existe');
+        return $this->goHome();
+    }
+
+    // Verificar si el usuario tiene el libro
+    $userHasBook = false;
+    if (!Yii::$app->user->isGuest) {
+        // 👇 OJO: usa 'book_id' en lugar de 'id'
+        $userHasBook = Yii::$app->user->identity->hasBook($book->book_id);
+    }
+
+    // Leer mensajes flash si existen
+    $flash = null;
+    if (Yii::$app->session->hasFlash('success')) {
+        $flash = Yii::$app->session->getFlash('success');
+    } elseif (Yii::$app->session->hasFlash('error')) {
+        $flash = Yii::$app->session->getFlash('error');
+    }
+
+    // Renderizar la vista con todos los datos necesarios
+    return $this->render('detail.tpl', [
+        'book' => $book,
+        'userHasBook' => $userHasBook,
+        'flash' => $flash,
+    ]);
+}
+
+La vista quedo:
+
+{use class="yii\helpers\Html"}
+
+{if $flash}
+    <div class="alert alert-success">
+        {$flash}
+    </div>
+{/if}
+
+<h1>{$book->title|escape}</h1>
+<p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
+
+{if $userHasBook}
+    <p>Ya lo tengo</p>
+    <p>
+        {Html::a('Ya no lo tengo', ['book/i-dont-own-this-book', 'book_id' => $book->book_id]) nofilter}
+    </p>
+
+    {* Aquí podrías incluir el formulario para calificar o lo que necesites *}
+     {*formulario->['book/score']*}
+     {*1 - 5*}
+    {*Ciero el formulario*}
+{else}
+    <p>
+        {Html::a('Tengo este libro', ['book/i-own-this-book', 'book_id' => $book->book_id]) nofilter}
+    </p>
+{/if}
+
+
+
+

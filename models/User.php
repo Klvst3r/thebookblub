@@ -205,5 +205,23 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
         ];
     }
 
+    public function hasBook($book_id): bool
+    {
+        return UserBook::find()
+            ->where(['user_id' => $this->id, 'book_id' => $book_id])
+            ->exists();
+    }
+
+    //  public function actionView($id)
+    // {
+    //     $book = Book::findOne($id);
+    //     $userHasBook = Yii::$app->user->identity->hasBook($id);
+        
+    //     return $this->render('view.tpl', [
+    //         'book' => $book,
+    //         'userHasBook' => $userHasBook,
+    //     ]);
+    // }
+
 
 }

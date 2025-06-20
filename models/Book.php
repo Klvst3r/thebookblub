@@ -28,14 +28,21 @@ class Book extends ActiveRecord
         ];
     }
 
+    public static function primaryKey()
+    {
+        return ['book_id'];
+    }
+
+
 
     
     
     public function getAuthor(){
         //se relaciona el autor con el libro    author.author_id / book.author_id
-        return $this
-            ->hasOne(Author::class, ['author_id' => 'author_id'])
-            ->one();
+        // return $this
+        //     ->hasOne(Author::class, ['author_id' => 'author_id'])
+        //     ->one();
+            return $this->hasOne(Author::class, ['author_id' => 'author_id']);
     }
 
     public function toString() {
