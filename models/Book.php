@@ -56,6 +56,33 @@ class Book extends ActiveRecord
         );
     }
 
+    public function getVotes(){
+        return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])->all();
+    }
+
+    // public function getScore():float{
+        public function getScore():string{
+        //$score =  0;
+        $i = 0; //contador
+        $sum = 0; //variable que guarda la suma de los votos para despues sacar el promedio
+
+        foreach($this->votes as $vote){
+            $i++;
+            $sum = $sum += $vote->score;
+        }
+
+        //return $score;
+        //return $i == 0 ? 0 : $sum/$i; //Si i es igual a 0 devuelve 0 y si no devuelve promedio cuando devuelv un flotante
+        
+        if($i == 0){
+            return "Sin votos";
+        }
+        return sprintf("%0.2f (%d votos)", $sum/$i, $i); 
+        //El %f es el espacio para un float con dos decimales, devolviendo en lugar de un float un string
+
+    }
+
+
     public function rules()
     {
         return [

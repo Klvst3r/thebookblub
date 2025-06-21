@@ -1,0 +1,205 @@
+Generación de Información a Partir de Datos en Bases de Datos
+
+Resumen
+-------
+
+
+¿Cómo generar información a partir de datos en bases de datos?
+
+En el mundo actual, no basta con tener datos almacenados en bases de datos; es crucial transformarlos en información útil, especialmente cuando trabajamos con entidades como libros, calificaciones y usuarios. Este proceso puede parecer complejo, pero con las herramientas correctas y un poco de ingenio, se puede llevar a cabo de manera efectiva.
+¿Cuál es el objetivo principal al generar información a partir de datos?
+
+La clave está en asociar datos entre sí, creando una capa de información que permita obtener análisis valiosos. Por ejemplo, puedes calcular el score total de un libro, el promedio de calificaciones que le ha dado un usuario a sus lecturas y, en el caso de un autor, entender cuál es el score promedio de sus libros.
+¿Qué papel juegan las tablas intermedias y las relaciones juntas en SQL?
+
+Cuando trabajamos con bases de datos, muchas veces necesitamos utilizar tablas intermedias para gestionar las relaciones. En el ejemplo de libros y usuarios, la tabla intermedia user_books (usuario_libros) es crucial. Para construir estas relaciones, utilizamos comandos simples del Query Builder, como via table, que finalmente se traduce en un join en SQL.
+Código Ejemplo: Utilizando via table en SQL:
+
+public function getVotes() {
+    return $this->hasMany( BookScore::class, where('book_id', $this->book_id))->all();
+}
+
+¿Cómo calcular el promedio de calificaciones de un libro?
+
+El objetivo es mostrar el promedio de calificaciones para cada libro, que ofrece una visión clara de cómo lo evalúan los usuarios. A continuación, se ilustra cómo realizar este cálculo dentro de un modelo:
+Código Ejemplo: Función para obtener el promedio de un libro:
+
+public function getScore(): float {
+    $sum = 0;
+    $i = 0;
+    
+    foreach ($this->votes as $vote) {
+        $i++;
+        $sum += $vote->score;
+    }
+    
+    return ($i === 0) ? 0 : $sum / $i;
+}
+
+¿Cómo se muestra esta información a los usuarios?
+
+Para proporcionar una mejor experiencia al usuario, es necesario informar tanto sobre el promedio de calificaciones como sobre el número de votos que ha recibido un libro. Esto se puede lograr de manera atractiva utilizando una notación clara y legible.
+¿Cómo calcular el promedio de calificaciones que un usuario ha dado?
+
+No solo es interesante saber el promedio de un libro, sino también comprender la tendencia de calificaciones individuales de cada usuario. Esto permite analizar qué tan exigente es un lector y cómo interactúa con diferentes obras.
+Código Ejemplo: Calcular el promedio de calificaciones de un usuario:
+
+public function getVotesAverage(): string {
+    $sum = 0;
+    $i = 0;
+    
+    foreach ($this->votes as $vote) {
+        $i++;
+        $sum += $vote->score;
+    }
+
+    return ($i === 0) ? 'Sin votos' : sprintf("%.2f", $sum / $i) . " de $i votos";
+}
+
+La importancia de la simplicidad y modularidad en el código
+
+Uno de los principios clave al trabajar con datos e información es mantener la simplicidad y modularidad del código. Es más eficiente primero obtener los datos y luego realizar operaciones necesarias sobre ellos, en lugar de rehacer el proceso.
+
+Así, no solo obtienes información valiosa, sino que también mantienes el código limpio y escalable para futuras necesidades. Con estos ejercicios prácticos, puedes ver lo sencillo que es desgranar y utilizar la información gracias a funciones bien definidas. 
+
+
+
+Referencia:
+-----------
+
+https://www.yiiframework.com/doc/guide/2.0/en/db-active-record#junction-table/
+
+
+
+Proceso:
+--------
+
+En los ultimos ejercicios se vio el camino completo de la información desde el usurio hasta la bd, ya se tiene el camino de regreso de la bd hacia el usuario, ahra lo que vamos a hacer es generar información, si los datos es lo que estamos guardando en la base de datos, asociar los datos de maneras mas potentes es o que genera información, es lo que se hara ahora.
+
+Generar información alrededor de los ibros y de las calificaciones, ya se tiene creado e tema de los scores de un libro, cual es el score promedio, de un usurio los scores, el usuario promedio de esas calificaciones.
+
+de Autores sacar el promedio de los scores de los libros.
+
+Tablas intemerdias, aquells que unen informacion de dos tablas, tenemos users, y tenemos books y en medio se tiene users_books, vamos a usar una funcion o comando llamado
+
+viaTable()
+
+Es una relación que termina siendo, un jion en sql, 
+
+Hay modificaciones, de los recursos.
+
+si hacemos 
+
+http://localhost:7000/
+
+
+Índice de sitio
+Hola klvst3r
+
+Total de libros registrados: 215 y (numero de autores) en el sistema
+
+acciones:
+
+- crear libro
+- agregar autor.
+
+
+Para agragar el autor es mediante un formulario
+
+Nuevo Autor
+    Name: 
+
+Nationality:
+    Nacionalidad (Select)
+
+Guardar
+
+
+El flash:
+    Author ha sido guardado como autor
+
+
+Se tiene un alista de autores visual
+
+
+http://localhost:7000/authors
+
+Fulanito de tal(0)
+
+Sin libros
+Cambios significativos para tener un sistema mas en forma, la idea es tener una aplicación mas completa:
+
+La vistafaltante se construe posteriormente.
+
+Lo primero es partir de poder escoger un libro.
+
+http://localhost:7000/books/
+
+Micorserfs
+    Dougas coupland
+
+Tengo este libro:
+
+Vamos a empezar por el detalle de un libro
+
+
+/views/detail.tpl
+
+<p> El promedio de este libro es de: {$book->getScore()}</p>
+
+Por ende ahora en el modelo necesitamos
+
+Book.php
+
+
+Crear una funcion llamada getScore()
+
+ public function getScore():float{
+        $score =  0;
+        return $score;
+    }
+
+En nuestra vista podremos tener:
+
+http://localhost:7000/book/22
+
+
+Microserfs
+
+Un libro escrito por Douglas Coupland.
+
+El promedio de este libro es de: 0
+
+
+Un libropuede tener muchos votos asi que vamos a traer todos.
+
+por ello
+
+public function getVotes(){
+        return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])->all();
+    }
+
+Lo que taemos aqui es todos los scores del libro
+
+ahora
+
+
+Necisto hacer la pruena con otro usuario pero necesar o crear otro usuario,
+
+Si esoy logieado no puedo crer el usuario
+test /test
+por lo que en la vista
+
+http://localhost:7000/user/new
+
+debo poder generar un nuevousuario, hasta ahora no m permite guardar el usuario de la vista a la acción revisar por que no me permite guardar el usuario nuevo.
+
+Par poder sacar e proedio del libro 
+
+Microsrf dos nlos votos de klvst3r y test
+para sumar dos votos.
+
+Min 8.22
+
+
+

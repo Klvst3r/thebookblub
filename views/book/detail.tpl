@@ -11,6 +11,8 @@
 <h1>{$book->title|escape}</h1>
 <p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
 
+<p> El promedio de este libro es de: {$book->getScore()}</p>
+
 
 {if $userHasBook}
     <p>Ya lo tengo</p>
