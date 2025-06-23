@@ -75,3 +75,15 @@ Podriamos proponer la creación de un formualrio para crear nuevas nacionalidade
 continuamos probando creando nuevo libros ahora ya con la posiblidad de nuestro registro de authores.
 
 Podemos ahora continuar a la practica del tema 5.5 con la generación de información a oartuir de losdatos en la base de datos
+
+
+Resumiendo lo que si hizo en el index es:
+
+- Se puede agregar el author.
+- Aparece ya el listado de autores,  partiendo de un serialize, mostrando el nuevo registro.
+
+A partir de aca ya se tiene una palicación mas completa.
+
+Nos falta
+
+

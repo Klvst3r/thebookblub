@@ -36,12 +36,12 @@ class Author extends ActiveRecord {
       }
 
       public function rules()
-    {
-        return [
-            [['name'], 'required'],
-            [['nationality'], 'string', 'max' => 100],
-            [['name'], 'string', 'max' => 255],
-        ];
-    }
+      {
+         return [
+               [['name'], 'required'],
+               [['nationality'], 'string', 'max' => 100],
+               [['name'], 'string', 'max' => 255],
+         ];
+      }
    
 }

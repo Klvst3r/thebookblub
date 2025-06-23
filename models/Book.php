@@ -56,8 +56,10 @@ class Book extends ActiveRecord
         );
     }
 
+    //Voy a traer todos los votos para este libro incluyendo de authors o usuario anonimos
     public function getVotes(){
-        return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])->all();
+        return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])
+        ->all();
     }
 
     // public function getScore():float{
@@ -66,6 +68,7 @@ class Book extends ActiveRecord
         $i = 0; //contador
         $sum = 0; //variable que guarda la suma de los votos para despues sacar el promedio
 
+        //Vamos a contar los votos, sacaremos el promedio de votos
         foreach($this->votes as $vote){
             $i++;
             $sum = $sum += $vote->score;

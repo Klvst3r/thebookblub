@@ -224,4 +224,30 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     // }
 
 
+    //Traemos el contador de los votos por usuarios
+   public function getVotes()
+    {
+        return $this->hasMany(BookScore::class, ['user_id' => 'user_id']);
+    }
+
+
+    //ahora necesito el promedio y el numero de elementos de los votos
+
+    public function getVotesCount(){
+
+        return count($this->votes);
+    }
+
+    public function getVotesAvg(){
+        $i = 0;
+        $sum = 0;
+        foreach($this->votes as $vote){
+            $i++;
+            $sum+= $vote->score;
+            if ($i == 0){
+                return "Sin votos";
+            }
+            return sprintf("%0.2f", $sum/$i);
+        }
+    }
 }

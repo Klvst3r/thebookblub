@@ -131,7 +131,7 @@ Cambios significativos para tener un sistema mas en forma, la idea es tener una 
 
 La vistafaltante se construe posteriormente.
 
-Lo primero es partir de poder escoger un libro.
+Lo primero es partir de poder escoger un libro. Entonce en el listado de libros
 
 http://localhost:7000/books/
 
@@ -140,10 +140,14 @@ Micorserfs
 
 Tengo este libro:
 
-Vamos a empezar por el detalle de un libro
+Vamos a empezar por el detalle de un libro, lo agregamos a nuestra repiza primero para poder otorgaruna calificación y le damos una calificación (4). 
+
+ahora debiaramos poner el scored ela califficación o el score de todos los scores, de todos los usuarios de forma anonima pero que se guarden ahi, para ello, empezamos por la vista.
+
+Vamos a ver el detalle de un libro.
 
 
-/views/detail.tpl
+/views/book/detail.tpl
 
 <p> El promedio de este libro es de: {$book->getScore()}</p>
 
@@ -190,6 +194,20 @@ Si esoy logieado no puedo crer el usuario
 test /test
 por lo que en la vista
 
+
+Primero voy a buscar los libros de microservs, pulsamos tengo este libro, y le damos una calificación,  aca podmeos ver que ya hay una calificación previa, pero lo calificamos desde nuestro criterio.
+
+Pero ahora ya veo diferentes
+Microserfs
+
+Un libro escrito por Douglas Coupland.
+
+El promedio de este libro es de: 4.50 (2 votos)
+
+
+
+
+
 http://localhost:7000/user/new
 
 debo poder generar un nuevousuario, hasta ahora no m permite guardar el usuario de la vista a la acción revisar por que no me permite guardar el usuario nuevo.
@@ -199,7 +217,79 @@ Par poder sacar e proedio del libro
 Microsrf dos nlos votos de klvst3r y test
 para sumar dos votos.
 
-Min 8.22
 
 
+Despues de calificar ahora podemos ver que tenemos ya dos votos. Tenemos libros y sus scros, pero que pasa si nosotros queremos ver cual es el promedio que ha dado un usuario normal, tenemos una tabla enmedio que es usuario, los libros que tiene userbooks y despues scores:books y eso le agrega un poco de complejidad pero en realidad no es nada del otro mundo o mas bien yii lo hace muy sencillo, vamyamos a ello. 
+
+
+si por ejemplo esoy logueado como klvst3r,voy a agregar aca mismo en el index, el promedio total de los votos que yo he dado.
+
+
+
+dara la información que necesitamos.
+
+
+Para ello vamos a abrir la vista del site/index.tpl
+
+<p>Has votado {$user->votesCount} veces y
+   promedio de {$user->votesAvg}
+
+
+Agregamos pero no existe la variable $user por ende  $smarty asign
+
+de estos<p>Hola {$username} 👋</p>
+
+Agregamos:
+
+
+y promedio de {$user->votesAvg}</p>
+
+y ahora vamos a crear esta funcion en el modelo User
+
+
+//ahora necesito el promedio y el numero de elementos de los votos
+
+    public function getVotesCount(){
+
+        return count($this->votes);
+    }
+
+    public function getVotesAvg(){
+        $i = 0;
+        $sum = 0;
+        foreach($this->votes as $vote){
+            $i++;
+            $sum+= $vote->score;
+            if ($i == 0){
+                return "Sin votos";
+            }
+            return sprintf("%0.2f", $sum/$i);
+        }
+    }
+
+Eon esto en la vista tenemos: el promedio de votos por usuario
+    Índice de sitio
+
+Hola test 👋
+
+Has votado 1 veces y promedio de 5.00
+
+Total de libros registrados: 218
+
+Total de autores registrados: 151
+
+
+Podemos verificar que tenemos en la bd al respecto, 
+select * from book_scores where user_id = 1;
+
+
+tiene sentido y ahora
+select avg(score) from book_scores where user_id = 1;
+
+
+con esto vemos que es practico y sencillo desgranar la fuente de información, con funciones como 
+
+primero traeme los votos y despues, puedo operar sobr eeso, no tengo que traerlos y volver a crear sosas, este getVotes(), puede funcionar para muchisimas cosas mas, el ejemplo y la prctica puntual es, entender que este getVotes() se tuiliza en dos, formas directamente inmediata.
+
+Vamos a despues tener una tabla enmedio y poder operar al respecto.
 

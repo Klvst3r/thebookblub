@@ -14,7 +14,7 @@ use app\models\Book;
 
 use app\models\Author;
 
-
+use yii\helpers\Html;  //Porque ahgregamos en el render de index 'loginLink' => Html::a('Inicia sesión', ['site/login']),
 
 class SiteController extends Controller
 {
@@ -75,8 +75,8 @@ class SiteController extends Controller
         $username = $isGuest ? null : Yii::$app->user->identity->username;
         $loginLink = \yii\helpers\Html::a('Login', ['site/login']);
         $bookCount = Book::find()->count(); // <<-- Aquí obtenemos el conteo
-
-         $author_count = Author::find()->count();
+        $user = Yii::$app->user->identity;
+        $author_count = Author::find()->count();
 
         return $this->render('index.tpl', [
             'author_count' => $author_count,
@@ -84,6 +84,9 @@ class SiteController extends Controller
             'username' => $username,
             'loginLink' => $loginLink,
             'bookCount' => $bookCount, // <<-- Lo enviamos a la vista
+            'app' => Yii::$app,
+            'user' => $user,
+             'loginLink' => Html::a('Inicia sesión', ['site/login']),
         ]);
     }
 
