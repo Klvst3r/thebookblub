@@ -3,10 +3,20 @@
 <h1>Índice de sitio</h1>
 
 {if $isGuest}
-  Hola invitado, {$loginLink nofilter}
+  <p>Hola invitado, {$loginLink nofilter}</p>
 {else}
-  Hola {$username}
+  <p>Hola {$username} 👋</p>
 {/if}
 
 <p>Total de libros registrados: {$bookCount}</p>
-<p>{Html::a('crear libro', ['book/new'])}</p>
+
+<p>
+  {Html::a("Ver todos los libros", ['book/all'])} |
+  {Html::a("Ver todos los autores", ['author/all'])}
+</p>
+
+<h3>Acciones:</h3>
+<ul>
+  <li>{Html::a('Crear libro', ['book/new'])}</li>
+  <li>{Html::a('Agregar autor', ['author/new'])}</li>
+</ul>

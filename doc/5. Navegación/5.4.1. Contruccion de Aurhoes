@@ -1,0 +1,77 @@
+cuando avanzamos a la seccion de generación de información para datos estadiscticos, es necesario contar con la posiblidad de crear libros y ahores, 
+
+cosa que hasta este puinto no era posible por lo que moficiamos:
+
+1. las vistas de libros y autores.
+2. Los controladores de BookControles y authorController en las acciones de actionNew para podr crear nuevos resgitros de libros y autores.
+3. Modificamos el login para las rutas.
+4. Creamos el acion actionNew en el controlador authorController
+5. Creamos la plantilla para visualizar todos los autores desde el index
+6. Creamos la plantilla para la vista del formulario para crear nuevo autor.
+
+7. Ahi nos detuvimos porque existio un problema con e campo nacionalidad, ya que permite solo un campo con dos valores, y queremos escalar la aplicación y poder tener un list o select en lugar de uncampo de tipo input.
+
+Asi que 
+
+8. Creamos la tabla para crear la nacinalidades
+Modificamos el schema
+
+
+Creacion de la tabla nacinalities y su llenado inicial:
+CREATE TABLE nationalities (
+  code CHAR(2) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+INSERT INTO nationalities (code, name) VALUES
+('MX', 'México'),
+('US', 'Estados Unidos'),
+('FR', 'Francia'),
+('JP', 'Japón');
+
+
+9. ahora verificamos en el formuario de registro de authores.
+sevisualiza el formulario de registro de authores.
+
+10. se propone crear un nuevo formulari para registrar nuevas nacionalidades, pero de moento hasta ahi esta bien la aplicación el ejemplo es claro con los registros insertados.
+
+Se tenia considera do la modificacion de authores
+
+estrcutura de authors:
+
+desc authors;
++-------------+------------------+------+-----+---------+----------------+
+| Field       | Type             | Null | Key | Default | Extra          |
++-------------+------------------+------+-----+---------+----------------+
+| author_id   | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+| name        | varchar(100)     | NO   |     | NULL    |                |
+| nationality | varchar(2)       | YES  |     | NULL    |                |
++-------------+------------------+------+-----+---------+----------------+
+
+
+Se habia propuesto la modificación de la tablapaa poder utiliar un drowpdownlist:
+
+ALTER TABLE authors
+MODIFY COLUMN nationality CHAR(2),
+ADD CONSTRAINT fk_author_nationality FOREIGN KEY (nationality) REFERENCES nationalities(code);
+
+
+Per si en la  tabla authors la columna nationality ya está definida como varchar(2) y apunta con clave foránea a nationalities(code), entonces no es necesario hacer cambios adicionales en la estructura para que tu formulario y controlador funcionen.
+
+Con esa estructura:
+
+    El modelo Author debe tener el atributo nationality (varchar(2)), que enlaza con el código de la tabla nationalities.
+
+    El dropdown en el formulario debe llenar ese campo con códigos de país (code).
+
+    En la vista o en la lógica, puedes mostrar el nombre completo del país usando la relación entre Author y Nationality.
+
+El esquema está bien normalizado, y ya tenemos la flexibilidad para manejar nacionalidades mediante la tabla independiente.
+
+Podriamos proponer la creación de un formualrio para crear nuevas nacionalidades pero no es la finalidad, ya quedo comprendido la historia desde la creción de una nueva tabla, crear la vista, el formulario de creación de registros, modificar o crear el actionNew para nuevos registros y l acreación del modelo neceario para las tablas creadas, por lo que podemos dejar esta posiblidad fuera.
+
+continuamos probando creando nuevo libros ahora ya con la posiblidad de nuestro registro de authores.
+
+Podemos ahora continuar a la practica del tema 5.5 con la generación de información a oartuir de losdatos en la base de datos

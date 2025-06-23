@@ -20,12 +20,30 @@ use app\models\UserBook;
 
 use app\models\BookScore;
 
+//Aqgregamos par apoder usitlizar mayusculas y minuscilas
+use yii\db\Expression;
+
 
 class BookController extends controller {
-    public function actionAll(){
-        $books = Book::find()->all();
+    public function actionAll($search = null){
+
+        if ($search !== null) {
+            //busqueda de todos los libros
+            //$books = Book::find()->all();
+
+        //Aca permitimos sensibilidad a mayusculas y minusculas no importa como se escriba
+             $books = Book::find()
+            ->where(['like', new Expression('LOWER(title)'), mb_strtolower($search)])
+            ->all();
+
+        } else {
+            $books = Book::find()->all();
+        }
         //return serialize($books);
-        return $this->render('all.tpl', ['books' => $books, 'titulo' => 1]);
+        return $this->render('all.tpl', [
+            'books' => $books,
+            'bookCount' => count($books), // nombre más claro y útil
+        ]);
     }
 
     // public function actionDetail($id){
@@ -170,9 +188,15 @@ class BookController extends controller {
 
   public function actionNew()
     {
-        if(Yii::$app->user->isGuest){
-            return $this->goHome();
-        }
+        /*Si no esta logueado el usuario no permite registro*/ 
+        // if(Yii::$app->user->isGuest){
+        //     return $this->goHome();
+        // }
+        //modificamos por lo siguiente: 
+         if (Yii::$app->user->isGuest) {
+        Yii::$app->session->setFlash('warning', 'Debes iniciar sesión para poder registrar un libro.');
+        return $this->redirect(['site/login']);
+    }
 
         $book = new Book();
         $flash = null;

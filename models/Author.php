@@ -4,6 +4,7 @@ namespace app\models;
 
 use yii\db\ActiveRecord;
 
+
 class Author extends ActiveRecord {
      public static function tableName(){
         return 'authors';
@@ -33,5 +34,14 @@ class Author extends ActiveRecord {
          }
          return $ret;
       }
+
+      public function rules()
+    {
+        return [
+            [['name'], 'required'],
+            [['nationality'], 'string', 'max' => 100],
+            [['name'], 'string', 'max' => 255],
+        ];
+    }
    
 }

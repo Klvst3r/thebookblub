@@ -12,6 +12,10 @@ use app\models\ContactForm;
 
 use app\models\Book;
 
+use app\models\Author;
+
+
+
 class SiteController extends Controller
 {
     /**
@@ -72,7 +76,10 @@ class SiteController extends Controller
         $loginLink = \yii\helpers\Html::a('Login', ['site/login']);
         $bookCount = Book::find()->count(); // <<-- Aquí obtenemos el conteo
 
+         $author_count = Author::find()->count();
+
         return $this->render('index.tpl', [
+            'author_count' => $author_count,
             'isGuest' => $isGuest,
             'username' => $username,
             'loginLink' => $loginLink,

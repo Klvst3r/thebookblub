@@ -34,10 +34,17 @@ class UserController extends controller {
         }
 
         ob_start();
-        $form = \yii\widgets\ActiveForm::begin(['id' => 'new-user']);
+        $form = \yii\widgets\ActiveForm::begin([
+            
+        //Validación del lado del cliente
+            'id' => 'new-user',
+            'enableClientValidation' => true,
+            'enableAjaxValidation' => false, // si no estás usando validación vía AJAX
+        ]);
 
+    //Formulario
         echo $form->field($user, 'username');
-        echo $form->field($user, 'email');
+        echo $form->field($user, 'email')->input('email');
         echo $form->field($user, 'password')->passwordInput(); // Campo de contraseña
         echo $form->field($user, 'password_repeat')->passwordInput()->label('hola'); // Campo agregado
         echo $form->field($user, 'bio')->textArea(); // Campo de arad e teto para escribir la biografia dl usuario

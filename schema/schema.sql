@@ -73,3 +73,17 @@ create table if not exists user_books (
 	modified_at timestamp not null default current_timestamp on update current_timestamp,
 	unique key no_rep(user_id, book_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+
+CREATE TABLE nationalities (
+  code CHAR(2) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+INSERT INTO nationalities (code, name) VALUES
+('MX', 'México'),
+('US', 'Estados Unidos'),
+('FR', 'Francia'),
+('JP', 'Japón');
