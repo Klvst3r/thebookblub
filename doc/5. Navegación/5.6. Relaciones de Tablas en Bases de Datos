@@ -1,0 +1,396 @@
+Relaciones de Tablas en Bases de Datos: Cálculo de Promedios
+
+Resumen
+--------
+¿Cómo se relacionan las tablas en una base de datos mediante otra tabla intermediaria?
+
+Comencemos con un aspecto crítico en la administración de bases de datos: relacionar tablas a través de una tabla intermediaria. A menudo, en lugar de una relación directa, se requiere utilizar otra tabla que actúe como puente. Un ejemplo común es calcular el promedio de las calificaciones de las obras de un autor. Aquí, 'autor' se relaciona con 'libro', y luego 'libro' se conecta con 'votos'. Esta estrategia permite agregar complejidad y flexibilidad a la estructura.
+¿Cómo implementamos la funcionalidad de cálculo en el modelo?
+
+Al implementar la funcionalidad en el modelo de un autor para obtener el puntaje promedio de sus obras, utilizamos aspectos como:
+
+    Crear funciones públicas como getScore para calcular y devolver la media.
+    Inicializar variables de suma e índice para calcular el promedio.
+    Utilizar un conteo para validar casos donde no haya votos registrados.
+
+public function getScore()
+{
+    $i = 0;
+    $sum = 0;
+    foreach ($this->votes as $vote) {
+        $i++;
+        $sum += $vote->score;
+    }
+    return $i === 0 ? 'Sin votos' : sprintf("%.2f con %d votos", $sum / $i, $i);
+}
+
+¿Cómo conectar relaciones indirectas utilizando código?
+
+En este ejemplo, un autor se conecta con votos a través de sus libros. Implementamos esta relación usando la función viaTable. Esto permite definir la conexión lógica y obtener el conjunto de votos asociados.
+
+public function getVotes()
+{
+    return $this->hasMany(BookScore::class)->viaTable('books', ['author_id' => 'author_id']);
+}
+
+Esta implementación relaciona las tablas efectivamente, optimizando consultas y manejo de datos, al aprovechar las características intrínsecas de los ORMs modernos.
+¿Cómo se puede mejorar la funcionalidad de votaciones?
+
+Para un manejo más avanzado, podemos implementar sobrecargas de funciones. Esto permite que una función, como getVotes, pueda tomar parámetros opcionales, aumentando su flexibilidad.
+¿Qué hace que las funciones de sobrecarga sean poderosas?
+
+Al añadir un argumento, como bookId, a una función existente, podemos especificar consultas y afinar la información devuelta.
+
+public function getVotes($bookId = null)
+{
+    $query = $this->hasMany(BookScore::class)
+                  ->viaTable('books', ['author_id' => 'author_id']);
+    
+    if (!empty($bookId)) {
+        $query->andWhere(['book_id' => $bookId]);
+    }
+    return $query->all();
+}
+
+¿Cómo aplicamos esto en ejemplos prácticos?
+
+Con el uso adecuado de argumentos, logramos extraer datos específicos como promedio de votos de un único libro bajo un autor, comparado con todos los libros del autor.
+
+$getScoreForBook = function ($bookId) {
+    $votes = $this->getVotes($bookId);
+    if(empty($votes)) return "Sin votos";
+    $sum = array_sum(array_column($votes, 'score'));
+    return sprintf("%.2f con %d votos", $sum / count($votes), count($votes));
+};
+
+Esta flexibilidad empodera a los desarrolladores para manejar datos complejos con menos código y más eficiencia.
+
+¡La programación se parece a resolver un rompecabezas! La sistematización de datos a través de relaciones es uno de los motores propulsores hacia una base de datos robusta y altamente funcional.
+
+
+Referencias:
+------------
+https://www.yiiframework.com/doc/guide/2.0/en/db-active-record#junction-table/
+
+
+
+Procedmiento
+--------------
+
+
+Para asosciar una tabla con otra, con un atabla en medio, elmejor ejemplo que tenemos aqui es pedirle a un autor que nos de cual es el promedio de sus obras.
+
+En realidad el autor es a traves del libro por queno hay book_score en la tabla auhtor_id entonces tengo que trar el libro primero y sobre ese traer todos los votos.
+
+entonces, empecemos a traves de la vista.
+
+Vista
+
+author/detail
+
+
+<p>El promedio de todas sus obras es:
+    <?= $auhtor->score ?>
+</p>
+
+
+ahora en el modelo de ahotor
+
+ public function getScore(){
+         return 1.2;
+      }
+
+
+
+Alessandro Baricco (3)
+
+El promedio de todas sus obras es: 1.2
+
+Tenemos ahora el place holder ahora vamos a llenarlo con información.
+
+
+
+Considerando que los votos y el ahotr estan en los extremos y los libros estan enmedio, es decir el ahotr tiene relacion con los libros pero no directa,ete con los votos, sino a trves de os libros, el libro, si tiene una relacioin directa con los votos y eso es lo que vamosa traer.
+
+Al final de cuentas en autor tiene muchos votos a traves de sus libros, entonces, 
+
+  public function getVotes(){
+         return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])
+         ->viaTable('books', ['author_id' => 'author_id'])
+         ->all();
+      }
+
+
+Cn esto tenemos cuantos votos tiene este autor en total, vamos a hacer un truco 
+
+public function getScore(){
+         return count($this->votes);
+      }
+
+Para dar el numero de votos      
+
+
+comprobamos a nivle de bd:
+
+> select * 
+    from book_scores 
+    left join books 
+    on books.book_id = book_scores.book_id 
+    where books.author_id = 88;
+
+
+select * from book_scores where left join books on book.book_id = book_scores.book_id where book.author_id = 151;
+
+Que es el ultimo creado
+
+select *      from book_scores      left join books      on books.book_id = book_scores.book_id      where books.author_id = 151;
++---------------+---------+---------+-------+---------------------+---------------------+---------+-----------+-----------+
+| book_score_id | user_id | book_id | score | created_at          | modified_at         | book_id | title     | author_id |
++---------------+---------+---------+-------+---------------------+---------------------+---------+-----------+-----------+
+|             5 |       2 |     218 |     4 | 2025-06-24 09:27:08 | 2025-06-24 09:27:08 |     218 | inevntado |       151 |
++---------------+---------+---------+-------+---------------------+---------------------+---------+-----------+-----------+
+1 row in set (0.001 sec)
+
+
+con esto tenemos dos votos que suman 9 con un promedio que debe ser 4.5
+
+
+http://localhost:7000/book/218
+
+
+inevntado
+
+Un libro escrito por patroncito shulo.
+
+El promedio de este libro es de: 4.50 (2 votos)
+
+
+eso es lo que queremos sacar ahora, para esto 
+
+
+ public function getScore(){
+         //return 1.2;
+         //return count($this->votes); //solo para comprobar el prmedio
+
+         $i = 0;
+         $sum = 0;
+         foreach($this->votes as $vote) {
+            $i++;
+            $sum += $vote->score;
+         }
+         if($i == 0){
+            return 'Sin votos';
+         }
+         return sprintf("%0.2f (%d votos", $sum/$i, $i);
+      }
+
+Obtenemos el promedio      
+
+
+
+
+
+inevntado
+
+Un libro escrito por patroncito shulo.
+
+El promedio de este libro es de: 4.50 (2 votos)
+
+Es una relacion de tres tablas en dos lineas 
+viaTable()
+
+Lo que viene es algo que nos puede volar la cabeza cuando ligramos entender la potencia que tiene, veremos eso en dos ejemplos.
+
+
+Viendo el codigo anterior que pasa si, le mandamos el book_id
+
+
+public function getVotes($book_id){
+         return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])
+         ->viaTable('books', ['author_id' => 'author_id'])
+         ->all();
+      }
+
+
+Es algo que un arquitecto no lo haria pero es un ejemplo que da una respuesta muy potente.
+
+
+  public function getVotes($book_id = null){
+         return $this->hasMany(BookScore::class, ['book_id' => 'book_id'])
+         ->viaTable('books', ['author_id' => 'author_id'])
+         ->all();
+      }
+
+
+Es decir lo colocamos a null, sobrecarga si no viene nada se asigna directamente, por otro lado en el query 
+
+
+   public function getVotes($book_id = null){
+         $query = $this->hasMany(BookScore::class, ['book_id' => 'book_id'])
+         ->viaTable('books', ['author_id' => 'author_id']);
+
+         return $query->all();
+      }
+
+Al final devolveremos $query->all();
+
+Hasta aca no hay ninguna diferencia, si no le mando al getVotes()
+
+Podemos probar
+
+public function getVotes($book_id = null){
+         $query = $this->hasMany(BookScore::class, ['book_id' => 'book_id'])
+         ->viaTable('books', ['author_id' => 'author_id']);
+
+         if(!empty($book_id)){
+            $query = $query->where(['book_id' => '$book_id']);
+         }
+         return $query->all();
+      }
+
+
+Lo vamos aporobar en 
+
+select *      from book_scores      left join books      on books.book_id = book_scores.book_id      where books.author_id = 151;
++---------------+---------+---------+-------+---------------------+---------------------+---------+-----------+-----------+
+| book_score_id | user_id | book_id | score | created_at          | modified_at         | book_id | title     | author_id |
++---------------+---------+---------+-------+---------------------+---------------------+---------+-----------+-----------+
+|             5 |       2 |     218 |     4 | 2025-06-24 09:27:08 | 2025-06-24 09:27:08 |     218 | inevntado |       151 |
+|             6 |       1 |     218 |     5 | 2025-06-24 09:28:45 | 2025-06-24 09:28:45 |     218 | inevntado |       151 |
++---------------+---------+---------+-------+---------------------+---------------------+---------+-----------+-----------+
+2 rows in set (0.001 sec)
+
+
+vamos aporbarlo con el 218
+
+ public function getScore(){
+         //return 1.2;
+         //return count($this->votes); //solo para comprobar el prmedio
+
+         $i = 0;
+         $sum = 0;
+         //foreach($this->votes as $vote) {
+         foreach($this->getVotes(218) as $vote) {
+            $i++;
+            $sum += $vote->score;
+         }
+         if($i == 0){
+            return 'Sin votos';
+         }
+         return sprintf("%0.2f (%d votos", $sum/$i, $i);
+      }
+
+
+Probamos:
+
+
+http://localhost:7000/author/151
+
+
+i
+patroncito shulo (1)
+
+El promedio de todas sus obras es: 4.50 (2 votos
+Libros:
+
+    inevntado
+
+
+
+Aca trajimos solamente los libros, solamente los votos del 218, y a la hora de imprimir los libros vamos a imprimir el promedio a traves del auhtor, esto es algo ineficiente pero es real, claro por que leestamos indicando traeme el promedio, de todos los votos de este o este libros a traves del author, ve y has un caminote, para traerme un datito, que podria traer con el ibro, pero va a ser claro para el ejemplo, para ello abrimos , 
+
+
+en Author
+
+
+agregamos
+public function getScore($book_id){
+
+
+
+
+ public function getScore($book_id = null){
+
+         $i = 0;
+         $sum = 0;
+         $arr = $this->votes;
+         if(!empty($book_id)){
+            $arr = $this->getVotes($book_id);
+         }
+
+         foreach($this->votes as $vote) {
+            $i++;
+            $sum += $vote->score;
+         }
+         if($i == 0){
+            return 'Sin votos';
+         }
+         return sprintf("%0.2f (%d votos", $sum/$i, $i);
+      }
+
+
+Lo que estamos haciendo aquie es
+
+Con esto indicamos que si no trae ningun parametro, el arreglo que vamos a utilizar es todos los votos que corresponde al autor y si trae algo voy a intentar traer la información de ese libro, y se acabo.
+Entonces el getScore va a ser el getScore a traves del libro a traves del autor, con esto que es ineficiente pero claro para el ejemplo, es algo que estamos recargando los getters por defercto en donde podemos traer votes, como un atributo y siempre, lo vamos a ejecutar sin parametros, por otro lado con el book_id.
+
+
+Regresando al detalle en
+
+author/detail
+
+<?= $book->author->getScore($book->id) ?>
+
+
+Completos queda
+
+<h2>Libros: </h2>
+<ol>
+<?php foreach($author->books as $book) { ?>
+    <li><?= Html::a($book->title, ['book/detail','id' => $book->id]) ?>
+    <?= $book->author->getScore($book->id) ?>
+
+</li>
+
+<?php } ?>
+</ol>
+
+ 
+
+
+teniendo esto y probandolo,
+
+tenemos ahora que por cada libro veremos el detalle de votos y el numero de votos de cada libro.
+
+Ej.
+
+http://localhost:7000/author/151
+
+
+
+patroncito shulo (1)
+
+El promedio de todas sus obras es: 4.50 (2 votos)
+Libros:
+
+    inevntado 4.50 (2 votos)
+
+
+
+
+
+
+Viola!! 
+Identificamos una necesidad real de nuestro sistema (mostrar promedio de votos por autor/libro).
+implementamos relaciones entre modelos.
+Adaptamos la lógica a múltiples niveles (controlador, modelo y vista).
+
+Tenemos ahora que nuestro libro inventado tiene dos votos cn un promedio de 4.5 y hasta la parte superior tenemos el promedio de todos los voos y el numero total de votos.
+
+
+Estamos creando información, que creamos a travesdel usuario, esto es increiblemente escencial, para ejecutar de una manera rapida, ordenada la cual le da un manteniumiento muy bieno.
+
+
+dejamos la parte de cruza de inormación y la parte fuerte de este sistema.
+
+
