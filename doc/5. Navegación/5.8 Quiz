@@ -1,0 +1,8 @@
+Para modificar la etiqueta del nombre de nuestra aplicación en vista web, ¿en qué archivo hay que crear el atributo name ?
+
+config/web.php
+
+2.
+
+¿Para qué sirve la función viaTable() de Yii2?
+Para gestionar modelos que están relacionados entre sí a través de una tabla intermedia.
