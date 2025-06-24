@@ -1,0 +1,332 @@
+Modificaciones de Menú y Layout en Aplicación Web con G
+
+
+Resumen
+--------
+¿Cómo mejorar nuestra aplicación de biblioteca de manera sencilla?
+
+¿Estás buscando formas de optimizar y mejorar el desarrollo de tu aplicación web? En esta clase, hemos hecho exactamente eso usando un proyecto simple de biblioteca. Hemos aplicado algunos ajustes y técnicas que pueden parecer menores, pero que pueden marcar una gran diferencia.
+¿Cómo personalizar la navegación de nuestra aplicación?
+
+La personalización de la navegación de nuestra aplicación puede mejorar la experiencia del usuario y hacer que la aplicación sea más coherente con nuestras necesidades.
+
+    Cambiar el nombre de la aplicación: En el archivo config/web.php, añadimos la llave Name y modificamos el nombre a "Debug Club".
+
+    // config/web.php
+    'name' => 'Debug Club',
+
+    Modificar el menú de navegación: En el archivo main.php, que está dentro de views/layouts, hicimos ajustes para cambiar las etiquetas del menú. Sustituimos "Home" por "Libros" y "About" por "Autores". Además, eliminamos el enlace de "Contact" del menú.
+
+    // views/layouts/main.php
+    $menuItems = [
+        ['label' => 'Libros', 'url' => ['site/index']],
+        ['label' => 'Autores', 'url' => ['author/all']],
+        ['label' => 'Logout', 'url' => ['site/logout']]
+    ];
+
+¿Cómo añadir funcionalidad al detalle del libro?
+
+A menudo, agregar funcionalidades a una aplicación puede parecer complejo, pero con pequeños pasos se puede lograr fácilmente.
+
+    Crear un enlace en el detalle del libro: Hemos añadido un enlace en el detalle del libro para redirigir al usuario al detalle del autor. Utilizamos HTML y ayudándonos de los atributos de nombre e ID del autor.
+
+    // Book Detail
+    echo Html::a($book->author->name, ['author/detail', 'id' => $book->author_id]);
+
+    Evitar votaciones repetidas en los libros: Para evitar que un usuario vote más de una vez por el mismo libro, hemos implementado una función en el modelo User que verifica si el usuario ya ha votado.
+
+    // User Model
+    public function hasVotedForBook($bookID)
+    {
+        $bs = BookScore::find()->where(['book_id' => $bookID, 'user_id' => $this->id])->one();
+        return !empty($bs);
+    }
+
+    // Vista
+    if ($user->hasVotedForBook($book->id)) {
+        echo "Ya votaste. Tu voto fue de " . $user->getVoteForBook($book->id)->score;
+    } else {
+        // Mostrar formulario de votación
+    }
+
+¿Cómo personalizar el pie de página de la aplicación?
+
+Con personalizaciones simples, podemos hacer que nuestra aplicación sea más profesional y adaptada a nuestras necesidades.
+
+    Modificar el pie de página: Cambiamos el nombre de "My Company" a "Platzi" y mostramos el año actual usando la función date con el formato de año de cuatro dígitos.
+
+    // views/layouts/main.php - Footer
+    echo Html::encode("Platzi " . date('Y'));
+
+¿Qué hacer cuando tienes problemas con consultas SQL?
+
+Cuando te enfrentas a problemas con consultas SQL en Active Query, es útil provocar un error deliberadamente para revisar la consulta SQL generada. Este tipo de técnica nos permite entender mejor las operaciones detrás de escena.
+
+// User Model - Provocar error
+$bookID = 'book_ids'; // Cambia a un identificador no existente para provocar un error
+
+Este enfoque, aunque parece contraproducente, puede ser un recurso valioso cuando se desea desentrañar el funcionamiento interno de las consultas SQL generadas por Active Query.
+
+
+Comentarios:
+
+Muchachos, en este punto, cuando estèn pensando en aplicaciones que van a ser usadas por muchas personas al tiempo, tengan cuidado con optimizar las consultas a los modelos, porque como es tan facil desarrollar con ActiveRecord, se nos puede olvidar que en un proceso podemos hacer llamadas redundantes a la base de datos.
+
+En Laravel hay un complemento que se llama Laravel Telescope, y nos permite evaluar las consultas que se ven rrealizando a la base de datos para optimizarlas.
+
+en yii 2 el equivalente viene siendo Yii Debugger.
+
+
+Procedimiento:
+--------------
+
+Tenemos un apalicacion para crer nuestra propia biblioteca no es algo que se ira a produccion y sera un excelente producto, pero es algo honesto en nuestro trabajo.
+
+Es algo que abarca muchos conceptos, de una manera muy sencilla y rapida y en esta sesion veremos 3 o 4 tips para el desarrollo, en yii.
+
+
+el Perimero es mejorar algo de la forma en que vemos en la narra de navegación.
+
+Cambiamos el nombre desde el archov web.php
+
+
+
+Con poner la llava name
+
+$config = [
+    'id' => 'basic',
+    'name' => 'The Book Club',
+
+el nombre denuestra apicación cambiar
+
+2. Ahora about, contact no corrsponden, vienen con el tempñate, del proyecto no nos interes ahora , para ello en el layout views/layout/main.php
+
+
+Este archivo es el wraper el que esta alrededor de todo el sitio, incluyendo el diseño, 
+
+Todo lo que se hace va en la variable
+<?= $content ?>
+
+
+que renderea los templates de sparty y los mete ahi, para eso vamos a modificar el nav widget que es el menu
+
+Aca deja claro cual es el formato
+'items' => [
+            ['label' => 'Home', 'url' => ['/site/index']],
+            ['label' => 'About', 'url' => ['/site/about']],
+            ['label' => 'Contact', 'url' => ['/site/contact']],
+            Yii::$app->user->isGuest
+                ? ['label' => 'Login', 'url' => ['/site/login']]
+                : '<li class="nav-item">'
+                    . Html::beginForm(['/site/logout'])
+                    . Html::submitButton(
+                        'Logout (' . Yii::$app->user->identity->username . ')',
+                        ['class' => 'nav-link btn btn-link logout']
+                    )
+                    . Html::endForm()
+                    . '</li>'
+        ]
+
+
+Para agregar o modificar nuevos elementos
+
+ Yii::$app->user->isGuest
+                ? ['label' => 'Login', 'url' => ['/site/login']]
+                : '<li class="nav-item">'
+                    . Html::beginForm(['/site/logout'])
+                    . Html::submitButton(
+                        'Logout (' . Yii::$app->user->identity->username . ')',
+                        ['class' => 'nav-link btn btn-link logout']
+                    )
+                    . Html::endForm()
+                    . '</li>'
+
+La parte que se ve es mas espantador que complejo, ya que es unatraiada, esuancondicion de que pasa en true, que pasa en false,
+
+Faltamuchos pos atender a los no usuaruos
+
+Pero es claro para que quede claro.
+
+En el layou hacemos todas las modificaciones grandes.
+
+
+
+Punto numero 3 navegación
+desde
+
+views/book/detail
+
+Lo que queremos es que el link nombre del author me lleve al author
+
+<p>Un libro escrito por <strong>{Html::a($book->author->name|escape, ['author/detail', 'id' => $book->author_id])}</strong>.</p>
+
+
+
+El ultimo tweak que se hara es 
+
+
+si ya tengo un score vamos a mostrar el score en lugar de darme la opcion de volver a votar por que podria generar un error tal vez d eintegraridad en la bd por que el voto por usuario se pude hacer unsa sola vez.
+
+Modificamos el 
+
+
+{ActiveForm id="new-score" assign="forma" action=['book/score']}
+
+
+Es decir si ya lo califique no me de opcion.
+
+Para ello vamos a abrir el modelo
+
+User 
+
+Para agrgar la funcion siguiente:
+
+public function hasVotedFor($book_id){
+        $bs = BookScore::find()
+        ->where([
+            'book_id' => $book_id,
+            'user_id' => $this->id,
+        ])
+        ->one();
+        if(empty($bs)){
+            return false;
+        }
+        return true;
+    }
+
+Ahora en la vista     
+
+views/book/detail
+
+ {Html::a('Ya no lo tengo', ['book,all'])} (no hace nada )
+
+    {if $user->hasVotedFor($book->id)}
+        
+        Ya votaste.
+    {else}
+   
+        {ActiveForm id="new-score" assign="forma" action=['book/score']}
+
+        {$forma->field($book_score, 'score')
+        ->dropdownList([
+            1 => '⭐',
+            2 => '⭐⭐',
+            3 => '⭐⭐⭐',
+            4 => '⭐⭐⭐⭐',
+            5 => '⭐⭐⭐⭐⭐'
+            ])}
+        
+        {$forma->field($book_score, 'book_id')->hiddenInput()->label(false)}
+
+        <input type="submit" value="calificar">
+        {/ActiveForm}
+    {/if}
+
+
+Asi si ya votamos por un libro nonos permite votar nuevamente     
+
+
+Ahora voy a ver cual es la caficiacion mia
+
+en el modelo User
+
+public function getVotedForBook($book_id){
+
+    }
+
+Este es un getter que no tiene sobrecarga de operadores
+
+Forsozamente necesita el book_di, con eso no va a funcionar elVoteforBook nada mas, no funcionada nada marcara error.
+
+
+
+Con esto traera todos los bookscores que tengasn el user_id, el primero de acuerdo al orden que se utilice, 
+
+
+
+
+public function getVotedForBook($book_id){
+        return $this->hasOne(BookScore::class, ['user_id' => 'user_id'])
+        ->where(['book_id' => $book_id])
+        ->one();
+    
+    }
+
+
+asi getBookForBook tenemos un objeto detipo BookScore, entonces podemos ascribir en la vista detail.tpl
+
+Ya votaste, tu voto fue de: {$user->getVotedForBook($book->id)->score}.
+
+
+Con esto si por ejemplo en el libro
+http://localhost:7000/book/2
+
+
+Ulysses
+
+Un libro escrito por James Joyce.
+
+El promedio de este libro es de: 5.00 (1 votos)
+Ya no lo tengo (no hace nada ) Ya votaste, tu voto fue de: 5. 
+
+
+Tenemos el voto de algo mas
+
+
+En el footer cambiamos por nuestra logout
+
+<div class="col-md-6 text-center text-md-start">&copy; Klvst3r <?= date('Y') ?></div>
+
+La joya de la corona en forma de tip es:
+
+
+Podremos probocar un error.
+
+Ya que cuando estamos trabajando con queries con el ActiveQuery, podemos perdernos y no entender que esta haciendo el SQL entonces la sugerencia es probocar un error.
+
+Asiq eue en el modelo User.php
+
+Asiq eu cambiamos un nombre
+Ej.
+
+public function getVotedForBook($book_id){
+        return $this->hasOne(BookScore::class, ['user_id' => 'user_id'])
+        ->where(['book_id' => $book_id])
+        ->one();
+    
+    }
+
+
+Especificamente 
+
+->where(['book_id' => $book_id])
+
+cambiamos nu nombre
+book_ids
+
+->where(['book_ids' => $book_id])
+
+Es decir este book_ids no existe, saltara un error de SQL, pero en ese  error mostrara el SQL para entender que es lo que estamos haciendo.
+
+
+Database Exception – yii\db\Exception
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'book_ids' in 'WHERE'
+The SQL being executed was: SELECT * FROM `book_scores` WHERE (`book_ids`=2) AND (`user_id`=1)
+
+Error Info: Array
+(
+    [0] => 42S22
+    [1] => 1054
+    [2] => Unknown column 'book_ids' in 'WHERE'
+)
+
+↵
+Caused by: PDOException
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'book_ids' in 'WHERE'
+
+in /home/klvst3r/dev/yii/thebookblub/vendor/yiisoft/yii2/db/Command.php at line 1320
+
+
+Y ponem el Query completo, con esto podemos ver los queries y ver que es lo que yii esta haciendo detras para interpretar sql.
+
+

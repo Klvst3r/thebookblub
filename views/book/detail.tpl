@@ -9,29 +9,37 @@
 {/if}
 
 <h1>{$book->title|escape}</h1>
-<p>Un libro escrito por <strong>{$book->author->name|escape}</strong>.</p>
+<p>Un libro escrito por <strong>{Html::a($book->author->name|escape, ['author/detail', 'id' => $book->author_id])}</strong>.</p>
 
 <p> El promedio de este libro es de: {$book->getScore()}</p>
 
+{assign "user" Yii::$app->user->identity}
+
 
 {if $userHasBook}
-    <p>Ya lo tengo</p>
-    
-    {ActiveForm id="new-score" assign="forma" action=['book/score']}
+    {Html::a('Ya no lo tengo', ['book,all'])} (no hace nada )
 
-    {$forma->field($book_score, 'score')
-    ->dropdownList([
-        1 => '⭐',
-        2 => '⭐⭐',
-        3 => '⭐⭐⭐',
-        4 => '⭐⭐⭐⭐',
-        5 => '⭐⭐⭐⭐⭐'
-        ])}
-    
-    {$forma->field($book_score, 'book_id')->hiddenInput()->label(false)}
+    {if $user->hasVotedFor($book->id)}
+        
+        Ya votaste, tu voto fue de: {$user->getVotedForBook($book->id)->score}.
+    {else}
+   
+        {ActiveForm id="new-score" assign="forma" action=['book/score']}
 
-    <input type="submit" value="calificar">
-    {/ActiveForm}
+        {$forma->field($book_score, 'score')
+        ->dropdownList([
+            1 => '⭐',
+            2 => '⭐⭐',
+            3 => '⭐⭐⭐',
+            4 => '⭐⭐⭐⭐',
+            5 => '⭐⭐⭐⭐⭐'
+            ])}
+        
+        {$forma->field($book_score, 'book_id')->hiddenInput()->label(false)}
+
+        <input type="submit" value="calificar">
+        {/ActiveForm}
+    {/if}
 
 
     {* Aquí podrías incluir el formulario para calificar o lo que necesites *}

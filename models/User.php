@@ -250,4 +250,25 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
             return sprintf("%0.2f", $sum/$i);
         }
     }
+
+
+    public function hasVotedFor($book_id){
+        $bs = BookScore::find()
+        ->where([
+            'book_id' => $book_id,
+            'user_id' => $this->id,
+        ])
+        ->one();
+        if(empty($bs)){
+            return false;
+        }
+        return true;
+    }
+
+    public function getVotedForBook($book_id){
+        return $this->hasOne(BookScore::class, ['user_id' => 'user_id'])
+        ->where(['book_id' => $book_id])
+        ->one();
+    
+    }
 }
