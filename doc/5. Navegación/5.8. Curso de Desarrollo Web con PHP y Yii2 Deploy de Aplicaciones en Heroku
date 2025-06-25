@@ -1,0 +1,383 @@
+Deploy de Aplicaciones en Heroku: Paso a Paso Práctico
+
+Resumen
+Preparar proyecto de Yii2 con MySQL para desplegar en Heroku
+
+Este tutorial te guiará a través de los pasos necesarios para configurar y desplegar un proyecto Yii2 en Heroku, utilizando una base de datos MySQL y asegurando que todas las configuraciones sean correctas para un entorno de producción.
+1. Crear una cuenta en Heroku
+
+    Registrarse en Heroku: Si no tienes una cuenta, ve a Heroku.com y regístrate.
+    Instalar Heroku CLI: Descarga e instala Heroku CLI para manejar tu aplicación desde la terminal.
+
+2. Configurar el proyecto Yii2 en el repositorio existente
+
+    Configurar .gitignore: En la raíz de tu proyecto Yii2, asegúrate de que el archivo .gitignore excluya las siguientes carpetas y archivos innecesarios:
+
+    /vendor/
+    /runtime/
+    /web/assets/
+    /tests/_output/
+    /composer.lock
+    /.env
+
+    Esto evitará que archivos innecesarios o confidenciales se suban al repositorio.
+
+    Añadir el Procfile para Heroku: En la raíz de tu proyecto, crea un archivo llamado Procfile que Heroku usará para saber cómo ejecutar tu aplicación. Este archivo debería contener:
+
+    web: vendor/bin/heroku-php-apache2 web/
+
+    ¿Por qué vendor/bin/heroku-php-apache2 web/?
+        Compatibilidad con dependencias: Este comando asegura que Heroku use la versión específica de Apache que viene con el buildpack PHP de Heroku, instalada a través de Composer en la carpeta vendor/bin.
+        Gestión de dependencias: Garantiza que las versiones de las herramientas utilizadas están alineadas con las dependencias de tu proyecto, mejorando la consistencia y la estabilidad del entorno de producción.
+        Aislamiento y control: Al usar esta ruta, se asegura que los cambios en el entorno subyacente de Heroku no afecten a la ejecución de tu aplicación, manteniendo un entorno predecible.
+
+    Configurar el archivo composer.json: Asegúrate de que todas las dependencias de tu proyecto están listadas y agrega un script para ejecutar migraciones de base de datos automáticamente después de instalar las dependencias:
+
+    "scripts": {
+        "post-install-cmd": [
+            "php yii migrate --interactive=0"
+        ]
+    }
+
+3. Crear una base de datos MySQL en la nube
+
+    Agregar ClearDB MySQL a tu aplicación en Heroku: Heroku ofrece ClearDB para utilizar MySQL. Puedes añadirlo a tu aplicación con el siguiente comando:
+
+    heroku addons:create cleardb:ignite
+
+    Obtener la URL de la base de datos: Después de crear la base de datos, obtén la URL de conexión ejecutando:
+
+    heroku config | grep CLEARDB_DATABASE_URL
+
+    Configurar la conexión a la base de datos en Yii2: Actualiza tu archivo config/db.php para usar la variable de entorno proporcionada por Heroku:
+
+    'dsn' => getenv('CLEARDB_DATABASE_URL'),
+    'username' => 'usuario',
+    'password' => 'contraseña',
+    'charset' => 'utf8',
+
+
+Siguiendo estos pasos, podrás preparar exitosamente tu aplicación Yii2 para desplegarla en Heroku, con la garantía de que todas las configuraciones necesarias para un entorno de producción están correctamente implementadas.
+
+
+Archivos:
+export db_host=localhost 
+export db_name=thebookclub 
+export db_user=platzi 
+export db_pass=Yii2Rulez!
+export db_port=3306
+
+export salt=TUSALAQUI
+
+
+Referencias:
+https://www.heroku.com/
+
+https://github.com/platzi/php-yii-web/commit/38c27ff101228f5b8bf3768bb77af1954f9ab406
+
+
+Comentarios:
+
+Hola, hay un espacio en donde el profe cambió el index.php para adaptarlo a producción, pero puede ocasionar problemas si quieres seguir trabajando en el proyecto, porque quien lo clone va a tener la versión de producción y no la de desarrollo.
+
+La solución más sencilla es agregar una variable de entorno que se llame environment, y en el index.php colocas:
+
+if(getenv('environment')!=='production'){
+  //Agreegue los metodo de debuggeo de Yii 2
+}
+```y en el sources.sh colocas la variable environment como Dev, Local o etc.
+
+Así, cualquier desarrollador que descargue la app va a trabajar en entorno local, y en entorno productivo no habrá inconveniente.
+
+Si se puede hacer eso que comentas y es una opción aunque no la mejor. Ya que Yii Framework 2 cuando creas un proyecto lo normal es ejecutar php init y ahí seleccionas el entorno en el que se encuentra el proyecto ya sea en modo desarrollo o producción, malas practicas del @beco. Algo así sería: <img height="126" width="440" src="https://static.platzi.com/media/user_upload/image-ecab5aab-f89a-4752-b18e-f954bead7795.jpg" />
+
+
+podrias explicar donde y como creaste la base de datos?
+
+Se creó la base de datos con el comando 'Create Database If Not Exists The Book Club'. Esto se ejecutó en la terminal de MySQL.
+
+
+
+Procedimiento:
+--------------
+
+Deploy a Heroku 
+
+Todo el codigo que se ha hecho esta en un repositorio en git, ese se va a mover de forma sencilla con heroku a un dino, para ver lo facil que es.
+
+Para el ejercicio se va a conectar a una bd que se tiene en la nube, nosotros crearemos una mysql en donde se guste pero que sea accesible via inyernet.
+
+Haremos unas pruebas par mandar el ccsv de las sesiones a produccicón y despues nos conectaremos, se dara de alta las variables, y ver fncionar el proyecto en un dominio publico.
+
+
+Recordemos 
+
+teniamos
+
+more local/variables_local,sh
+
+export db_host=localhost 
+export db_name=thebookclub 
+export db_user=platzi 
+export db_pass=Yii2Rulez!
+export db_port=3306
+
+export salt=gPcro5UJCdPNfSH2s9X02KrLOWuL6FT!M
+
+
+
+Lo que ahora vamos a hacer es copiarlo aproducción, primero en local y despues dar de alta estas variables arriba 
+
+
+ejecutamos
+
+    $ cd local
+    $ cp variables_local.sh variables_prod.sh
+    $ vi variables_prod.sh
+
+Para editarlo, tenemos:
+
+export db_host=mibasededatos.com
+export db_name=thebookclub 
+export db_user=klvst3r 
+export db_pass=desarrollo
+export db_port=3306
+
+export salt=gPcro5UJCdPNfSH2s9X02KrLOWuL6FT!M
+
+
+Ahora en
+
+random.otorgaruna
+
+List & More / Strings
+
+
+10 de 10
+
+Get Strings
+
+Copiamos uno al hasar pegamos
+
+Copiamos otro al hasar 4 veces
+
+este seran variables de proudcción.
+
+Ha que cuidar cules son la variables que tenemos.
+
+Con las variables dadas de alta abrimos  los libros 
+
+es decir el archivo
+
+    local/books.ccsv
+
+Nos vamos a nuestra inea de comandos.
+
+Desde raiz 
+
+Cargar las variables 
+    $ source local/variables_prod.sh
+
+Acabamos de sobreescribir las variables que teiamos en local, es decir 
+
+    $ echo $salt
+Tiene que dar algo que termina en !m
+
+Tendemos la salt.
+
+ahora en la bd local dentro de la bd thebookclub
+
+
+    
+Ahora nos vamos a conectar a la bd de producción 
+
+vamos a crear la bd
+
+create database thebookclub;
+
+use thebookclub;
+
+
+Podremos copiar todo de golpe puesto que es lo que se estuvo trabajando en local para construir las tablas de la bd.
+
+
+Copiamos el archivo schema.sql
+
+
+Pegamos. o damos de alta la bd para poder tener nuestra información.
+
+Podriamos importarla en un archivo y colocarla en el servidor de producción de la base de datos.
+
+Ya tebiendo la bd
+
+> show tables;
+
+
+la bd ya esta creada en algun lugar, 
+
+
+en otra terminal
+ya cargadas las variables de producción y con la instanacia de nuestro proyecto de yii, podremos ejecutar ya comandos desde producción.
+
+con el comando yii.
+
+
+Podremos ejecutar por ejemplo:
+
+    klvst3r/books
+
+php yii klvst3r/books local/books.csv
+
+Lo que hace es agarrar el csv leerlo y que crear autores y librs por otro lado y guardarlos en la base de datos.
+
+
+para cargar las variables
+    source local/variables_prod.sh
+
+y volvemos 
+a ejecutar
+    $ php yii klvst3r/books local/books.csv
+
+Sube todos los archivos 
+
+y ahora podemos desde la bd
+
+
+select * from books;
+
+select * from authors;
+
+Ya teniendo todo listos, y tnemos arriba todos los archivos de ejecución, subio uno por uno 
+
+-ya cuando esten arriba los registros de libros y autores.
+
+El siguiente paso es crear el proyecto en heroku, mandar el proyecto a heroku 
+
+Cambiar las variables en heroku para que se lea la bd y tener el proyecto en linea.
+
+
+En heroku, 
+
+
+Crar una palicación.
+
+New app
+App name: thebookclub
+Region: United States
+Create App
+
+Ya con la App creada, ahora es conectarla con el repositorio del proyeto que esta en github.
+
+En la parte inferior 
+
+Search for repository to connect to:
+
+Github:
+
+    klvst3r/thebookclub
+Conectamos, se hablan uno a uno, ya se tienen los permisos y debiaramos
+
+No se va a lñanzar todavia, se van a dar de alta las variables.
+
+En settings
+
+Opcion de keroku-22
+
+
+Viada util hasta el 2027.
+
+No tenemos variables de entorno.
+
+Vamos a dar de alta en el archivo de variables locales_prod.sh
+
+Con el valor de producción.
+
+
+Ya con la variables de entorno.
+
+
+Config Vars:
+
+
+export db_host=mibasededatos.com
+export db_name=thebookclub 
+export db_user=klvst3r 
+export db_pass=desarrollo
+export db_port=3306
+
+export salt=gPcro5UJCdPNfSH2s9X02KrLOWuL6FT!M
+
+
+si queremos agregar algua en un futuro se pude desde el mismo keroku.
+
+variable : valor
+Ya en heroku dadas de alta las variables oficiales de configuración.
+
+
+Flta crear el prod_file que es el archivo que va en la raiz del proyecto que heroku para entender que stack se va a utilizar. y cuales es la configuración basica del repositorio web que va a apuntar nuestro servidor web
+
+En el proyecto creamos un archivo llamado
+
+Procfile 
+
+
+web: vendor/bin/heroku-php-apache2 web/
+
+para crear un servidor web, que paunta a web
+
+En nuestra terminal
+
+ $ git status
+ $ git add .
+ $ git commit -m "hmoa gregado el rpocfile para heroku"
+ $ git push 
+
+
+
+ Importante estamos en main y vamos a keroku
+
+ en Deploy
+
+ podemos habliiatr
+
+    Enable Automatic Deploys
+
+no se hace inmediatamente o pedir que se haga un deploy de esta rama
+
+
+Cn todo esto sencillo.
+
+Deploy branch
+
+
+Vemos la salida del sistema 
+
+
+Creando todo lo que esta en el composer 
+
+Instalando y actualizando lo que venga del codigo.
+
+Ya con ello y el deploy listo de heroku.
+
+
+views
+
+Puede que genere un error
+
+
+Not instalable - yii\NotinstallableException
+
+
+Mencionarlo
+
+No puede instalar el modulo de thebug
+
+Por n leer el codigo y esto ahora 
+
+Esta en index.php
+
+
+
+
+
+11.18
